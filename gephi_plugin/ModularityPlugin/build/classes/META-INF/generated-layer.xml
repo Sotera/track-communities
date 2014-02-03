@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.2//EN"
+                            "http://www.netbeans.org/dtds/filesystem-1_2.dtd">
+<filesystem>
+    <folder name="Menu">
+        <folder name="Window">
+            <file name="com-sotera-dfa-modularity-modularityTopComponent.shadow">
+                <!--com.sotera.dfa.modularity.modularityTopComponent-->
+                <attr name="originalFile" stringvalue="Actions/Window/com-sotera-dfa-modularity-modularityTopComponent.instance"/>
+            </file>
+        </folder>
+    </folder>
+    <folder name="Windows2">
+        <folder name="Components">
+            <file name="modularityTopComponent.settings">
+                <!--com.sotera.dfa.modularity.modularityTopComponent--><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE settings PUBLIC "-//NetBeans//DTD Session settings 1.0//EN" "http://www.netbeans.org/dtds/sessionsettings-1_0.dtd">
+<settings version="1.0">
+  <instance class="com.sotera.dfa.modularity.modularityTopComponent"/>
+</settings>
+]]></file>
+        </folder>
+        <folder name="Modes">
+            <folder name="filtersmode">
+                <file name="modularityTopComponent.wstcref">
+                    <!--com.sotera.dfa.modularity.modularityTopComponent--><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tc-ref PUBLIC "-//NetBeans//DTD Top Component in Mode Properties 2.0//EN" "http://www.netbeans.org/dtds/tc-ref2_0.dtd">
+<tc-ref version="2.0">
+  <tc-id id="modularityTopComponent"/>
+  <state opened="true"/>
+</tc-ref>
+]]></file>
+            </folder>
+        </folder>
+    </folder>
+    <folder name="Actions">
+        <folder name="Window">
+            <file name="com-sotera-dfa-modularity-modularityTopComponent.instance">
+                <!--com.sotera.dfa.modularity.modularityTopComponent-->
+                <attr
+                    methodvalue="org.openide.windows.TopComponent.openAction" name="instanceCreate"/>
+                <attr name="component" newvalue="com.sotera.dfa.modularity.modularityTopComponent"/>
+                <attr name="preferredID" stringvalue="modularityTopComponent"/>
+                <attr
+                    bundlevalue="com.sotera.dfa.modularity.Bundle#CTL_modularityAction" name="displayName"/>
+            </file>
+        </folder>
+    </folder>
+    <folder name="xml">
+        <folder name="entities">
+            <folder name="com_sotera_dfa_modularity">
+                <file name="modularity" url="nbres:/org/netbeans/modules/settings/resources/properties-1_0.dtd">
+                    <!--com.sotera.dfa.modularity.modularityTopComponent-->
+                    <attr name="hint.originalPublicID" stringvalue="-//com.sotera.dfa.modularity//modularity//EN"/>
+                </file>
+            </folder>
+        </folder>
+        <folder name="memory">
+            <folder name="com">
+                <folder name="sotera">
+                    <folder name="dfa">
+                        <folder name="modularity">
+                            <file name="modularityTopComponent">
+                                <!--com.sotera.dfa.modularity.modularityTopComponent-->
+                                <attr name="settings.providerPath" stringvalue="xml/lookups//com_sotera_dfa_modularity/modularity.instance"/>
+                            </file>
+                        </folder>
+                    </folder>
+                </folder>
+            </folder>
+        </folder>
+        <folder name="lookups">
+            <folder name="com_sotera_dfa_modularity">
+                <file name="modularity.instance">
+                    <!--com.sotera.dfa.modularity.modularityTopComponent-->
+                    <attr
+                        methodvalue="org.netbeans.api.settings.Factory.create" name="instanceCreate"/>
+                    <attr
+                        methodvalue="org.netbeans.api.settings.Factory.properties" name="settings.convertor"/>
+                    <attr name="settings.instanceClass" stringvalue="com.sotera.dfa.modularity.modularityTopComponent"/>
+                    <attr name="settings.instanceOf" stringvalue="com.sotera.dfa.modularity.modularityTopComponent"/>
+                    <attr boolvalue="true" name="xmlproperties.preventStoring"/>
+                </file>
+            </folder>
+        </folder>
+    </folder>
+</filesystem>
