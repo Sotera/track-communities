@@ -1,9 +1,20 @@
 
-
-
+//dynamic graph init
+var color = null;
+var force = null;
+var dg_graph = null;
+var dg_svg = null;
+var transition_time = 1000;
 
 var width = 960,
     height = 480;
+
+var overlay;
+var svg;
+var g;
+var googleMapProjection;
+var currentGeoJson = [];
+var map;
     
 var startTime = new Date();
 var endTime = new Date();
@@ -11,79 +22,121 @@ var endTime = new Date();
 var mySlider;
 var animate = false;
 var playSpeed = .1;
+var animateInterval = 10;
 
 d3.select('#slidertext').text(startTime.toUTCString());
     
 var defaultColors = ["red", "blue", "green", "magenta", "sienna", "teal", "goldenrod", "cyan", "indigo", "springgreen"];
-    
-var currentScale = 153;
 
-var geodata;
+dg_svg = d3.select("#graph");
 
-var projection = d3.geo.equirectangular()
-    .scale(currentScale)
-    .translate([width / 2, height / 2])
-    .precision(.1);
+force = d3.layout.force()
+            .charge(-500)
+            .linkDistance(100)
+            .gravity(0.2)
+            .friction(0.6)
+            .size([width, height]);
 
-var path = d3.geo.path()
-    .projection(projection);
+color = d3.scale.category20();
 
-var graticule = d3.geo.graticule();
-
-var svg = d3.select("#map").append("svg")
-    .attr("width", width)
-    .attr("height", height);
-    
-var g = svg.append("g")
-    .attr("id", "group");
-
-g.append("path")
-    .datum(graticule.outline)
-    .attr("class", "background")
-    .attr("d", path);
-
-d3.json("world-50m.json", function(error, world) {
-    
-  g.insert("path", ".graticule")
-      .datum(topojson.feature(world, world.objects.land))
-      .attr("class", "land")
-      .attr("d", path);
-
-  g.insert("path", ".graticule")
-      .datum(topojson.mesh(world, world.objects.countries, function(a, b) { return a !== b; }))
-      .attr("class", "boundary")
-      .attr("d", path);
-    
-});
-
-// zoom and pan
-var zoom = d3.behavior.zoom()
-    .on("zoom",function() {
-        g.attr("transform","translate("+ 
-            d3.event.translate.join(",")+")scale("+d3.event.scale+")");
-  });
-
-svg.call(zoom)
-
-d3.select(self.frameElement).style("height", height + "px");
-
-svg.append("rect")
-    .attr("width", 0)
-    .attr("height", 0)
-    .attr("x", 2)
-    .attr("y", 4)
-    .attr("opacity", .2)
-    .attr("stroke", "black")
-    .attr("fill", "black");
-
+var timeout = null;
 $(function () {
+
+    //create google map
+    var $map=$("#map");
+    map = new google.maps.Map($map[0], {
+        zoom: 2,
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        center: new google.maps.LatLng(0, 0)
+//        mapTypeControl: false
+    });
+
+    //create the overlay on which we will draw our heatmap
+    overlay = new google.maps.OverlayView();
+
+    overlay.onAdd = function () {
+
+        var layer = d3.select(this.getPanes().overlayMouseTarget).append("div").attr("class", "SvgOverlay");
+        svg = layer.append("svg");
+        g = svg.append("g");//.attr("id", "polys");
+
+        overlay.draw = function () {
+            var markerOverlay = this;
+            var overlayProjection = markerOverlay.getProjection();
+
+            // Turn the overlay projection into a d3 projection
+            googleMapProjection = function (coordinates) {
+                var googleCoordinates = new google.maps.LatLng(coordinates[1], coordinates[0]);
+                var pixelCoordinates = overlayProjection.fromLatLngToDivPixel(googleCoordinates);
+                return [pixelCoordinates.x+4000, pixelCoordinates.y+4000];
+            }
+
+            path = d3.geo.path().projection(googleMapProjection);
+
+			geodata = g.selectAll("path")
+			.data(currentGeoJson, trackid)
+			.attr("d", path);
+
+			geodata.enter()
+				.append("svg:path")
+				.attr("opacity", .5)
+				.attr("fill", "none")
+				.attr("stroke", function (d) { return getColor(d.index); })
+				.attr("d", path);
+
+			geodata.exit().remove();
+
+			var geocircles = g.selectAll("circle")
+			.data(currentGeoJson, trackid)
+				.attr('cx', function(d) {
+					var coordinates = googleMapProjection([d.coordinates[0][0], 0]);
+					return coordinates[0];
+				})
+				.attr('cy', function(d) {
+					var coordinates = googleMapProjection([0, d.coordinates[0][1]]);
+					return coordinates[1];
+				});
+						
+			geocircles.enter().append('svg:circle')
+				.attr('cx', function(d) {
+					var coordinates = googleMapProjection([d.coordinates[0][0], 0]);
+					return coordinates[0];
+					})
+				.attr('cy', function(d) {
+					var coordinates = googleMapProjection([0, d.coordinates[0][1]]);
+					return coordinates[1];
+					})
+				.attr('r', 5)
+				.attr("opacity", 1)
+				.attr("fill", function (d) { return getColor(d.index); })
+				.attr('stroke', "gray")
+				.append("svg:title")
+					.text(function(d) { return d.track_id; });
+					
+			geocircles.exit().remove();
+
+        };
+
+	/*
+	google.maps.event.addListener(map, 'zoom_changed', function() {
+//		console.log("zoom_changed");
+	});
+	*/
+
+    };
+
+    overlay.setMap(map);
+
     $("#play").click(function () {
         animate = !animate;
         
         var buttonLabel = "Play";
         if (animate) {
             buttonLabel = "Pause";
-        }
+	    timeout = setInterval(AnimateTracks, animateInterval);
+        } else {
+	    clearInterval(timeout);
+	}
         $("#play").text(buttonLabel);
         
         if (timeSlider.value() >= 100) {
@@ -95,115 +148,116 @@ $(function () {
         Reset(false);
         
         $.ajax({
-            url: 'http://localhost:8787/getcomm/',
+            url: 'http://xdata:8787/getcomm/',
             type: 'GET',
             success: function(data) {
                 var serviceCall = '?comm="'+data+'"';
-                
-                $.getJSON('myservice'+serviceCall, function (data) {
-                    
-                    var xdiff = data.bounds.east - data.bounds.west;
+
+				d3.select('#community-id').text("Community ID: "+data);
+					
+				$.getJSON('myservice'+serviceCall, function (data) {
+					
+					currentGeoJson = data["result"];
+					
+					var xdiff = data.bounds.east - data.bounds.west;
                     var ydiff = data.bounds.north - data.bounds.south;
-                    
-                    var bigdiff = xdiff > ydiff ? xdiff : ydiff;
-                    
-                    var newScale = (30000 / bigdiff) + 70;
                     
                     var centerx = xdiff / 2 + data.bounds.west;
                     var centery = ydiff / 2 + data.bounds.south;
                     
-                    projection.center([centerx, centery])
-                    .scale(Math.round(newScale));
-                    
-                    g.attr("transform", "translate(0,0)scale(1)");
-                    zoom.scale(1);
-                    zoom.translate([0,0]);
-                    
-                    g.selectAll("path")  
-                        .attr("d", path.projection(projection));
-                    
-                    geodata = g.selectAll(".geojson").data(data["result"], trackid);
-                    
-                    geodata.enter()
-                    .append("path")
-                    .attr("opacity", .5)
-                    .attr("fill", "none")
-                    .attr("stroke", function (d) {
-                        var trackColor;
-                        if (d.index >= defaultColors.length) {
-                            trackColor = '#'+pad(Math.floor(Math.random()*16777215).toString(16),6);
-                            defaultColors.push(trackColor);
-                        } else {
-                            trackColor = defaultColors[d.index];
-                        }
-                        
-                        return trackColor;
-                    })
-                    .attr("d", path);
-                    
-                    geodata.exit().remove();
-                    
-                    var geocircles = g.selectAll("circle").data(data["result"], trackid);
-                    
-                    geocircles.enter().append('svg:circle')
-                        .attr('cx', function(d) {
-                            var coordinates = projection([d.coordinates[0][0], 0]);
-                            return coordinates[0];
-                            })
-                        .attr('cy', function(d) {
-                            var coordinates = projection([0, d.coordinates[0][1]]);
-                            return coordinates[1];
-                            })
-                        .attr('r', 5)
-                        .attr("opacity", .5)
-                        .attr("fill", function (d) {
-                        var trackColor;
-                        if (d.index >= defaultColors.length) {
-                            trackColor = '#'+pad(Math.floor(Math.random()*16777215).toString(16),6);
-                            defaultColors.push(trackColor);
-                        } else {
-                            trackColor = defaultColors[d.index];
-                        }
-                        
-                        return trackColor;
-                    })
-                        
-                    geocircles.exit().remove();
-                    
-                    //text
-                    var textY = 15;
-                    var text = svg.selectAll("text")
-                        .data(data["result"], trackid)
-                        .enter()
-                        .append("text");
-                        
-                    var textLabels = text
-                         .attr("x", 5)
-                         .attr("y", function(d) { return textY*d.index+textY })
-                         .text( function (d) { return d.track_id; })
-                         .attr("font-family", "sans-serif")
-                         .attr("font-size", "10px")
-                         .attr("fill", function (d) {
-                            var trackColor;
-                            if (d.index >= defaultColors.length) {
-                                trackColor = '#'+pad(Math.floor(Math.random()*16777215).toString(16),6);
-                            } else {
-                                trackColor = defaultColors[d.index];
-                            }
-                            
-                            return trackColor;
-                        });
-                         
-                    //legend background?            
-                    var background = svg.select("rect")
-                        .attr("width", 200)
-                        .attr("height", data["result"].length * textY);
-                        
-                    startTime = new Date(Date.parse(data["start"]+" GMT"));
-                    endTime = new Date(Date.parse(data["end"]+" GMT"));
-                    
-                    d3.select('#slidertext').text(startTime.toUTCString());
-                });
+					map.setCenter(new google.maps.LatLng(centery, centerx));
+					
+					var sw = new google.maps.LatLng(data.bounds.south, data.bounds.west);
+					var ne = new google.maps.LatLng(data.bounds.north, data.bounds.east);
+					map.fitBounds(new google.maps.LatLngBounds(sw, ne));
+					
+                    //projection.center([centerx, centery])
+                    //.scale(Math.round(newScale));
+
+					overlay.draw();
+
+							startTime = new Date(Date.parse(data["start"]+" GMT"));
+							endTime = new Date(Date.parse(data["end"]+" GMT"));
+							
+							d3.select('#slidertext').text(startTime.toUTCString());
+
+					//dynamic graph stuff
+
+					tau = 2 * Math.PI;
+					angle = tau / data["result"].length;
+					$.each(data["result"], function (i, v) {
+					data["result"][i].x = (width / 4) * Math.cos(i * angle) + (width / 2);
+					data["result"][i].y = (height / 4) * Math.sin(i * angle) + (height / 2);
+					});
+
+					/*
+					link = svg.select("g#links")
+						.selectAll(".link")
+						.data(graph.edges, function (d) {
+							return d.id;
+						});
+
+					link.enter().append("line")
+						.classed("link", true)
+						.style("opacity", 0.0)
+						.style("stroke-width", 0.0)
+						.transition()
+						.duration(transition_time)
+						.style("opacity", 1.0)
+						.style("stroke-width", 1.0);
+
+					link.exit()
+						.transition()
+						.duration(transition_time)
+						.style("opacity", 0.0)
+						.style("stroke-width", 0.0)
+						.remove();
+					*/
+					//create nodes
+					node = dg_svg.select("g#nodes")
+						.selectAll(".node")
+						.data(data["result"], trackid);
+
+					enter = node.enter().append("circle")
+						.classed("node", true)
+						.attr("r", 15)
+						.style("opacity", 0.0)
+						.style("fill", "red");
+					enter.transition()
+						.duration(transition_time)
+						.attr("r", 10)
+						.style("opacity", 1.0)
+					.style("stroke", "gray")
+						.style("fill", function (d) {
+							return defaultColors[d.index];
+						});
+
+					enter.call(force.drag)
+						.append("title")
+						.text(function (d) {
+							return d.track_id;
+						});
+
+					node.exit()
+						.transition()
+						.duration(transition_time)
+						.style("opacity", 0.0)
+						.attr("r", 0.0)
+						.style("fill", "black")
+						.remove();
+					
+					force.nodes(data["result"])
+					//force.nodes(graph.nodes)
+						//.links(graph.edges)
+						.start();
+					
+					force.on("tick", function () {
+						node.attr("cx", function (d) { return d.x; })
+							.attr("cy", function (d) { return d.y; });
+					});
+
+					//store edge data
+				});
             }
         });
         
@@ -215,25 +269,17 @@ $(function () {
 });
 
 function Reset(full) {
-    if (geodata != null) {
-        geodata.remove();
-    }
-    g.selectAll("circle").remove();
-    svg.selectAll("text").remove();
-    
-    var background = svg.select("rect")
-        .attr("height", 0);
-    
-    if (full) {   
-        projection.center([0, 0]).scale(153);
-        g.attr("transform", "translate(0,0)scale(1)");
-        zoom.scale(1);
-        zoom.translate([0,0]);
-        
-        g.selectAll("path")  
-            .attr("d", path.projection(projection));
-        currentScale = 153;
-    }
+	console.log("Current Bounds: "+map.getBounds());
+
+    d3.select('#community-id').text("Community ID: None");
+    dg_svg.select("g#nodes").selectAll(".node").remove();
+	
+	map.setCenter(new google.maps.LatLng(0, 0));
+	map.setZoom(2);
+	
+	currentGeoJson = [];
+	
+	overlay.draw();
 }
 
 d3.select('#time-slider').call(timeSlider = d3.slider().on("slide", function(evt, value) {
@@ -268,7 +314,7 @@ function SetCircles(value) {
             }
             
             if (beforeIndex == afterIndex) {
-                return projection(d.coordinates[beforeIndex])[0];
+                return googleMapProjection(d.coordinates[beforeIndex])[0];
             } else {
                 var beforeTime = new Date(Date.parse(d.timestamps[beforeIndex]+" GMT"));
                 var afterTime = new Date(Date.parse(d.timestamps[afterIndex]+" GMT"));
@@ -292,7 +338,7 @@ function SetCircles(value) {
             var dist = distance(beforeY, afterY, beforeX, afterX);
             var newCoords = destination(beforeY, beforeX, brng, dist * percent);
             
-            var coordinates = projection(newCoords);
+            var coordinates = googleMapProjection(newCoords);
             return coordinates[0];
         })
         .attr('cy', function(d) {
@@ -317,7 +363,7 @@ function SetCircles(value) {
             }
             
             if (beforeIndex == afterIndex) {
-                return projection(d.coordinates[beforeIndex])[1];
+                return googleMapProjection(d.coordinates[beforeIndex])[1];
             } else {
                 var beforeTime = new Date(Date.parse(d.timestamps[beforeIndex]+" GMT"));
                 var afterTime = new Date(Date.parse(d.timestamps[afterIndex]+" GMT"));
@@ -341,26 +387,25 @@ function SetCircles(value) {
             var dist = distance(beforeY, afterY, beforeX, afterX);
             var newCoords = destination(beforeY, beforeX, brng, dist * percent);
             
-            var coordinates = projection(newCoords);
+            var coordinates = googleMapProjection(newCoords);
             return coordinates[1];
         });
 }
 
-setInterval(function(){
-    if (animate) {
-        var currentValue = timeSlider.value()+playSpeed;
-        timeSlider.value(currentValue);
-        
-        if (timeSlider.value() >= 100) {
-            animate = false;
-            $("#play").text("Play");
-        } else {
-            SetCircles(currentValue);
-        }
-        
-        d3.select('#time-slider').selectAll("a").attr("style", "left: "+currentValue+"%;");
-    }
-},10);
+function AnimateTracks() {
+	var currentValue = timeSlider.value()+playSpeed;
+	timeSlider.value(currentValue);
+
+	if (timeSlider.value() >= 100) {
+	    animate = false;
+	    $("#play").text("Play");
+	    clearInterval(timeout);
+	} else {
+	    SetCircles(currentValue);
+	}
+
+	d3.select('#time-slider').selectAll("a").attr("style", "left: "+currentValue+"%;");
+}
 
 function pad(num, size) {
     var s = "000000" + num;
@@ -369,6 +414,18 @@ function pad(num, size) {
 
 function trackid(track) {
     return track.track_id;
+}
+
+function getColor(index) {
+    var trackColor;
+    if (index >= defaultColors.length) {
+        trackColor = '#'+pad(Math.floor(Math.random()*16777215).toString(16),6);
+	defaultColors.push(trackColor);
+    } else {
+        trackColor = defaultColors[index];
+    }
+    
+    return trackColor;
 }
 
 function destination(lat1, lon1, brng, d) {

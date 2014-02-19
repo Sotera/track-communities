@@ -34,27 +34,49 @@
     opacity: .5;
 }
 
+.SvgOverlay svg {
+    position: absolute;
+    top: -4000px;
+    left: -4000px;
+    width: 8000px;
+    height: 8000px;
+}
+
+#map {
+    position: absolute;
+    left: 0px;
+    right: 0px;
+}
+
 </style>
 
 <head>
     <title>Paths</title>
-    <link href=http://bootswatch.com/2/readable/bootstrap.min.css rel=stylesheet type=text/css>
+    <link href="tangelo.css" rel=stylesheet type=text/css>
 </head>
 <body>
     <!-- Tangelo utility to set up a nice Bootstrap navbar -->
-    <div data-tangelo-type="navbar" data-tangelo-app="Paths"></div>
+    <div data-tangelo-type="navbar" data-tangelo-app="Tracks"></div>
  
-    <div class="container" align="center">
+    <div align="center">
  
         <!-- Our little form to submit the text -->
-        <h2>Paths</h2>
+        <h2>Track Communities</h2>
         
         <!-- Create a fullscreen Google map -->
-        <div id=map class=gmap style="width:100%;height:100%"></div>
+	<!--div id=map class=gmap style="width:100%;height:100%;"></div-->
+	<div id=map class=gmap style="width:50%;height:100%;float: left" height="480"></div>
+	<div style="width:50%;height:100%;float: right">
+		<svg id=graph>
+		    <rect width=100% height=100% style="fill:silver;"/>
+		    <g id="links"></g>
+		    <g id="nodes"></g>
+		</svg>
+	</div>
  
     </div>
     
-    <div data-tangelo-type=control-panel>
+    <div class=control-panel>
         <div class=container>
             <div class=row>
                 <div class=span3>
@@ -69,8 +91,9 @@
                     <div id="speed-slider"></div>
                 </div>
                 
-                <div class=span3>
+                <div>
                     <h4>Data Controls</h4>
+		    <div id="community-id">Community ID: None</div>
                     <a id="refresh" class="btn">Refresh</a>
                     <a id="reset" class="btn">Reset</a>
                 </div>
@@ -79,15 +102,16 @@
     </div>
     
     <!-- Boilerplate Javascript -->
-    <script src=http://code.jquery.com/ui/1.9.1/jquery-ui.min.js></script>
-    <script src=http://netdna.bootstrapcdn.com/bootstrap/2.3.0/js/bootstrap.min.js></script>
-    <script src="http://d3js.org/d3.v3.min.js"></script>
-    <script src=/js/tangelo.js></script>
- 
-    <script src="http://d3js.org/topojson.v1.min.js"></script>
+    <script src="jquery-1.8.2.js"></script>
+    <script src="bootstrap.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <!--script src="/tangelo.js"></script-->
+    
+    <script src="topojson.v1.min.js"></script>
     <script src="d3.slider.js"></script>
-   <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-   <script src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script> 
+
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+    
     <!-- Styling for UI elements -->
     <link href=http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css rel=stylesheet>
         

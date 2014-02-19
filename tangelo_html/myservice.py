@@ -32,8 +32,8 @@ def convert_results(results, fields=False):
     converted.append(row)
   return converted
 
-def run(database="default", table="FILL_THIS_IN", host="localhost", port="21000", trackId=None, comm=None):
-        response = tangelo.empty_response()
+def run(database="default", table="ais_small_final_tracks_comms_joined", host="xdata", port="21000", trackId=None, comm=None):
+        response = {}
         
         query = "select * from %s" % (table)
         
@@ -44,7 +44,7 @@ def run(database="default", table="FILL_THIS_IN", host="localhost", port="21000"
         else:
             return response
         
-        query = query + " order by track_id, dt limit 10000"
+        query = query + " order by track_id, dt limit 100000"
         
         client = impala.ImpalaBeeswaxClient(host + ':' + port)
         client.connect()
