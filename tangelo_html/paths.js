@@ -24,7 +24,7 @@ var animate = false;
 var playSpeed = .1;
 var animateInterval = 10;
 
-d3.select('#slidertext').text(startTime.toUTCString());
+d3.select('#slidertext').text(startTime);
     
 var defaultColors = ["red", "blue", "green", "magenta", "sienna", "teal", "goldenrod", "cyan", "indigo", "springgreen"];
 
@@ -148,7 +148,7 @@ $(function () {
         Reset(false);
         
         $.ajax({
-            url: 'http://xdata:8787/getcomm/',
+            url: 'http://localhost:8787/getcomm/',
             type: 'GET',
             success: function(data) {
                 var serviceCall = '?comm="'+data+'"';
@@ -176,10 +176,10 @@ $(function () {
 
 					overlay.draw();
 
-							startTime = new Date(Date.parse(data["start"]+" GMT"));
-							endTime = new Date(Date.parse(data["end"]+" GMT"));
+							startTime = new Date(Date.parse(data["start"]));
+							endTime = new Date(Date.parse(data["end"]));
 							
-							d3.select('#slidertext').text(startTime.toUTCString());
+							d3.select('#slidertext').text(startTime);
 
 					//dynamic graph stuff
 
@@ -190,20 +190,19 @@ $(function () {
 					data["result"][i].y = (height / 4) * Math.sin(i * angle) + (height / 2);
 					});
 
-					/*
-					link = svg.select("g#links")
+					
+					link = dg_svg.select("g#links")
 						.selectAll(".link")
-						.data(graph.edges, function (d) {
-							return d.id;
-						});
+						.data(data["graph"], edgeid);
 
-					link.enter().append("line")
+					enter = link.enter().append("line")
 						.classed("link", true)
 						.style("opacity", 0.0)
-						.style("stroke-width", 0.0)
-						.transition()
+						.style("stroke-width", 1.0);
+					enter.transition()
 						.duration(transition_time)
-						.style("opacity", 1.0)
+						.style("opacity", 0.0)
+						.style("stroke", "#FFFFFF")
 						.style("stroke-width", 1.0);
 
 					link.exit()
@@ -212,7 +211,7 @@ $(function () {
 						.style("opacity", 0.0)
 						.style("stroke-width", 0.0)
 						.remove();
-					*/
+					
 					//create nodes
 					node = dg_svg.select("g#nodes")
 						.selectAll(".node")
@@ -248,12 +247,16 @@ $(function () {
 					
 					force.nodes(data["result"])
 					//force.nodes(graph.nodes)
-						//.links(graph.edges)
+						.links(data["graph"])
 						.start();
 					
 					force.on("tick", function () {
 						node.attr("cx", function (d) { return d.x; })
 							.attr("cy", function (d) { return d.y; });
+					link.attr("x1", function(d) { return d.source.x; })
+        				.attr("y1", function(d) { return d.source.y; })
+        				.attr("x2", function(d) { return d.target.x; })
+        				.attr("y2", function(d) { return d.target.y; });
 					});
 
 					//store edge data
@@ -273,6 +276,7 @@ function Reset(full) {
 
     d3.select('#community-id').text("Community ID: None");
     dg_svg.select("g#nodes").selectAll(".node").remove();
+    dg_svg.select("g#links").selectAll(".link").remove();
 	
 	map.setCenter(new google.maps.LatLng(0, 0));
 	map.setZoom(2);
@@ -284,11 +288,43 @@ function Reset(full) {
 
 d3.select('#time-slider').call(timeSlider = d3.slider().on("slide", function(evt, value) {
     SetCircles(value);
+    SetRelationships(value);
 }));
+
+function SetRelationships(value) {
+console.log("Start Here"); 
+console.log("Start Here");   
+var currentDate = new Date(startTime.getTime() + ((endTime.getTime() - startTime.getTime()) * value / 100));
+    link = dg_svg.select("g#links")
+         .selectAll(".link")
+         .style("stroke-width", function(d) {
+return d.value;
+})
+         .style("opacity", function(d) {
+    startD = new Date(d.start);
+    endD = new Date(d.end);
+console.log(startD + ' <= ' + currentDate + ' < ' + endD);
+    
+if ( startD <= currentDate && currentDate < endD )
+{
+console.log("Match");
+
+return 1.0;
+}
+else {
+console.log("Nope");
+return 0.0;
+
+}
+}
+)
+
+
+}
 
 function SetCircles(value) {
     var currentDate = new Date(startTime.getTime() + ((endTime.getTime() - startTime.getTime()) * value / 100));
-    d3.select('#slidertext').text(currentDate.toUTCString());
+    d3.select('#slidertext').text(currentDate);
     
     //update circles
     var geocircles = g.selectAll("circle")
@@ -299,7 +335,7 @@ function SetCircles(value) {
             var beforeIndex = 0;
             var afterIndex = 0;
             for(var i=0;i<d.timestamps.length;i++) {
-                var compareDate = new Date(Date.parse(d.timestamps[i]+" GMT"));
+                var compareDate = new Date(Date.parse(d.timestamps[i]));
                 if (currentDate > compareDate) {
                     beforeIndex = i;
                     afterIndex = i;
@@ -316,8 +352,8 @@ function SetCircles(value) {
             if (beforeIndex == afterIndex) {
                 return googleMapProjection(d.coordinates[beforeIndex])[0];
             } else {
-                var beforeTime = new Date(Date.parse(d.timestamps[beforeIndex]+" GMT"));
-                var afterTime = new Date(Date.parse(d.timestamps[afterIndex]+" GMT"));
+                var beforeTime = new Date(Date.parse(d.timestamps[beforeIndex]));
+                var afterTime = new Date(Date.parse(d.timestamps[afterIndex]));
                 
                 var indexDiff = new Date(afterTime.getTime() - beforeTime.getTime());
                 var currentDiff = new Date(currentDate.getTime() - beforeTime.getTime());
@@ -348,7 +384,7 @@ function SetCircles(value) {
             var beforeIndex = 0;
             var afterIndex = 0;
             for(var i=0;i<d.timestamps.length;i++) {
-                var compareDate = new Date(Date.parse(d.timestamps[i]+" GMT"));
+                var compareDate = new Date(Date.parse(d.timestamps[i]));
                 if (currentDate > compareDate) {
                     beforeIndex = i;
                     afterIndex = i;
@@ -365,8 +401,8 @@ function SetCircles(value) {
             if (beforeIndex == afterIndex) {
                 return googleMapProjection(d.coordinates[beforeIndex])[1];
             } else {
-                var beforeTime = new Date(Date.parse(d.timestamps[beforeIndex]+" GMT"));
-                var afterTime = new Date(Date.parse(d.timestamps[afterIndex]+" GMT"));
+                var beforeTime = new Date(Date.parse(d.timestamps[beforeIndex]));
+                var afterTime = new Date(Date.parse(d.timestamps[afterIndex]));
                 
                 var indexDiff = new Date(afterTime.getTime() - beforeTime.getTime());
                 var currentDiff = new Date(currentDate.getTime() - beforeTime.getTime());
@@ -402,6 +438,7 @@ function AnimateTracks() {
 	    clearInterval(timeout);
 	} else {
 	    SetCircles(currentValue);
+            SetRelationships(currentValue);
 	}
 
 	d3.select('#time-slider').selectAll("a").attr("style", "left: "+currentValue+"%;");
@@ -410,6 +447,10 @@ function AnimateTracks() {
 function pad(num, size) {
     var s = "000000" + num;
     return s.substr(s.length-size);
+}
+
+function edgeid(edge) { 
+    return edge.source + ':' +  edge.target;
 }
 
 function trackid(track) {

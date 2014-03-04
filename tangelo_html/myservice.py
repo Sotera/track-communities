@@ -32,7 +32,18 @@ def convert_results(results, fields=False):
     converted.append(row)
   return converted
 
-def run(database="default", table="ais_small_final_tracks_comms_joined", host="xdata", port="21000", trackId=None, comm=None):
+def linkages(comm=None, nodemap=None, host="localhost", port="21000"):
+  query = "select source, destination, firstdate, lastdate, value from ais_small_final_dynamic_graph_w_comms_final where sourcecomm = " + comm + " and destcomm = " + comm + " limit 100000 "
+  client = impala.ImpalaBeeswaxClient(host + ':' + port)
+  client.connect()
+  qResults = client.execute(query)
+  edges = []
+  for record in qResults.data:
+    source,target,start,end,value = record.split('\t')
+    edges.append({"source":nodemap[source],"target":nodemap[target],"start":start,"end":end,"value":value})
+  return edges
+
+def run(database="default", table="ais_small_final_tracks_comms_joined", host="localhost", port="21000", trackId=None, comm=None):
         response = {}
         
         query = "select * from %s" % (table)
@@ -52,7 +63,7 @@ def run(database="default", table="ais_small_final_tracks_comms_joined", host="x
         qResults = client.execute(query)
         
         results = convert_results(qResults, "true")
-        
+        nodemap = {}
         bounds = { "north": -1,
                    "south": -1,
                    "east": -1,
@@ -86,6 +97,7 @@ def run(database="default", table="ais_small_final_tracks_comms_joined", host="x
                                  "coordinates": [],
                                  "timestamps": []
                                 }
+		nodemap[record["track_id"]] = trackIndex
                 trackIndex = trackIndex + 1
                 geoResults.append(currentTrack)
                 
@@ -117,5 +129,6 @@ def run(database="default", table="ais_small_final_tracks_comms_joined", host="x
         response["bounds"] = bounds
         response["start"] = start
         response["end"] = end
-        
+        edges = linkages(comm,nodemap,host,port)
+        response["graph"] = edges
         return response

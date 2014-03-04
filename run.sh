@@ -6,13 +6,14 @@ id=$(sed -n 's/.*table_schema_id *: *\([^ ]*.*\)/\1/p' < ../aggregate-micro-path
 latitude=$(sed -n 's/.*table_schema_lat *: *\([^ ]*.*\)/\1/p' < ../aggregate-micro-paths/hive-streaming/conf/${ini_file})
 longitude=$(sed -n 's/.*table_schema_lon *: *\([^ ]*.*\)/\1/p' < ../aggregate-micro-paths/hive-streaming/conf/${ini_file})
 dt=$(sed -n 's/.*table_schema_dt *: *\([^ ]*.*\)/\1/p' < ../aggregate-micro-paths/hive-streaming/conf/${ini_file})
+temporal_split=$(sed -n 's/.*temporal_split *: *\([^ ]*.*\)/\1/p' < ../aggregate-micro-paths/hive-streaming/conf/${ini_file})
 
 # 1st Run Triplines
 cd ../aggregate-micro-paths/hive-streaming
 python AggregateMicroPath.py -c ${ini_file}
 
 cd ../../track-communities
-hive -hiveconf table=${table} -f query.sql
+hive -hiveconf ts=${temporal_split} -hiveconf table=${table} -f query.sql
 
 hive -e "select * from ${table}_network_edges;" > network_edges.tsv
 
