@@ -13,6 +13,7 @@ setup(
   keywords='louvain',
   install_requires=[
     'bottle',
+    'impyla'
   ],
   license='Apache License, Version 2.0'
 )
