@@ -33,6 +33,9 @@ cd ../track-communities
 rm -Rf output
 hadoop fs -get /tmp/trackcomms/${table}/output .
 
+rm -Rf louvain_to_gephi
+python louvain_to_gephi.py
+
 cd output
 
 cd giraph_1
