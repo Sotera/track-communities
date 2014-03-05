@@ -22,7 +22,7 @@ def index(name=''):
     global comm
     global outputkml
     comm = name
-    client = impala.ImpalaBeeswaxClient('arcus7:21000')
+    client = impala.ImpalaBeeswaxClient('localhost:21000')
     client.connect()
     count = client.execute("select count(*) from " + table + " where comm = '" + comm + "'")
     count_result = count.get_data()
