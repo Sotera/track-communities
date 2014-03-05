@@ -1,6 +1,3 @@
 track-communities
 =================
-Need Video Here...
-This analytic forms communities from geo-temporal track data based on co-occurrence.
-
-[This is a test](http://nbviewer.ipython.org/github/Sotera/track-communities/blob/master/Test.ipynb)
+This analytic first assigns relationships between tracks based on a configuarable definition of geo-temporal co-occurrence.  It then runs [Distributed Louvain Modularity|http://sotera.github.io/distributed-louvain-modularity/] .
