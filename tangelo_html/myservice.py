@@ -47,91 +47,86 @@ def linkages(comm=None, nodemap=None, host="localhost", port="21000"):
     return edges
 
 def run(database="default", table="", host="localhost", port="21000", trackId=None, comm=None):
-        response = {}
-        table = cache.get().get("table", "") + "_tracks_comms_joined"
-        query = "select * from %s" % (table)
+    response = {}
+    table = cache.get().get("table", "") + "_tracks_comms_joined"
+    query = "select * from %s" % (table)
         
-        if trackId != None:
-            query = query + " where track_id = %s" % (trackId)
-        elif comm != None:
-            query = query + " where comm = %s" % (comm)
-        else:
-            return response
-        
-        query = query + " order by track_id, dt limit 100000"
-        
-        client = impala.ImpalaBeeswaxClient(host + ':' + port)
-        client.connect()
-        
-        qResults = client.execute(query)
-        
-        results = convert_results(qResults, "true")
-        nodemap = {}
-        bounds = { "north": -1,
-                   "south": -1,
-                   "east": -1,
-                   "west": -1
-                 }
-        start = -1
-        end = -1
-        geoResults = []
-        trackIndex = 0
-        
-        #convert table results into LineStrings
-        for record in results:
-            currentTrack = {}
-            
-            recordx = float(record["intersecty"])
-            recordy = float(record["intersectx"])
-            
-            found = False
-            for track in geoResults:
-                if track["track_id"] == record["track_id"]:
-                    currentTrack = track
-                    found = True
-                    break
-                
-            if found == False:
-                
-                currentTrack = { "type": "LineString",
-                                 "track_id": record["track_id"],
-                                 "comm": record["comm"],
-                                 "index": trackIndex,
-                                 "coordinates": [],
-                                 "timestamps": []
-                                }
-		nodemap[record["track_id"]] = trackIndex
-                trackIndex = trackIndex + 1
-                geoResults.append(currentTrack)
-                
-            coords = [ recordx,
-                       recordy
-                     ]
-            currentTrack["coordinates"].append(coords)
-            currentTrack["timestamps"].append(record["dt"])
-            
-            if bounds["north"] == -1 or bounds["north"] < recordy:
-                bounds["north"] = float(recordy)
-                
-            if bounds["south"] == -1 or bounds["south"] > recordy:
-                bounds["south"] = float(recordy)
-                
-            if bounds["east"] == -1 or bounds["east"] < recordx:
-                bounds["east"] = float(recordx)
-                
-            if bounds["west"] == -1 or bounds["west"] > recordx:
-                bounds["west"] = float(recordx)
-            
-            if start == -1 or record["dt"] < start:
-                start = record["dt"]
-                
-            if end == -1 or record["dt"] > end:
-                end = record["dt"]
-        
-        response["result"] = geoResults
-        response["bounds"] = bounds
-        response["start"] = start
-        response["end"] = end
-        edges = linkages(comm,nodemap,host,port)
-        response["graph"] = edges
+    if trackId != None:
+        query = query + " where track_id = %s" % (trackId)
+    elif comm != None:
+        query = query + " where comm = %s" % (comm)
+    else:
         return response
+        
+    query = query + " order by track_id, dt limit 100000"
+    
+    client = impala.ImpalaBeeswaxClient(host + ':' + port)
+    client.connect()
+    qResults = client.execute(query)
+    results = convert_results(qResults, "true")
+    nodemap = {}
+    bounds = { "north": -1,
+               "south": -1,
+               "east": -1,
+               "west": -1
+    }
+    start = -1
+    end = -1
+    geoResults = []
+    trackIndex = 0
+        
+    #convert table results into LineStrings
+    for record in results:
+        currentTrack = {}
+    
+        recordx = float(record["intersecty"])
+        recordy = float(record["intersectx"])
+            
+        found = False
+        for track in geoResults:
+            if track["track_id"] == record["track_id"]:
+                currentTrack = track
+                found = True
+                break
+                
+        if found == False:
+            currentTrack = { "type": "LineString",
+                             "track_id": record["track_id"],
+                             "comm": record["comm"],
+                             "index": trackIndex,
+                             "coordinates": [],
+                             "timestamps": []
+            }
+            nodemap[record["track_id"]] = trackIndex
+            trackIndex = trackIndex + 1
+            geoResults.append(currentTrack)
+                
+        coords = [ recordx, recordy ]
+        currentTrack["coordinates"].append(coords)
+        currentTrack["timestamps"].append(record["dt"])
+            
+        if bounds["north"] == -1 or bounds["north"] < recordy:
+            bounds["north"] = float(recordy)
+                
+        if bounds["south"] == -1 or bounds["south"] > recordy:
+            bounds["south"] = float(recordy)
+                
+        if bounds["east"] == -1 or bounds["east"] < recordx:
+            bounds["east"] = float(recordx)
+                
+        if bounds["west"] == -1 or bounds["west"] > recordx:
+            bounds["west"] = float(recordx)
+            
+        if start == -1 or record["dt"] < start:
+            start = record["dt"]
+                
+        if end == -1 or record["dt"] > end:
+            end = record["dt"]
+        
+    response["result"] = geoResults
+    response["bounds"] = bounds
+    response["start"] = start
+    response["end"] = end
+    edges = linkages(comm,nodemap,host,port)
+    response["graph"] = edges
+    return response
