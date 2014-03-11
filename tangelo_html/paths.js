@@ -148,7 +148,8 @@ $(function () {
     Reset(false);
     
     $.ajax({
-      url: 'http://localhost:8787/getcomm/',
+      //url: 'http://localhost:8787/getcomm/',
+      url: 'community/getcomm/',      
       type: 'GET',
       success: function(data) {
         var serviceCall = '?comm="'+data+'"';
@@ -273,7 +274,7 @@ $(function () {
   $("#set-comm").click(function(){
     var commid = $("#comm-id").val();
     Reset(true);
-    $.get("http://localhost:8787/setcomm/" + commid)
+    $.get("community/setcomm/" + commid)
       .done(
         function(data){
           var b = 0 == data;

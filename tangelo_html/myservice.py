@@ -2,19 +2,20 @@ import impala
 import json
 import tangelo
 import itertools
+import cache
 
 def convert(value, type):
-  if type == "tinyint":
-    return int(value)
-  elif type == "int":
-    return int(value)
-  elif type == "double":
-    return float(value)
-  elif type == "string":
-    return value
-  elif type == "boolean":
-    return True if value == "true" else False
-  return None
+    if type == "tinyint":
+        return int(value)
+    elif type == "int":
+        return int(value)
+    elif type == "double":
+        return float(value)
+    elif type == "string":
+        return value
+    elif type == "boolean":
+        return True if value == "true" else False
+    return None
 
 def convert_results(results, fields=False):
   schema = results.schema.fieldSchemas
@@ -33,7 +34,8 @@ def convert_results(results, fields=False):
   return converted
 
 def linkages(comm=None, nodemap=None, host="localhost", port="21000"):
-  query = "select source, destination, firstdate, lastdate, value from ais_small_final_dynamic_graph_w_comms_final where sourcecomm = " + comm + " and destcomm = " + comm + " limit 100000 "
+  table = cache.get().get("table","") + "_dynamic_graph_w_comms_final"
+  query = "select source, destination, firstdate, lastdate, value from " + table + " where sourcecomm = " + comm + " and destcomm = " + comm + " limit 100000 "
   client = impala.ImpalaBeeswaxClient(host + ':' + port)
   client.connect()
   qResults = client.execute(query)
@@ -43,9 +45,9 @@ def linkages(comm=None, nodemap=None, host="localhost", port="21000"):
     edges.append({"source":nodemap[source],"target":nodemap[target],"start":start,"end":end,"value":value})
   return edges
 
-def run(database="default", table="ais_small_final_tracks_comms_joined", host="localhost", port="21000", trackId=None, comm=None):
+def run(database="default", table="", host="localhost", port="21000", trackId=None, comm=None):
         response = {}
-        
+        table = cache.get().get("table", "") + "_tracks_comms_joined"
         query = "select * from %s" % (table)
         
         if trackId != None:
