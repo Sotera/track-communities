@@ -34,16 +34,17 @@ def convert_results(results, fields=False):
   return converted
 
 def linkages(comm=None, nodemap=None, host="localhost", port="21000"):
-  table = cache.get().get("table","") + "_dynamic_graph_w_comms_final"
-  query = "select source, destination, firstdate, lastdate, value from " + table + " where sourcecomm = " + comm + " and destcomm = " + comm + " limit 100000 "
-  client = impala.ImpalaBeeswaxClient(host + ':' + port)
-  client.connect()
-  qResults = client.execute(query)
-  edges = []
-  for record in qResults.data:
-    source,target,start,end,value = record.split('\t')
-    edges.append({"source":nodemap[source],"target":nodemap[target],"start":start,"end":end,"value":value})
-  return edges
+    table = cache.get().get("table","") + "_dynamic_graph_w_comms_final"
+    query = "select source, destination, firstdate, lastdate, value from " + table + " where sourcecomm = " + comm + " and destcomm = " + comm + " limit 100000 "
+    client = impala.ImpalaBeeswaxClient(host + ':' + port)
+    client.connect()
+    qResults = client.execute(query)
+    edges = []
+
+    for record in qResults.data:
+        source,target,start,end,value = record.split('\t')
+        edges.append({"source":nodemap[source],"target":nodemap[target],"start":start,"end":end,"value":value})
+    return edges
 
 def run(database="default", table="", host="localhost", port="21000", trackId=None, comm=None):
         response = {}
