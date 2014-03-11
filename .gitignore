@@ -1,3 +1,5 @@
 /.project
 /tmp
 *.pyc
+/tangelo_html/session/cache
+/tangelo_html/session/output.kml
