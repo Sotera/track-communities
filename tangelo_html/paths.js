@@ -269,6 +269,21 @@ $(function () {
     $("#reset").click(function () {
     	Reset(true);
     });
+
+    $("#set-comm").click(function(){
+      var commid = $("#comm-id").val();
+      Reset(true);
+      $.get("http://localhost:8787/setcomm/" + commid)
+        .done(
+          function(data){
+            var b = 0 == data;
+            console.log(b);
+          })
+        .fail(function(jqXHR, textStatus, err){
+          console.log(jqXHR);
+          alert("set community failed");
+      });
+    })
 });
 
 function Reset(full) {

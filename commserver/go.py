@@ -1,6 +1,7 @@
 from bottle import route, run, template, response
 import random
 import impala
+import json
 
 comm = ''
 outputkml = ''
@@ -8,6 +9,7 @@ table = 'FILL_THIS_IN'
 
 @route('/commkml/')
 def index():
+    response.set_header('Access-Control-Allow-Origin', '*')
     global outputkml
     return outputkml
 
@@ -16,6 +18,25 @@ def index():
     response.set_header('Access-Control-Allow-Origin', '*')
     global comm
     return comm
+
+@route('/gettables/')
+def gettables():
+    client = impala.ImpalaBeeswaxClient('localhost:21000')
+    client.connect()
+    results = client.execute("show tables")
+    rows = results.get_data()
+    client.close_connection()
+    response.set_header('Access-Control-Allow-Origin', '*')
+    response.set_header('Content-Type', 'application/json')
+    return json.dumps({ 'tables' : [ table for table in rows.split('\n') if table.endswith("tracks_comms_joined") ]})
+
+@route('/settable/<name>')
+def index(name=''):
+    global table
+    table = name
+    response.set_header('Access-Control-Allow-Origin', '*')
+    response.set_header('Content-Type', 'text/plain')
+    return "0"
 
 @route('/setcomm/<name>')
 def index(name=''):
@@ -58,5 +79,8 @@ def index(name=''):
     output = open('output.kml','w')
     outputkml = document
     output.write(document)
+    response.set_header('Access-Control-Allow-Origin', '*')
+    response.set_header('Content-Type', 'text/plain')
+    return "0"
         
 run(host='0.0.0.0', port=8787)
