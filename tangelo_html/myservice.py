@@ -18,20 +18,20 @@ def convert(value, type):
     return None
 
 def convert_results(results, fields=False):
-  schema = results.schema.fieldSchemas
-  converted = []
-  for d in results.data:
-    parts = d.split("\t")
-    if fields:
-      row = {}
-      for i in range(len(parts)):
-        row[schema[i].name] = convert(parts[i], schema[i].type)
-    else:
-      row = []
-      for i in range(len(parts)):
-        row.append(convert(parts[i], schema[i].type))
-    converted.append(row)
-  return converted
+    schema = results.schema.fieldSchemas
+    converted = []
+    for d in results.data:
+        parts = d.split("\t")
+        if fields:
+            row = {}
+            for i in range(len(parts)):
+                row[schema[i].name] = convert(parts[i], schema[i].type)
+        else:
+            row = []
+            for i in range(len(parts)):
+                row.append(convert(parts[i], schema[i].type))
+        converted.append(row)
+    return converted
 
 def linkages(comm=None, nodemap=None, host="localhost", port="21000"):
     table = cache.get().get("table","") + "_dynamic_graph_w_comms_final"
