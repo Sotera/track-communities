@@ -39,6 +39,34 @@ force = d3.layout.force()
 
 color = d3.scale.category20();
 
+
+function showConfig() {
+  $.get("community/current").done(function(cfg){
+    d3.select("#track-table").property("value", cfg.table);
+    d3.select("#comm-id").property("value", cfg.community);
+  });
+}
+
+function updateConfig() {
+  var table, comm;
+  table = $("#track-table").val()
+  comm = $("#comm-id").val()
+
+  $.get("community/settable/" + table)
+    .then(function(){
+      $.get("community/setcomm/" + comm);
+  });
+  
+  // $.ajax({
+  //   url : "community/", 
+  //   contentType: "application/json",
+  //   data: JSON.stringify({ "table" : table, "community" : comm }),
+  //   dataType: "json",
+  //   type: "POST"
+  // });
+
+}
+
 var timeout = null;
 $(function () {
 
@@ -271,20 +299,6 @@ $(function () {
     Reset(true);
   });
 
-  $("#set-comm").click(function(){
-    var commid = $("#comm-id").val();
-    Reset(true);
-    $.get("community/setcomm/" + commid)
-      .done(
-        function(data){
-          var b = 0 == data;
-          console.log(b);
-        })
-      .fail(function(jqXHR, textStatus, err){
-        console.log(jqXHR);
-        alert("set community failed");
-      });
-  })
 });
 
 function Reset(full) {

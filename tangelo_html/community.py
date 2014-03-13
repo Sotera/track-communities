@@ -18,7 +18,7 @@ def tables(*args):
     rows = results.get_data()
     client.close_connection()
     tangelo.content_type("application/json")
-    return json.dumps({ 'tables' : [ table for table in rows.split('\n') if table.endswith("tracks_comms_joined") ]})
+    return json.dumps({ 'tables' : [ table[:-20] for table in rows.split('\n') if table.endswith("tracks_comms_joined") ]})
 
 #/community/settable/<name>
 def settable(*args):
@@ -33,6 +33,12 @@ def getcomm(*args):
 #/community/commkml/
 def commkml(*args):
     return slurp(cherrypy.config.get("webroot") + "/session/output.kml")
+
+#/community/current
+def getcurrent(*args):
+    c = cache.get()
+    tangelo.content_type("application/json")    
+    return { "table" : c["table"], "community" : c["community"] }
 
 #/community/setcomm/<name>
 def setcomm(*args):
@@ -84,7 +90,8 @@ actions = {
     "setcomm": setcomm,
     "gettable": gettable,
     "settable": settable,
-    "tables": tables
+    "tables": tables,
+    "current": getcurrent
 }
 
 @tangelo.restful
