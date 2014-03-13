@@ -84,7 +84,7 @@
     <div class=control-panel>
         <div class=container>
             <div class=row>
-                <div class=span4>
+                <div class=span3>
                     <h4>Timeline</h4>
                     <div id="time-slider"></div>
                     <div id="slidertext">0</div>
@@ -95,11 +95,16 @@
                     <div id="speed-slider"></div>
                 </div>
                 
-                <div class=span4>
+                <div class=span3>
                     <h4>Data Controls</h4>
 		    <div id="community-id">Community ID: None</div>
                     <a id="refresh" class="btn">Refresh</a>
                     <a id="reset" class="btn">Reset</a>
+                </div>
+                <div class=span3>
+                    <h4>Heatmap View</h4>
+                    <a id="heatmap-generate" class="btn">Generate</a>
+                    <a id="heatmap" class="btn">HeatMap</a>
                 </div>
             </div>
         </div>
@@ -108,12 +113,11 @@
     <!-- Boilerplate Javascript -->
     <script src="jquery-1.8.2.js"></script>
     <script src="bootstrap.js"></script>
-    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="d3.v3.min.js" charset="utf-8"></script>
     <script src="tangelo.js"></script>
-    
+   
     <script src="d3.slider.js"></script>
-
-    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=visualization"></script>
     <!-- The app's Javascript -->
     <script src="paths.js"></script> 
     

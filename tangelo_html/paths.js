@@ -299,6 +299,42 @@ $(function () {
     Reset(true);
   });
 
+  $("#heatmap-generate").click(function () {
+    $.get("heatmap/generate").done(function(){
+      alert("fin.");
+    });
+  });
+
+
+  $("#heatmap").click(function () {
+    Reset(true);
+    console.log("click");
+
+    $.ajax({
+      "url":"heatmap/map",
+      "type" : "GET"
+    }).done(function(data){
+      eval("var heatdata = " + data);
+      var heatmap = new google.maps.visualization.HeatmapLayer({ data: heatdata});      
+      heatmap.set('radius', heatmap.get('radius') ? null : 15);
+      heatmap.setMap(map);
+      console.log(heatdata.length)
+    });
+
+
+    // $.get("heatmap/map", function(data){
+    //   console.log("cb");
+    // })
+    //   .done(function(heatdata){
+    //     console.log("data");
+    //     
+    //   // heatmap.set('gradient', heatmap.get('gradient') ? null : gradient);
+    //   // 
+    //   
+    // })
+  });
+
+
 });
 
 function Reset(full) {

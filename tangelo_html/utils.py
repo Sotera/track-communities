@@ -6,6 +6,11 @@ def slurp(filePath):
     with open(filePath) as x: data = x.read()
     return data
 
+def slurpA(filePath):
+    # same as slurp but return Array of lines instead of string
+    with open(filePath) as x: data = x.read().splitlines()
+    return data
+
 def spit(filePath, data, overwrite=False):
     # write all contents to a file
     mode= 'w' if overwrite else 'a'
