@@ -15,7 +15,7 @@ var g;
 var googleMapProjection;
 var currentGeoJson = [];
 var map;
-
+var heatmap = new google.maps.visualization.HeatmapLayer({ data: []});      
 var startTime = new Date();
 var endTime = new Date();
 
@@ -299,41 +299,22 @@ $(function () {
     Reset(true);
   });
 
-  $("#heatmap-generate").click(function () {
-    $.get("heatmap/generate").done(function(){
-      alert("fin.");
-    });
+  $("#heatmap-remove").click(function () {
+      heatmap.setMap(null);    
   });
 
-
   $("#heatmap").click(function () {
-    Reset(true);
-    console.log("click");
-
     $.ajax({
       "url":"heatmap/map",
       "type" : "GET"
     }).done(function(data){
       eval("var heatdata = " + data);
-      var heatmap = new google.maps.visualization.HeatmapLayer({ data: heatdata});      
+      heatmap.setMap(null);
+      heatmap.setData(heatdata);
       heatmap.set('radius', heatmap.get('radius') ? null : 15);
       heatmap.setMap(map);
-      console.log(heatdata.length)
     });
-
-
-    // $.get("heatmap/map", function(data){
-    //   console.log("cb");
-    // })
-    //   .done(function(heatdata){
-    //     console.log("data");
-    //     
-    //   // heatmap.set('gradient', heatmap.get('gradient') ? null : gradient);
-    //   // 
-    //   
-    // })
   });
-
 
 });
 
@@ -346,9 +327,8 @@ function Reset(full) {
   
   map.setCenter(new google.maps.LatLng(0, 0));
   map.setZoom(2);
-  
+
   currentGeoJson = [];
-  
   overlay.draw();
 }
 
@@ -371,21 +351,15 @@ function SetRelationships(value) {
       endD = new Date(d.end);
       console.log(startD + ' <= ' + currentDate + ' < ' + endD);
       
-      if ( startD <= currentDate && currentDate < endD )
-      {
+      if ( startD <= currentDate && currentDate < endD ) {
         console.log("Match");
-
         return 1.0;
       }
       else {
         console.log("Nope");
         return 0.0;
-
       }
-    }
-          )
-
-
+    });
 }
 
 function SetCircles(value) {
