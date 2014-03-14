@@ -1,8 +1,8 @@
-import impala
 import json
 import tangelo
 import itertools
 import cache
+from utils import *
 
 def convert(value, type):
     if type == "tinyint":
@@ -36,15 +36,13 @@ def convert_results(results, fields=False):
 def linkages(comm=None, nodemap=None, host="localhost", port="21000"):
     table = cache.get().get("table","") + "_dynamic_graph_w_comms_final"
     query = "select source, destination, firstdate, lastdate, value from " + table + " where sourcecomm = " + comm + " and destcomm = " + comm + " limit 100000 "
-    client = impala.ImpalaBeeswaxClient(host + ':' + port)
-    client.connect()
-    qResults = client.execute(query)
-    edges = []
-
-    for record in qResults.data:
-        source,target,start,end,value = record.split('\t')
-        edges.append({"source":nodemap[source],"target":nodemap[target],"start":start,"end":end,"value":value})
-    return edges
+    with impalaopen(host + ':' + port) as client:
+        qResults = client.execute(query)
+        edges = []
+        for record in qResults.data:
+            source,target,start,end,value = record.split('\t')
+            edges.append({"source":nodemap[source],"target":nodemap[target],"start":start,"end":end,"value":value})
+        return edges
 
 def run(database="default", table="", host="localhost", port="21000", trackId=None, comm=None):
     response = {}
@@ -59,11 +57,13 @@ def run(database="default", table="", host="localhost", port="21000", trackId=No
         return response
         
     query = query + " order by track_id, dt limit 100000"
-    
-    client = impala.ImpalaBeeswaxClient(host + ':' + port)
-    client.connect()
-    qResults = client.execute(query)
-    results = convert_results(qResults, "true")
+
+    results = None
+    with impalaopen(host + ':' + port) as client:
+        qResults = client.execute(query)
+        results = convert_results(qResults, "true")
+
+
     nodemap = {}
     bounds = { "north": -1,
                "south": -1,

@@ -2,7 +2,6 @@ import tangelo
 import cherrypy
 import json
 import random
-import impala
 from utils import *
 import cache
 
@@ -12,13 +11,11 @@ def gettable(*args):
 
 #/community/tables
 def tables(*args):
-    client = impala.ImpalaBeeswaxClient('localhost:21000')
-    client.connect()
-    results = client.execute("show tables")
-    rows = results.get_data()
-    client.close_connection()
-    tangelo.content_type("application/json")
-    return json.dumps({ 'tables' : [ table[:-20] for table in rows.split('\n') if table.endswith("tracks_comms_joined") ]})
+    with impalaopen('localhost:21000') as client:
+        results = client.execute("show tables")        
+        rows = results.get_data()
+        tangelo.content_type("application/json")
+        return json.dumps({ 'tables' : [ table[:-20] for table in rows.split('\n') if table.endswith("tracks_comms_joined") ]})
 
 #/community/settable/<name>
 def settable(*args):
@@ -48,14 +45,13 @@ def setcomm(*args):
     c = cache.update({ "community" : args[0] })
     comm = c["community"]
     table = c["table"] + "_tracks_comms_joined"
-    client = impala.ImpalaBeeswaxClient('localhost:21000')
-    client.connect()
-    count = client.execute("select count(*) from " + table + " where comm = '" + comm + "'")
-    count_result = count.get_data()
-    print count_result.strip()
-    results = client.execute("select * from " + table + " where comm = '" + comm + "' order by track_id, dt asc limit " + count_result.strip())
-    client.close_connection()
-    rows = results.get_data()
+    rows = []
+    with impalaopen('localhost:21000') as client:
+        count = client.execute("select count(*) from " + table + " where comm = '" + comm + "'")
+        count_result = count.get_data()
+        print count_result.strip()
+        results = client.execute("select * from " + table + " where comm = '" + comm + "' order by track_id, dt asc limit " + count_result.strip())
+        rows = results.get_data()
 
     whens = {}
     coords = {}
