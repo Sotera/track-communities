@@ -1,5 +1,6 @@
 
 import os
+import impala
 
 def slurp(filePath):
     # read contents of file to string
@@ -19,3 +20,16 @@ def spit(filePath, data, overwrite=False):
 def exists(filePath):
     return os.path.exists(filePath)
 
+class impalaopen(object):
+    
+    def __init__(self, host):
+        self.client = None
+        self.host = host
+
+    def __enter__(self):
+        self.client = impala.ImpalaBeeswaxClient(self.host)
+        self.client.connect()
+        return self.client
+
+    def __exit__(self, type, value, traceback):
+        self.client.close_connection()
