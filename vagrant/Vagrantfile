@@ -1,0 +1,58 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  # All Vagrant configuration is done here. The most common configuration
+  # options are documented and commented below. For a complete reference,
+  # please see the online documentation at vagrantup.com.
+
+  # Every Vagrant virtual environment requires a box to build off of.
+  config.vm.box = "xdata-vm1"
+
+  # The url from where the 'config.vm.box' box will be fetched if it
+  # doesn't already exist on the user's system.
+  # config.vm.box_url = "http://domain.com/path/to/above.box"
+
+  #config.vm.provision :shell, :path => "provision.sh"
+
+  config.vm.provision :puppet do |puppet|
+    puppet.module_path = "modules"
+    puppet.manifests_path = "manifests"
+    puppet.manifest_file  = "init.pp"
+  end
+
+
+  # Create a forwarded port mapping which allows access to a specific port
+  # within the machine from a port on the host machine. In the example below,
+  # accessing "localhost:8080" will access port 80 on the guest
+  # machine.
+  config.vm.network :forwarded_port, guest: 50070, host: 50070, auto_correct: true
+  config.vm.network :forwarded_port, guest: 50090, host: 50090, auto_correct: true
+  config.vm.network :forwarded_port, guest: 50030, host: 50030, auto_correct: true
+  config.vm.network :forwarded_port, guest: 50060, host: 50060, auto_correct: true
+  config.vm.network :forwarded_port, guest: 9095, host: 9095, auto_correct: true
+  config.vm.network :forwarded_port, guest: 60010, host: 60010, auto_correct: true
+  config.vm.network :forwarded_port, guest: 60030, host: 60030, auto_correct: true
+  config.vm.network :forwarded_port, guest: 8085, host: 8085, auto_correct: true
+  config.vm.network :forwarded_port, guest: 8000, host: 8000, auto_correct: true
+  config.vm.network :forwarded_port, guest: 8787, host: 8787, auto_correct: true
+  config.vm.network :forwarded_port, guest: 21000, host: 21000, auto_correct: true
+
+  # Provider-specific configuration so you can fine-tune various
+  # backing providers for Vagrant. These expose provider-specific options.
+  # Example for VirtualBox:
+  #
+  config.vm.provider :virtualbox do |vb|
+    # Don't boot with headless mode
+    vb.gui = false
+  
+    # Use VBoxManage to customize the VM. For example to change memory:
+    vb.customize ["modifyvm", :id, "--memory", "4096"]
+    vb.customize ["modifyvm", :id, "--ioapic", "on"]
+    vb.customize ["modifyvm", :id, "--cpus", "8"]
+  end
+
+end
