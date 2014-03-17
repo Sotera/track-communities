@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os
 
 os.system("mkdir louvain_to_gephi")
