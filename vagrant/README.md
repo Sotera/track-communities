@@ -47,12 +47,12 @@ you use `vagrant ssh` to login to the box.  Just run `sudo -u bigdata
 **Tangelo** also will not be started.  It is setup for you to just run
   `tangelo start` and `tangelo stop`.
   
-  config - /etc/tangelo.conf 
-  root - /srv/software/track-communities/tangelo_html
-  host - 0.0.0.0
-  pids - /var/tmp/tanglo.[pid]
-  logs - /var/log/tangelo
-  
+  config - /etc/tangelo.conf<br/>
+  root - /srv/software/track-communities/tangelo_html<br/>
+  host - 0.0.0.0<br/>
+  pids - /var/tmp/tanglo.[pid]<br/>
+  logs - /var/log/tangelo<br/>
+  <br/>
   check [http://localhost:8000] in your browser for the page 
   
 ### Track Communities
