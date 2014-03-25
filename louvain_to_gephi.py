@@ -53,6 +53,8 @@ while os.path.exists(pm):
       edgelist = edgelist.strip().split(',')
       for e in edgelist:
         o.write('\t'.join((source,e.split(':')[0],e.split(':')[1])) + '\n')
+      if int(weight) != 0:
+        o.write('\t'.join((source,source,weight,'\n')))
 
   o.close()
   f.close()
