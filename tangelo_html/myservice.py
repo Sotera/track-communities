@@ -33,9 +33,9 @@ def convert_results(results, fields=False):
         converted.append(row)
     return converted
 
-def linkages(comm=None, nodemap=None, host="localhost", port="21000"):
-    table = cache.get().get("table","") + "_dynamic_graph_w_comms_final"
-    query = "select source, destination, firstdate, lastdate, value from " + table + " where sourcecomm = " + comm + " and destcomm = " + comm + " limit 100000 "
+def linkages(comm=None, level=None, nodemap=None, host="localhost", port="21000"):
+    table = cache.get().get("table","") + "_dynamic_graph_w_comms"
+    query = "select source, destination, firstdate, lastdate, value from " + table + " where comm_"+str(level.replace('"',"")) +"_source= " + comm + " and comm_"+str(level.replace('"','')) + "_destination= " + comm + " limit 100000 "
     with impalaopen(host + ':' + port) as client:
         qResults = client.execute(query)
         edges = []
@@ -44,15 +44,15 @@ def linkages(comm=None, nodemap=None, host="localhost", port="21000"):
             edges.append({"source":nodemap[source],"target":nodemap[target],"start":start,"end":end,"value":value})
         return edges
 
-def run(database="default", table="", host="localhost", port="21000", trackId=None, comm=None):
+def run(database="default", table="", host="localhost", port="21000", trackId=None, comm=None, lev=None):
     response = {}
     table = cache.get().get("table", "") + "_tracks_comms_joined"
     query = "select * from %s" % (table)
         
     if trackId != None:
         query = query + " where track_id = %s" % (trackId)
-    elif comm != None:
-        query = query + " where comm = %s" % (comm)
+    elif comm != None and lev != None:
+        query = query + " where comm_" + str(lev.replace('"','')) + " = %s" % (comm)
     else:
         return response
         
@@ -92,7 +92,7 @@ def run(database="default", table="", host="localhost", port="21000", trackId=No
         if found == False:
             currentTrack = { "type": "LineString",
                              "track_id": record["track_id"],
-                             "comm": record["comm"],
+                             "comm": record["comm_1"],
                              "index": trackIndex,
                              "coordinates": [],
                              "timestamps": []
@@ -127,6 +127,6 @@ def run(database="default", table="", host="localhost", port="21000", trackId=No
     response["bounds"] = bounds
     response["start"] = start
     response["end"] = end
-    edges = linkages(comm,nodemap,host,port)
+    edges = linkages(comm,lev,nodemap,host,port)
     response["graph"] = edges
     return response

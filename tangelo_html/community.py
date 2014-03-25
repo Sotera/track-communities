@@ -23,9 +23,13 @@ def settable(*args):
         cache.update({ "table" : args[0] })
     return "0"
 
+#/community/getlevel/
+def getlevel(*args):
+    return cache.get().get("level", "")
+
 #/community/getcomm/
 def getcomm(*args):
-    return cache.get().get("community", "")
+    return cache.get().get("community", "") + "/" + cache.get().get("level", "")
 
 #/community/commkml/
 def commkml(*args):
@@ -35,28 +39,30 @@ def commkml(*args):
 def getcurrent(*args):
     c = cache.get()
     tangelo.content_type("application/json")    
-    return { "table" : c["table"], "community" : c["community"] }
+    return { "table" : c["table"], "community" : c["community"], "level" : c["level"] }
 
-#/community/setcomm/<name>
+#/community/setcomm/<comm_name>/<level>
 def setcomm(*args):
     if not args:
         return tangelo.HTTPStatusCode(400, "No community name")
    
     c = cache.update({ "community" : args[0] })
+    c = cache.update({ "level" : args[1] })
     comm = c["community"]
+    level = c["level"]
     table = c["table"] + "_tracks_comms_joined"
     rows = []
     with impalaopen('localhost:21000') as client:
-        count = client.execute("select count(*) from " + table + " where comm = '" + comm + "'")
+        count = client.execute("select count(*) from " + table + " where comm_" + str(level) + " = '" + comm + "'")
         count_result = count.get_data()
         print count_result.strip()
-        results = client.execute("select * from " + table + " where comm = '" + comm + "' order by track_id, dt asc limit " + count_result.strip())
+        results = client.execute("select intersectx, intersecty, dt, track_id from " + table + " where comm_" + str(level) + " = '" + comm + "' order by track_id, dt asc limit " + count_result.strip())
         rows = results.get_data()
 
     whens = {}
     coords = {}
     for i in rows.split('\n'):
-        latitude, longitude, dt, track, comm = i.strip().split('\t')
+        latitude, longitude, dt, track = i.strip().split('\t')
         if whens.get(track) == None:
             whens[track] = "<when>" + dt.split('.')[0].replace(' ','T') + "</when>\n"
         else:

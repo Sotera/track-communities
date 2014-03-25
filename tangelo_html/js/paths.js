@@ -44,6 +44,7 @@ function showConfig() {
   $.get("community/current").done(function(cfg){
     d3.select("#track-table").property("value", cfg.table);
     d3.select("#comm-id").property("value", cfg.community);
+    d3.select("#level").property("value", cfg.level);
   });
 }
 
@@ -51,10 +52,11 @@ function updateConfig() {
   var table, comm;
   table = $("#track-table").val()
   comm = $("#comm-id").val()
+  level = $("#level").val()
 
   $.get("community/settable/" + table)
     .then(function(){
-      $.get("community/setcomm/" + comm);
+      $.get("community/setcomm/" + comm + '/' + level);
   });
   
   // $.ajax({
@@ -180,9 +182,9 @@ $(function () {
       url: 'community/getcomm/',      
       type: 'GET',
       success: function(data) {
-        var serviceCall = '?comm="'+data+'"';
+        var serviceCall = '?comm="'+data.split("/")[0]+'"&lev="'+data.split("/")[1]+'"';
 
-	d3.select('#community-id').text("Community ID: "+data);
+	d3.select('#community-id').text("Community ID: "+data.split("/")[0]);
 	
 	$.getJSON('myservice'+serviceCall, function (data) {
 	  

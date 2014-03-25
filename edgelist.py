@@ -1,14 +1,21 @@
 import sys
 
 nodes = {}
-f = open('network_edges.tsv','r')
-for line in f:
+lastsource = None
+for line in sys.stdin:
   source, target, weight = line.strip().split('\t')
-  if nodes.get(source) == None:
-    nodes[source] = target + ':' + weight
+  if lastsource == None or lastsource == source:
+    if nodes.get(source) == None:
+      nodes[source] = target + ':' + weight
+    else:
+      nodes[source] =  nodes[source] + ',' + target + ':' + weight
   else:
-    nodes[source] =  nodes[source] + ',' + target + ':' + weight
+    for key in nodes.keys():
+      print key + '\t0\t' + nodes[key]
+    nodes = {}
+    nodes[source] = target + ':' + weight
+  lastsource = source
 
-out = open('edgelist.tsv','w')
 for key in nodes.keys():
-  out.write(key + '\t0\t' + nodes[key] + '\n')
+  print key + '\t0\t' + nodes[key]
+

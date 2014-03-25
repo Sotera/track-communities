@@ -1,8 +1,3 @@
-set mapred.map.tasks=96;
-set mapred.child.java.opts=-Xmx8024m;
-set mapred.reduce.tasks=96;
-set mapreduce.reduce.java.opts=-Xmx8024m;
-set mapreduce.map.java.opts=-Xmx8024m;
 
 drop table ${hiveconf:table}_track_linkages;
 create table ${hiveconf:table}_track_linkages as
@@ -62,3 +57,24 @@ select source as Source, destination as Target, count(*) as Weight
 from ${hiveconf:table}_network
 group by source, destination;
 
+add file edgelist.py;
+
+drop table ${hiveconf:table}_edgelist;
+create table ${hiveconf:table}_edgelist
+(
+node string,
+val string,
+edgelist string
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY '\t';
+
+from(
+select source, target, weight
+from ${hiveconf:table}_network_edges
+distribute by source sort by source
+) m
+insert overwrite table ${hiveconf:table}_edgelist
+select transform(m.source, m.target, m.weight)
+using 'python edgelist.py'
+as node, val, edgelsit;
