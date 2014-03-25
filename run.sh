@@ -1,7 +1,10 @@
+#!/usr/bin/env bash 
+
+set -e 
+
 # This value should match the table value in the .ini file
 ini_file=$1
 
-set -e 
 
 #aggregate-micro-paths location
 AMP=/srv/software/aggregate-micro-paths
