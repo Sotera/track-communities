@@ -45,6 +45,6 @@ last_table=${table}_nodes_comms_${last_table_num}
 
 hive -hiveconf table=${table} -hiveconf id=${id} -hiveconf latitude=${latitude} -hiveconf longitude=${longitude} -hiveconf dt=${dt} -hiveconf last_table=${last_table} -f join_orig_tracks.sql
 
-python finamic_graph.py ${table} ${last_table} ${last_table_number}
+python finamic_graph.py ${table} ${last_table} ${last_table_num}
 
 echo "DONE!!"
