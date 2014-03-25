@@ -33,6 +33,31 @@ def convert_results(results, fields=False):
         converted.append(row)
     return converted
 
+def subgraph(comm=None, level=None, host="localhost", port="21000"):
+    table = cache.get().get("table","") + '_good_graph'
+    query = "select source, source_comm, target, target_comm, weight, level from " + table + " where level=" + level + " and (source_comm=" + comm + " and target_comm="+ comm + ") limit 100000"
+    with impalaopen(host + ':' + port) as client:
+        qResults = client.execute(query)
+        mapping = {}
+        edges = []
+        nodes = []
+        idx = 0
+        for record in qResults.data:
+            source,source_comm,target,target_comm,weight,level = record.split('\t')
+            if mapping.get(source) == None:
+                mapping[source] = {"index":idx,"nodename":source,"node_comm":source_comm,"level":level}
+                idx = idx + 1
+            if mapping.get(target) == None:
+                mapping[target] = {"index":idx,"nodename":target,"node_comm":target_comm,"level":level}
+                idx = idx + 1
+
+            edges.append({"source":mapping[source]["index"],"sourcename":source,"target":mapping[target]["index"],"targetname":target,"weight":weight})
+
+        for i in mapping.keys():
+            nodes.append({"index":mapping[i]["index"],"nodename":mapping[i]["nodename"],"node_comm":mapping[i]["node_comm"],"level":mapping[i]["level"]})
+        return nodes, edges
+
+
 def linkages(comm=None, level=None, nodemap=None, host="localhost", port="21000"):
     table = cache.get().get("table","") + "_dynamic_graph_w_comms"
     query = "select source, destination, firstdate, lastdate, value from " + table + " where comm_"+str(level.replace('"',"")) +"_source= " + comm + " and comm_"+str(level.replace('"','')) + "_destination= " + comm + " limit 100000 "
@@ -128,5 +153,8 @@ def run(database="default", table="", host="localhost", port="21000", trackId=No
     response["start"] = start
     response["end"] = end
     edges = linkages(comm,lev,nodemap,host,port)
+    gephinodes, gephigraph = subgraph(comm,lev,host,port)
     response["graph"] = edges
+    response["gephinodes"] = gephinodes
+    response["gephigraph"] = gephigraph
     return response
