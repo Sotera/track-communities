@@ -28,17 +28,30 @@ d3.select('#slidertext').text(startTime);
 
 var defaultColors = ["red", "blue", "green", "magenta", "sienna", "teal", "goldenrod", "cyan", "indigo", "springgreen"];
 
-dg_svg = d3.select("#graph");
+dg_svg = d3.select("#graph")
+      		.attr("preserveAspectRatio", "xMidYMid meet")
+      		.attr("pointer-events", "all")
+    		.call(d3.behavior.zoom().on("zoom", redraw));;
 
 force = d3.layout.force()
   .charge(-500)
-  .linkDistance(100)
-  .gravity(0.2)
-  .friction(0.6)
+  .linkDistance(200)
+  .linkStrength(2)
+  .gravity(0.1)
+  .friction(0.2)
   .size([width, height]);
 
 color = d3.scale.category20();
 
+function redraw() {
+  dg_svg.select("g#links").attr("transform",
+      "translate(" + d3.event.translate + ")"
+      + " scale(" + d3.event.scale + ")");
+ dg_svg.select("g#nodes").attr("transform",
+      "translate(" + d3.event.translate + ")"
+      + " scale(" + d3.event.scale + ")");
+
+}
 
 function showConfig() {
   $.get("community/current").done(function(cfg){
