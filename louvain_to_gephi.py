@@ -55,7 +55,11 @@ while os.path.exists(pm):
         o.write('\t'.join((source,e.split(':')[0],e.split(':')[1])) + '\n')
       if int(weight) != 0:
         o.write('\t'.join((source,source,weight,'\n')))
-
+    elif len(line.split('\t')) == 2:
+      source, weight = line.split('\t')
+      weight = weight.strip()
+      if int(weight) != 0:
+        o.write('\t'.join((source,source,weight,'\n')))
   o.close()
   f.close()
   

@@ -35,7 +35,10 @@ def convert_results(results, fields=False):
 
 def subgraph(comm=None, level=None, host="localhost", port="21000"):
     table = cache.get().get("table","") + '_good_graph'
-    query = "select source, source_comm, target, target_comm, weight, level from " + table + " where level=" + level + " and (source_comm=" + comm + " and target_comm="+ comm + ") limit 100000"
+    comm_filter_string = ""
+    if comm != None:
+        comm_filter_string = " and (source_comm=" + comm + " and target_comm="+ comm + ") "
+    query = "select source, source_comm, target, target_comm, weight, level from " + table + " where level=" + level + comm_filter_string
     with impalaopen(host + ':' + port) as client:
         qResults = client.execute(query)
         mapping = {}
@@ -59,8 +62,10 @@ def subgraph(comm=None, level=None, host="localhost", port="21000"):
 
 
 def linkages(comm=None, level=None, nodemap=None, host="localhost", port="21000"):
+    if comm == None:
+        return []
     table = cache.get().get("table","") + "_dynamic_graph_w_comms"
-    query = "select source, destination, firstdate, lastdate, value from " + table + " where comm_"+str(level.replace('"',"")) +"_source= " + comm + " and comm_"+str(level.replace('"','')) + "_destination= " + comm + " limit 100000 "
+    query = "select source, destination, firstdate, lastdate, value from " + table + " where comm_"+str(level.replace('"',"")) +"_source= " + comm + " and comm_"+str(level.replace('"','')) + "_destination= " + comm
     with impalaopen(host + ':' + port) as client:
         qResults = client.execute(query)
         edges = []
@@ -81,7 +86,7 @@ def run(database="default", table="", host="localhost", port="21000", trackId=No
     else:
         return response
         
-    query = query + " order by track_id, dt limit 100000"
+    query = query + " order by track_id, dt limit 10000000"
 
     results = None
     with impalaopen(host + ':' + port) as client:
@@ -117,7 +122,7 @@ def run(database="default", table="", host="localhost", port="21000", trackId=No
         if found == False:
             currentTrack = { "type": "LineString",
                              "track_id": record["track_id"],
-                             "comm": record["comm_1"],
+                             "comm": record["comm_" + str(lev.replace('"',''))],
                              "index": trackIndex,
                              "coordinates": [],
                              "timestamps": []

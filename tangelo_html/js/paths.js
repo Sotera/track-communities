@@ -45,6 +45,7 @@ function showConfig() {
     d3.select("#track-table").property("value", cfg.table);
     d3.select("#comm-id").property("value", cfg.community);
     d3.select("#level").property("value", cfg.level);
+    d3.select("#graph_stat_string").text(cfg.graph_stat_string);
   });
 }
 

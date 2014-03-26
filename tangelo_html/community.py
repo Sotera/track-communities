@@ -21,11 +21,15 @@ def tables(*args):
 def settable(*args):
     if args:
         cache.update({ "table" : args[0] })
+    with impalaopen('localhost:21000') as client:
+        data = client.execute("select level, count(distinct source) from " + args[0]  + "_good_graph group by level order by level desc limit 50")
+        data_result = data.get_data()
+        graph_stat_string = ""
+        for line in data_result.split('\n'):
+            level,nodes, = line.strip().split('\t')
+            graph_stat_string = graph_stat_string + "Level: " + level + ", " + nodes + " nodes "
+        cache.update({ "graph_stat_string" : graph_stat_string + "" })
     return "0"
-
-#/community/getlevel/
-def getlevel(*args):
-    return cache.get().get("level", "")
 
 #/community/getcomm/
 def getcomm(*args):
@@ -39,7 +43,7 @@ def commkml(*args):
 def getcurrent(*args):
     c = cache.get()
     tangelo.content_type("application/json")    
-    return { "table" : c["table"], "community" : c["community"], "level" : c["level"] }
+    return { "table" : c["table"], "community" : c["community"], "level" : c["level"], "graph_stat_string" : c["graph_stat_string"] }
 
 #/community/setcomm/<comm_name>/<level>
 def setcomm(*args):
