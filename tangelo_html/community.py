@@ -25,10 +25,16 @@ def settable(*args):
         data = client.execute("select level, count(distinct source) from " + args[0]  + "_good_graph group by level order by level desc limit 50")
         data_result = data.get_data()
         graph_stat_string = ""
+        num_levels = 2
+        i = 0
         for line in data_result.split('\n'):
             level,nodes, = line.strip().split('\t')
+            if i == 0:
+                num_levels = int(level)
+            i = i + 1
             graph_stat_string = graph_stat_string + "Level: " + level + ", " + nodes + " nodes "
         cache.update({ "graph_stat_string" : graph_stat_string + "" })
+        cache.update({"graph_num_levels" : num_levels })
     return "0"
 
 #/community/getcomm/
@@ -43,7 +49,7 @@ def commkml(*args):
 def getcurrent(*args):
     c = cache.get()
     tangelo.content_type("application/json")    
-    return { "table" : c["table"], "community" : c["community"], "level" : c["level"], "graph_stat_string" : c["graph_stat_string"] }
+    return { "table" : c["table"], "community" : c["community"], "level" : c["level"], "graph_stat_string" : c["graph_stat_string"], "graph_num_levels": c["graph_num_levels"] }
 
 #/community/setcomm/<comm_name>/<level>
 def setcomm(*args):
