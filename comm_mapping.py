@@ -12,6 +12,8 @@ while ret == 0:
   call("hadoop fs -rm -r /tmp/trackcomms/" + table + "/output/giraph_" + str(i
 ) +"/_SUCCESS",stdout=garbage,shell=True)
   call('hive -hiveconf table=' + table + ' -hiveconf level=' + str(i) + ' -hiveconf last_level=' + str(i-1) + ' -f bigtables.sql',stdout=garbage,shell=True)
+  
+  call('hive -hiveconf table=' + table + ' -hiveconf level=' + str(i) + ' -hiveconf last_level=' + str(i-1) + ' -f nodetables.sql',stdout=garbage,shell=True)
   i += 1
   ret = call('hadoop fs -ls /tmp/trackcomms/' + table + '/output/giraph_' + str(i) + '/',stdout=garbage,shell=True)
 

@@ -71,11 +71,13 @@ fi
 hive -hiveconf table=${table} -f nodes_comms.sql
 
 last_table_num=`python comm_mapping.py ${table}`
-if [ -a garbage.out]; then
+if [ -a garbage.out ]; then
     rm garbage.out
 fi
 
 last_table=${table}_nodes_comms_${last_table_num}
+
+hive -e "insert into table ${table}_good_nodes partition (level='1') select node, comm_1, '1' from ${last_table};"
 
 hive -hiveconf table=${table} -hiveconf id=${id} -hiveconf latitude=${latitude} -hiveconf longitude=${longitude} -hiveconf dt=${dt} -hiveconf last_table=${last_table} -f join_orig_tracks.sql
 

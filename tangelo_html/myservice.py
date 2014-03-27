@@ -33,31 +33,49 @@ def convert_results(results, fields=False):
         converted.append(row)
     return converted
 
-def subgraph(comm=None, level=None, host="localhost", port="21000"):
-    table = cache.get().get("table","") + '_good_graph'
-    comm_filter_string = ""
+def getWholeGephiGraph(comm=None, level=None, host="localhost", port="21000"):
+    gephinodes, gephigraph = subgraph(comm, level, host, port)
+    response = {}
+    response["gephinodes"] = gephinodes
+    response["gephigraph"] = gephigraph
+    return response
+
+def getNodes(comm=None, level=None, host="localhost", port="21000"):
+    nodetable = cache.get().get("table","") + '_good_nodes'
+    node_comm_filter_string = ""
     if comm != None:
-        comm_filter_string = " and (source_comm=" + comm + " and target_comm="+ comm + ") "
-    query = "select source, source_comm, target, target_comm, weight, level from " + table + " where level=" + level + comm_filter_string
+        node_comm_filter_string = " and comm=" + comm
+    nodequery = "select node, comm, num_members, level from " + nodetable + " where level=" + level + node_comm_filter_string
     with impalaopen(host + ':' + port) as client:
-        qResults = client.execute(query)
+        qResults = client.execute(nodequery)
         mapping = {}
-        edges = []
-        nodes = []
         idx = 0
         for record in qResults.data:
-            source,source_comm,target,target_comm,weight,level = record.split('\t')
-            if mapping.get(source) == None:
-                mapping[source] = {"index":idx,"nodename":source,"node_comm":source_comm,"level":level}
-                idx = idx + 1
-            if mapping.get(target) == None:
-                mapping[target] = {"index":idx,"nodename":target,"node_comm":target_comm,"level":level}
-                idx = idx + 1
+            node,comm,num_members,level = record.split('\t')
+            mapping[node] = {"index":idx,"nodename":node,"node_comm":comm,"level":level,"num_members":num_members}
+            idx = idx + 1
+    return mapping
 
+
+def subgraph(comm=None, level=None, host="localhost", port="21000"):
+    edgetable = cache.get().get("table","") + '_good_graph'
+
+    mapping = getNodes(comm,level,host,port)
+    edge_comm_filter_string = ""
+    if comm != None:
+        edge_comm_filter_string = " and (source_comm=" + comm + " and target_comm="+ comm + ") "
+
+    edgequery = "select source, target, weight, level from " + edgetable + " where level=" + level + edge_comm_filter_string
+    with impalaopen(host + ':' + port) as client:
+        qResults = client.execute(edgequery)
+        edges = []
+        nodes = []
+        for record in qResults.data:
+            source,target,weight,level = record.split('\t')
             edges.append({"source":mapping[source]["index"],"sourcename":source,"target":mapping[target]["index"],"targetname":target,"weight":weight})
 
         for i in mapping.keys():
-            nodes.append({"index":mapping[i]["index"],"nodename":mapping[i]["nodename"],"node_comm":mapping[i]["node_comm"],"level":mapping[i]["level"]})
+            nodes.append({"index":mapping[i]["index"],"nodename":mapping[i]["nodename"],"node_comm":mapping[i]["node_comm"],"level":mapping[i]["level"],"num_members":mapping[i]["num_members"]})
         return nodes, edges
 
 
@@ -75,6 +93,8 @@ def linkages(comm=None, level=None, nodemap=None, host="localhost", port="21000"
         return edges
 
 def run(database="default", table="", host="localhost", port="21000", trackId=None, comm=None, lev=None):
+    if comm == None:
+        return getWholeGephiGraph(comm,lev,host,port)
     response = {}
     table = cache.get().get("table", "") + "_tracks_comms_joined"
     query = "select * from %s" % (table)
