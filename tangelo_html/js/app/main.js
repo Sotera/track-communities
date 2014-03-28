@@ -272,7 +272,7 @@ $(function () {
 	  
 					// Community Browser
 					tau2 = 2 * Math.PI;
-					angle2 = tau / data["gephinodes"].length;
+					angle2 = tau2 / data["gephinodes"].length;
 					$.each(data["gephinodes"], function (i, v) {
 						data["gephinodes"][i].x = (width / 4) * Math.cos(i * angle2) + (width / 2);
 						data["gephinodes"][i].y = (height / 4) * Math.sin(i * angle2) + (height / 2);
