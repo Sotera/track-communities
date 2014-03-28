@@ -1,0 +1,186 @@
+<html lang="en">
+
+<head>
+	<title>XDATA: Track Communities</title>
+	<meta charset="utf-8">
+	
+	<!-- Stylesheets -->
+	<link rel="stylesheet" href="lib/jquery_ui/css/jquery-ui.css" type="text/css">
+	<link rel="stylesheet" href="lib/tangelo/css/tangelo.css" type="text/css">
+	<link rel="stylesheet" href="lib/bootstrap-switch/css/bootstrap2/bootstrap-switch.css" type="text/css">
+	<link rel="stylesheet" href="lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" type="text/css">
+	<link rel="stylesheet" href="lib/d3/css/d3.slider.css" type="text/css">
+	<style type="text/css">
+		#map-canvas {
+			width:100%;
+			height:100%;
+		}
+		div#tangelo-control-panel.control-panel {
+			background-color: black;
+			color: white;
+		}
+		div#tangelo-drawer-handle.centered.pointer.drawer {
+			background-color: black;
+			color: white;
+		}
+		.graticule {
+		  fill: none;
+		  stroke: #fff;
+		  stroke-width: .5px;
+		  stroke-opacity: .5;
+		}
+		.land {
+		  fill: #d7c7ad;
+		  stroke: #766951;
+		  stroke-width: 1;
+		}
+		.boundary {
+			fill: none;
+			stroke: #a5967e;
+		}
+		.background {
+			fill: #a4bac7;
+		}
+		.geojson {
+			fill: none;
+			stroke: red;
+			stroke-width: 2;
+			opacity: .5;
+		}
+		.SvgOverlay svg {
+			position: absolute;
+			top: -4000px;
+			left: -4000px;
+			width: 8000px;
+			height: 8000px;
+		}
+	</style>
+	
+	<!-- Scripts/Libraries -->
+	<script type="text/javascript" src="lib/jquery/jquery-2.1.0.min.js"></script>
+	<script type="text/javascript" src="lib/tangelo/js/tangelo.js"></script>
+	<script type="text/javascript" src="lib/d3/js/d3.v3.min.js"></script>
+	<script type="text/javascript" src="lib/d3/js/d3.slider.js"></script>
+	<script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="lib/bootstrap-switch/js/bootstrap-switch.js"></script>
+	<script type="text/javascript" src="lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js"></script>	
+	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=visualization"></script>
+	<script type="text/javascript" src="js/Number.js"></script>
+	<script type="text/javascript" src="js/app/config.js"></script> 
+	<script type="text/javascript" src="js/app/util.coordinates.js"></script> 
+	<script type="text/javascript" src="js/app/util.graph.js"></script>
+	<script type="text/javascript" src="js/app/util.map.js"></script>
+
+</head>
+
+<body>
+	
+	<div class="container-fluid" style="width:95%">
+		<div class="row-fluid">
+			<div class="span12" style="">
+				<!-- Utilize Tangelo utility to construct Bootstrap-based navigation bar -->
+				<div data-tangelo-type="navbar" data-tangelo-brand="XDATA" data-tangelo-brand-href="#" data-tangelo-app="Track Communities" data-config-load="showConfig" data-config-save="updateConfig">
+					<div data-tangelo-type="config">
+					
+						<h4> Load </h4>					
+						table <input id="track-table" type=text><br/>
+						<div id="graph_stat_string"></div>
+						community id <input id="comm-id" type=text><br/>
+						level <input id="level" type=text><br/>
+
+					</div>
+					<div data-tangelo-type="info">
+						<p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent libero neque, tincidunt in elit non, adipiscing bibendum quam. Duis congue nisl eu erat ullamcorper, non tincidunt felis rutrum. Vivamus dapibus vel metus in commodo. In sagittis erat vel egestas aliquam. In scelerisque, ipsum eget ultricies auctor, felis tortor ullamcorper est, in imperdiet justo dui at eros. Etiam pharetra erat vitae nisl elementum, vel dapibus felis mollis. In sit amet justo eu odio sollicitudin hendrerit. Curabitur nec consequat velit, eget hendrerit sem. In convallis eros id diam sagittis pretium. Aliquam neque quam, malesuada nec ullamcorper a, pulvinar sed ligula. Mauris adipiscing consectetur justo, vel egestas eros auctor ut. Nam viverra adipiscing elementum. Maecenas vitae porttitor neque, non adipiscing orci. Aenean sit amet luctus magna. Donec cursus ac diam quis rutrum. Morbi aliquam vulputate dictum. </p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row-fluid" style="padding-top:20px;">
+			<div class="span4" style="">
+				<h3> Community Browser </h3>
+				
+				<div id="communityBrowserForm">				
+					<div class="alert alert-error">
+						<h5> Your data set is not loaded or too large! </h5>
+						<p> Use the Config tab to load your data set, <br/> ... or use the Settings panel to capture your area of interest. </p>
+						
+					</div>
+
+				</div>
+				<div id="communityBrowserGraph" style="display:none;">
+				<div style="height:100%; width:100%">
+					<svg id="community-graph">
+						<rect width="100%" height="100%" style="fill:black;" />
+						<g id="cblinks"></g>
+						<g id="cbnodes"></g>
+					</svg>
+				</div>
+				</div>
+
+			</div>
+			<div class="span4" style="">
+				<h3> Map </h3>
+				<div id="map-canvas" class="gmap" style="">***</div>
+			</div>
+			<div class="span4" style="">
+				<h3> Dynamic Graph </h3>
+				<div style="height:100%; width:100%">
+					<svg id="dynamic-graph">
+						<rect width="100%" height="100%" style="fill:black;" />
+						<g id="dglinks"></g>
+						<g id="dgnodes"></g>
+					</svg>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Create a drawer panel with the controls in it -->
+	<div data-tangelo-type="control-panel">
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span2">
+                    <h4> Community </h4>
+					<div id="community-id">ID: None</div>
+					<p>
+					<a id="refresh" class="btn btn-mini" href="#">Refresh</a>
+					<a id="reset" class="btn btn-mini" href="#">Clear</a>
+					</p>
+				</div>
+				<div class="span2">
+					<h4> Heatmap </h4>
+					<div> &nbsp; </div>
+					<p>
+					<a id="heatmap" class="btn btn-mini">Show</a>
+					<a id="heatmap-remove" class="btn btn-mini">Hide</a>
+					<a id="loadCommunitiesFromFilter" class="btn btn-mini btn-primary">Load from Map</a>
+					</p>
+				</div>				
+				<div class="span4">
+					<h4>Timeline</h4>
+					<div id="time-slider"></div>
+					<div id="slidertext">0</div>
+				</div>
+				<div class="span4">
+					<h4>Animation</h4>
+					<a id="play" class="btn btn-mini">Play</a>
+					<div id="speed-slider"></div>
+				</div>					
+			</div>
+
+		</div>
+	</div>
+
+    <!-- Scripts/Application -->
+    <script type="text/javascript" src="js/app/main.js"></script> 
+	<script type="text/javascript">
+		$(document).ready( function() {
+			$("[id='heatmap-switch']").bootstrapSwitch();
+			$('#startDatetimeFilter').datetimepicker({});
+			$('#endDatetimeFilter').datetimepicker({});
+		});
+	</script>
+	
+</body>
+
+</html>
