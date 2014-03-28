@@ -304,14 +304,14 @@ $(function () {
 						.classed("node", true)
 						.on("dblclick", openCommunity)
 						.attr("r", function(d) { 
-							return d.num_members*10 || 10; 
+							return d.num_members*2 || 5; 
 						})
 						//.style("opacity", 0.0)
 						.style("fill", "red");
 					enter2.transition()
 						.duration(transition_time)
 						.attr("r", function(d) { 
-							return d.num_members*10 || 10;
+							return d.num_members*2 || 5;
 						})
 						//.style("opacity", 1.0)
 						.style("stroke", "gray")
