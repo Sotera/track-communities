@@ -22,11 +22,13 @@ function showConfig() {
 function updateConfig() {
   var table, comm, level;
   table = $("#track-table").val();
-  comm = $("#comm-id").val();
-  level = $("#level").val();
+  comm = $("#comm-id").val() || 0;
+  level = $("#level").val() || 1;
 
   $.get("community/settable/" + table)
     .then(function(){
-      $.get("community/setcomm/" + comm + '/' + level);
+	  if (comm && level) {
+		$.get("community/setcomm/" + comm + '/' + level);
+	  }
   });
 }
