@@ -271,36 +271,36 @@ $(function () {
 					}
 	  
 					// Community Browser
-					tau = 2 * Math.PI;
-					angle = tau / data["gephinodes"].length;
+					tau2 = 2 * Math.PI;
+					angle2 = tau / data["gephinodes"].length;
 					$.each(data["gephinodes"], function (i, v) {
-						data["gephinodes"][i].x = (width / 4) * Math.cos(i * angle) + (width / 2);
-						data["gephinodes"][i].y = (height / 4) * Math.sin(i * angle) + (height / 2);
+						data["gephinodes"][i].x = (width / 4) * Math.cos(i * angle2) + (width / 2);
+						data["gephinodes"][i].y = (height / 4) * Math.sin(i * angle2) + (height / 2);
 					});
 
-					link = communityBrowser.select("g#cblinks")
+					link2 = communityBrowser.select("g#cblinks")
 						.selectAll(".link")
 						.data(data["gephigraph"], edgeid);
-					enter = link.enter().append("line")
+					enter2 = link2.enter().append("line")
 						.classed("link", true)
 						//.style("opacity", 0.0)
 						.style("stroke-width", 1.0);
-					enter.transition()
+					enter2.transition()
 						.duration(transition_time)
 						//.style("opacity", 0.0)
 						.style("stroke", "#FFFFFF")
 						.style("stroke-width", 1.0);
-					link.exit()
+					link2.exit()
 						.transition()
 						.duration(transition_time)
 						.style("opacity", 0.0)
 						.style("stroke-width", 0.0)
 						.remove();
 	  
-					node = communityBrowser.select("g#cbnodes")
+					node2 = communityBrowser.select("g#cbnodes")
 						.selectAll(".node")
 						.data(data["gephinodes"], nodename);
-					enter = node.enter().append("circle")
+					enter2 = node2.enter().append("circle")
 						.classed("node", true)
 						.on("dblclick", openCommunity)
 						.attr("r", function(d) { 
@@ -308,7 +308,7 @@ $(function () {
 						})
 						//.style("opacity", 0.0)
 						.style("fill", "red");
-					enter.transition()
+					enter2.transition()
 						.duration(transition_time)
 						.attr("r", function(d) { 
 							return d.num_members*10 || 10;
@@ -318,12 +318,12 @@ $(function () {
 						.style("fill", function (d) {
 							return defaultColors[d.index];
 						});
-					enter.call(communityForce.drag)
+					enter2.call(communityForce.drag)
 						.append("title")
 						.text(function (d) {
 							return d.nodename;
 						});
-					node.exit()
+					node2.exit()
 						.transition()
 						.duration(transition_time)
 						//.style("opacity", 0.0)
@@ -335,9 +335,9 @@ $(function () {
 						.links(data["gephigraph"])
 						.start();
 					communityForce.on("tick", function () {
-						node.attr("cx", function (d) { return d.x; })
+						node2.attr("cx", function (d) { return d.x; })
 							.attr("cy", function (d) { return d.y; });
-						link.attr("x1", function(d) { return d.source.x; })
+						link2.attr("x1", function(d) { return d.source.x; })
 							.attr("y1", function(d) { return d.source.y; })
 							.attr("x2", function(d) { return d.target.x; })
 							.attr("y2", function(d) { return d.target.y; });
