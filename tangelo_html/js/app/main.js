@@ -283,13 +283,11 @@ $(function () {
 						.data(data["gephigraph"], edgeid);
 					enter2 = link2.enter().append("line")
 						.classed("link", true)
-						//.style("opacity", 0.0)
-						.style("stroke-width", 1.0);
+						.style("stroke-width", 0.5);
 					enter2.transition()
 						.duration(transition_time)
-						//.style("opacity", 0.0)
-						.style("stroke", "#FFFFFF")
-						.style("stroke-width", 1.0);
+						.style("stroke", "black")
+						.style("stroke-width", 0.5);
 					link2.exit()
 						.transition()
 						.duration(transition_time)
@@ -304,20 +302,21 @@ $(function () {
 						.classed("node", true)
 						.on("dblclick", openCommunity)
 						.attr("r", function(d) { 
-							return d.num_members*2 || 5; 
+							var r = d.num_members * 2;
+							if (r < 10) { r = 10; }
+							return r;
 						})
-						//.style("opacity", 0.0)
-						.style("fill", "red");
+						.attr("fill",function(d,i){return color(i);});
 					enter2.transition()
 						.duration(transition_time)
 						.attr("r", function(d) { 
-							return d.num_members*2 || 5;
+							var r = d.num_members * 2;
+							if (r < 10) { r = 10; }
+							return r;
 						})
-						//.style("opacity", 1.0)
-						.style("stroke", "gray")
-						.style("fill", function (d) {
-							return defaultColors[d.index];
-						});
+						.style("stroke", "black")
+						.style("stroke-width", 0.5)
+						.attr("fill",function(d,i){return color(i);});
 					enter2.call(communityForce.drag)
 						.append("title")
 						.text(function (d) {
@@ -326,7 +325,6 @@ $(function () {
 					node2.exit()
 						.transition()
 						.duration(transition_time)
-						//.style("opacity", 0.0)
 						.attr("r", 0.0)
 						.style("fill", "black")
 						.remove();

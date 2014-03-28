@@ -126,12 +126,12 @@ vis.selectAll(".node").remove();
 
 
   node.on("click", function(d) {
-//d3.select('#test').text(d.nodename);
 query = 'myservice?lev="' + (parseInt(l)-1).toString() + '"&comm="' + d.nodename + '"';
-//d3.select('#test').text(query); 
 drawIt(query);
 d3.select('#cc').property("value", d.nodename);
+$.get("community/setcomm/" + d.nodename + '/' + (parseInt(l)-1).toString());
 });
+})
 
   force.on("tick", function() {
     link.attr("x1", function(d) { return d.source.x; })
@@ -144,7 +144,6 @@ node.attr("transform", function(d) {
     //node.attr("cx", function(d) { return d.x; })
       //  .attr("cy", function(d) { return d.y; });
   });
-});
 
 }
 function redraw() {
