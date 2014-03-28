@@ -104,6 +104,7 @@ vis.selectAll(".node").remove();
 query = 'myservice?lev="' + (parseInt(l)-1).toString() + '"&comm="' + d.nodename + '"';
 d3.select('#test').text(query); 
 drawIt(query);
+$.get("community/setcomm/" + d.nodename + '/' + (parseInt(l)-1).toString());
 })
 
   force.on("tick", function() {
