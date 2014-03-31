@@ -8,6 +8,10 @@
 	<link rel="stylesheet" href="lib/jquery_ui/css/jquery-ui.css" type="text/css">
 	<link rel="stylesheet" href="lib/tangelo/css/tangelo.css" type="text/css">
 	<link rel="stylesheet" href="lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" type="text/css">
+	<link rel="stylesheet" href="lib/bootstrap-checkbox/css/bootstrap-checkbox.css" type="text/css">
+	<link rel="stylesheet" href="lib/bootstrap-editable/css/bootstrap-editable.css" type="text/css">
+	<link rel="stylesheet" href="lib/select2/select2.css" type="text/css">
+	<link rel="stylesheet" href="lib/select2/select2-bootstrap.css" type="text/css">
 	<link rel="stylesheet" href="lib/d3/css/d3.slider.css" type="text/css">
 	<style type="text/css">
 		#map-canvas {
@@ -57,7 +61,11 @@
 	<script type="text/javascript" src="lib/d3/js/d3.v3.min.js"></script>
 	<script type="text/javascript" src="lib/d3/js/d3.slider.js"></script>
 	<script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
-	<script type="text/javascript" src="lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js"></script>	
+	<script type="text/javascript" src="lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+	<script type="text/javascript" src="lib/bootstrap-checkbox/js/bootstrap-checkbox.js"></script>	
+	<script type="text/javascript" src="lib/bootstrap-editable/js/bootstrap-editable.min.js"></script>
+	<script type="text/javascript" src="lib/select2/select2.js"></script>
+	<script type="text/javascript" src="lib/jquery-clearsearch/src/jquery.clearsearch.js"></script>
 	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=visualization"></script>
 	<script type="text/javascript" src="js/Number.js"></script>
 	<script type="text/javascript" src="js/app/config.js"></script> 
@@ -74,17 +82,26 @@
 			<div class="span12" style="">
 				<!-- Utilize Tangelo utility to construct Bootstrap-based navigation bar -->
 				<div data-tangelo-type="navbar" data-tangelo-brand="XDATA" data-tangelo-brand-href="#" data-tangelo-app="Track Communities" data-config-load="showConfig" data-config-save="updateConfig">
+					<!--
+					<div data-tangelo-type="info">
+						<p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent libero neque, tincidunt in elit non, adipiscing bibendum quam. Duis congue nisl eu erat ullamcorper, non tincidunt felis rutrum. Vivamus dapibus vel metus in commodo. In sagittis erat vel egestas aliquam. In scelerisque, ipsum eget ultricies auctor, felis tortor ullamcorper est, in imperdiet justo dui at eros. Etiam pharetra erat vitae nisl elementum, vel dapibus felis mollis. In sit amet justo eu odio sollicitudin hendrerit. Curabitur nec consequat velit, eget hendrerit sem. In convallis eros id diam sagittis pretium. Aliquam neque quam, malesuada nec ullamcorper a, pulvinar sed ligula. Mauris adipiscing consectetur justo, vel egestas eros auctor ut. Nam viverra adipiscing elementum. Maecenas vitae porttitor neque, non adipiscing orci. Aenean sit amet luctus magna. Donec cursus ac diam quis rutrum. Morbi aliquam vulputate dictum. </p>
+					</div>
+					-->					
 					<div data-tangelo-type="config">
 					
-						<h4> Load </h4>					
+						<h4> Load </h4>
+						<p> Data Table: <input type="hidden" id="track-table" /> <br/> </p>
+						<p> Enable Heatmap: <input type="checkbox" id="heatMapEnabled" class="bootstrap-checkbox" checked="checked" data-label-prepend="Enable Heatmap  " /> </p>
+
+						<!--
 						table <input id="track-table" type=text><br/>
 						<div id="graph_stat_string"></div>
 						community id <input id="comm-id" type=text><br/>
 						level <input id="level" type=text><br/>
+						-->
 
 					</div>
-					<div data-tangelo-type="info">
-					<p>TODO by Justin</p></div>
+
 				</div>
 			</div>
 		</div>
@@ -99,14 +116,23 @@
 						
 					</div>
 				</div>
-				<div id="communityBrowserGraph" style="xxdisplay:none;">
-				<div style="height:100%; width:100%">
-					<svg id="community-graph">
-						<rect width="100%" height="100%" style="fill:white;" />
-						<g id="cblinks"></g>
-						<g id="cbnodes"></g>
-					</svg>
-				</div>
+				
+				<div id="communityBrowserGraph" style="display:none;">
+					<small> <div id="graph_stat_string"></div> </small>
+					
+					<p> Search on: 
+						<span class="pull-right"> 
+							<a href="#" id="comm-id"></a> and <a href="#" id="level"></a> &nbsp; &nbsp; &nbsp; <a id="applyCommunityFilter" class="btn btn-mini" href="#"><i class="icon-search"></i> Go</a> 
+						</span> 
+					</p>
+				
+					<div style="height:100%; width:100%">
+						<svg id="community-graph">
+							<rect width="100%" height="100%" style="fill:white;" />
+							<g id="cblinks"></g>
+							<g id="cbnodes"></g>
+						</svg>
+					</div>
 				</div>
 
 			</div>
@@ -131,14 +157,14 @@
 	<div data-tangelo-type="control-panel" class="control-panel">
 		<div class="container-fluid">
 			<div class="row-fluid">
-				<div class="span2">
+				<div class="span4">
                     <h4> Community </h4>
-					<div id="community-id">ID: None</div>
 					<p>
-					<a id="refresh" class="btn btn-mini" href="#">Refresh</a>
-					<a id="reset" class="btn btn-mini" href="#">Clear</a>
+					<!-- <a id="refresh" class="btn btn-mini" href="#">Refresh</a> -->
+					<!-- <a id="reset" class="btn btn-mini" href="#">Clear</a> -->
 					</p>
 				</div>
+				<!--
 				<div class="span2">
 					<h4> Heatmap </h4>
 					<div> &nbsp; </div>
@@ -147,7 +173,8 @@
 					<a id="heatmap-remove" class="btn btn-mini">Hide</a>
 					<a id="loadCommunitiesFromFilter" class="btn btn-mini btn-primary">Load from Map</a>
 					</p>
-				</div>				
+				</div>	
+				-->
 				<div class="span4">
 					<h4>Timeline</h4>
 					<div id="time-slider"></div>
@@ -162,14 +189,38 @@
 
 		</div>
 	</div>
-
+	
     <!-- Scripts/Application -->
     <script type="text/javascript" src="js/app/main.js"></script> 
 	<script type="text/javascript">
 		$(document).ready( function() {
 			//$('#startDatetimeFilter').datetimepicker({});
 			//$('#endDatetimeFilter').datetimepicker({});
-		});
+			
+			$("#track-table").select2({
+				width: '200',
+				placeholder: "Select a data set...",
+				ajax: {
+					url: "/community/tables",
+					dataType: 'json',
+					results: function (data, page) { 
+						var results = [];
+						for (var i=0, len=data.tables.length; i<len; i++) {
+							var t = data.tables[i];
+							results.push({
+								id: t,
+								text: t
+							});
+						}
+						return {"results": results};
+					}
+				},
+				initSelection : function (element, callback) {
+					var data = {id: element.val(), text: element.val()};
+					callback(data);
+				}				
+			});
+		});	
 	</script>
 	
 </body>

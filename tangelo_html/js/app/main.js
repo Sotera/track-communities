@@ -2,16 +2,21 @@
 
 var color = d3.scale.category20();
 var defaultColors = ["red", "blue", "green", "magenta", "sienna", "teal", "goldenrod", "cyan", "indigo", "springgreen"];
+var colorMapping = {};
 
 var width = 400; //960;
 var height = 400; //480;
 
 var dynamicGraph = d3.select("#dynamic-graph")
-	.attr("preserveAspectRatio", "xMinYMin meet")
+	.attr("width", "100%")
+	.attr("height", "100%")
+	.attr("preserveAspectRatio", "xMidYMid meet")
 	.attr("pointer-events", "all")
 	.call(d3.behavior.zoom().on("zoom", redraw));
 var communityBrowser = d3.select("#community-graph")
-	.attr("preserveAspectRatio", "xMinYMin meet")
+	.attr("width", "100%")
+	.attr("height", "100%")
+	.attr("preserveAspectRatio", "xMidYMid meet")
 	.attr("pointer-events", "all")
 	.call(d3.behavior.zoom().on("zoom", redrawCommunity));;
 var force = d3.layout.force()
@@ -20,7 +25,7 @@ var force = d3.layout.force()
 	.linkStrength(2)
 	.gravity(0.1)
 	.friction(0.2)
-	.size([width, height]);
+	.size([width, height]); 
 var communityForce = d3.layout.force()
 	.charge(-500)
 	.linkDistance(200)
@@ -47,6 +52,9 @@ var animate = false;
 var playSpeed = .1;
 var animateInterval = 10;
 var timeout = null;
+
+var reloadPanels = null;
+var resetPanels = null;
 
 /*	*	*	*	*	*	*	*	*	*	*	*	*	*	*	*/
 
@@ -92,7 +100,11 @@ $(function () {
 				.append("svg:path")
 				.attr("opacity", .5)
 				.attr("fill", "none")
-				.attr("stroke", function (d) { return getColor(d.index); })
+				.attr("stroke", function (d) { 
+					var comm = d.comm;
+					var c = colorMapping[comm] || color(d.index);
+					return c;
+				})
 				.attr("d", path);
 
 			geodata.exit().remove();
@@ -119,7 +131,11 @@ $(function () {
 				})
 				.attr('r', 5)
 				.attr("opacity", 1)
-				.attr("fill", function (d) { return getColor(d.index); })
+				.attr("fill", function (d) {
+					var comm = d.comm;
+					var c = colorMapping[comm] || color(d.index);
+					return c;
+				})
 				.attr('stroke', "gray")
 				.append("svg:title")
 				.text(function(d) { return d.track_id; });
@@ -147,7 +163,8 @@ $(function () {
 		}
 	});
   
-	var refreshFunction = function () {
+	var refreshFunction = function (doReset) {
+	
 		Reset(false);
 		$("#communityBrowserForm").hide();
 		$("#communityBrowserGraph").show();
@@ -160,39 +177,125 @@ $(function () {
 				var lev = data.split("/")[1]
 	  
 				var serviceCall = "";
-				if (comm && lev && comm !== "0") {
+				if (doReset === true) {
+					serviceCall = '?lev="'+lev+'"';
+				}
+				else if (comm && lev && comm !== "0") {
 					serviceCall = '?comm="'+comm+'"&lev="'+lev+'"';
 				}
 				else {
 					serviceCall = '?lev="'+lev+'"';
 				}
 				console.log(serviceCall);
-		
 
-				d3.select('#community-id').text("ID: "+comm);
+				//d3.select('#community-id').text("ID: "+comm);
 	
 				$.getJSON('myservice'+serviceCall, function (data) {
 	
 					console.log("Service Call Data Object");
 					console.dir(data);
+					
+					// Handle heat map overlay...
+					if ($('#heatMapEnabled').is(':checked')) {
+						renderHeatMap();
+					}		
+
+					// Community Browser
+					tau2 = 2 * Math.PI;
+					angle2 = tau2 / data["gephinodes"].length;
+					$.each(data["gephinodes"], function (i, v) {
+						data["gephinodes"][i].x = (width / 4) * Math.cos(i * angle2) + (width / 2);
+						data["gephinodes"][i].y = (height / 4) * Math.sin(i * angle2) + (height / 2);
+					});
+
+					link2 = communityBrowser.select("g#cblinks")
+						.selectAll(".link")
+						.data(data["gephigraph"], edgeid);
+					enter2 = link2.enter().append("line")
+						.classed("link", true)
+						.style("stroke-width", function(d) {
+							return d.weight * 0.1;
+						})
+					enter2.transition()
+						.duration(transition_time)
+						.style("stroke", "black")
+						.style("stroke-width", function(d) {
+							return d.weight * 0.1;
+						})
+					link2.exit()
+						.transition()
+						.duration(transition_time)
+						.style("opacity", 0.0)
+						.style("stroke-width", 0.0)
+						.remove();
+	  
+					node2 = communityBrowser.select("g#cbnodes")
+						.selectAll(".node")
+						.data(data["gephinodes"], nodename);
+					enter2 = node2.enter().append("circle")
+						.classed("node", true)
+						.on("dblclick", openCommunity)
+						.attr("r", function(d) { 
+							var r = d.num_members*2+8;
+							return r;
+						})
+						.attr("fill",function(d,i){ 
+							var c = color(i);
+							colorMapping[d.node_comm] = c;
+							return c;
+						});
+					enter2.transition()
+						.duration(transition_time)
+						.attr("r", function(d) { 
+							var r = d.num_members*2+8;
+							return r;
+						})
+						.style("stroke", "black")
+						.style("stroke-width", 0.5)
+						.attr("fill",function(d,i){ 
+							return color(i);
+						});
+					enter2.call(communityForce.drag)
+						.append("title")
+						.text(function (d) {
+							return d.nodename;
+						});
+					node2.exit()
+						.transition()
+						.duration(transition_time)
+						.attr("r", 0.0)
+						.style("fill", "black")
+						.remove();
+	  
+					communityForce.nodes(data["gephinodes"])
+						.links(data["gephigraph"])
+						.start();
+					communityForce.on("tick", function () {
+						node2.attr("cx", function (d) { return d.x; })
+							.attr("cy", function (d) { return d.y; });
+						link2.attr("x1", function(d) { return d.source.x; })
+							.attr("y1", function(d) { return d.source.y; })
+							.attr("x2", function(d) { return d.target.x; })
+							.attr("y2", function(d) { return d.target.y; });
+					});						
 	  
 					// Handle map, dynamic graph render only if there is existing data...
 					if (data["result"]) {
 						currentGeoJson = data["result"];
-		  
+						
 						var xdiff = data.bounds.east - data.bounds.west;
 						var ydiff = data.bounds.north - data.bounds.south;
-			  
+				  
 						var centerx = xdiff / 2 + data.bounds.west;
 						var centery = ydiff / 2 + data.bounds.south;
-			  
+				  
 						map.setCenter(new google.maps.LatLng(centery, centerx));
-		  
+			  
 						var sw = new google.maps.LatLng(data.bounds.south, data.bounds.west);
 						var ne = new google.maps.LatLng(data.bounds.north, data.bounds.east);
 						map.fitBounds(new google.maps.LatLngBounds(sw, ne));
 
-						overlay.draw();
+						overlay.draw();						
 
 						startTime = new Date(Date.parse(data["start"]));
 						endTime = new Date(Date.parse(data["end"]));
@@ -206,6 +309,9 @@ $(function () {
 							data["result"][i].x = (width / 4) * Math.cos(i * angle) + (width / 2);
 							data["result"][i].y = (height / 4) * Math.sin(i * angle) + (height / 2);
 						});
+						
+						console.log("Color Map:");
+						console.dir(colorMapping);
 
 						link = dynamicGraph.select("g#dglinks")
 							.selectAll(".link")
@@ -233,14 +339,20 @@ $(function () {
 							.classed("node", true)
 							.attr("r", 15)
 							.style("opacity", 0.0)
-							.style("fill", "red");
+							.style("fill", function (d) {
+								var comm = d.comm;
+								var c = colorMapping[comm] || color(d.index);
+								return c;
+							});
 						enter.transition()
 							.duration(transition_time)
 							.attr("r", 10)
 							.style("opacity", 1.0)
 							.style("stroke", "gray")
 							.style("fill", function (d) {
-								return defaultColors[d.index];
+								var comm = d.comm;
+								var c = colorMapping[comm] || color(d.index);
+								return c;
 							});
 						enter.call(force.drag)
 							.append("title")
@@ -270,77 +382,6 @@ $(function () {
 						
 					}
 	  
-					// Community Browser
-					tau2 = 2 * Math.PI;
-					angle2 = tau2 / data["gephinodes"].length;
-					$.each(data["gephinodes"], function (i, v) {
-						data["gephinodes"][i].x = (width / 4) * Math.cos(i * angle2) + (width / 2);
-						data["gephinodes"][i].y = (height / 4) * Math.sin(i * angle2) + (height / 2);
-					});
-
-					link2 = communityBrowser.select("g#cblinks")
-						.selectAll(".link")
-						.data(data["gephigraph"], edgeid);
-					enter2 = link2.enter().append("line")
-						.classed("link", true)
-						.style("stroke-width", 0.5);
-					enter2.transition()
-						.duration(transition_time)
-						.style("stroke", "black")
-						.style("stroke-width", 0.5);
-					link2.exit()
-						.transition()
-						.duration(transition_time)
-						.style("opacity", 0.0)
-						.style("stroke-width", 0.0)
-						.remove();
-	  
-					node2 = communityBrowser.select("g#cbnodes")
-						.selectAll(".node")
-						.data(data["gephinodes"], nodename);
-					enter2 = node2.enter().append("circle")
-						.classed("node", true)
-						.on("dblclick", openCommunity)
-						.attr("r", function(d) { 
-							var r = d.num_members * 2;
-							if (r < 10) { r = 10; }
-							return r;
-						})
-						.attr("fill",function(d,i){return color(i);});
-					enter2.transition()
-						.duration(transition_time)
-						.attr("r", function(d) { 
-							var r = d.num_members * 2;
-							if (r < 10) { r = 10; }
-							return r;
-						})
-						.style("stroke", "black")
-						.style("stroke-width", 0.5)
-						.attr("fill",function(d,i){return color(i);});
-					enter2.call(communityForce.drag)
-						.append("title")
-						.text(function (d) {
-							return d.nodename;
-						});
-					node2.exit()
-						.transition()
-						.duration(transition_time)
-						.attr("r", 0.0)
-						.style("fill", "black")
-						.remove();
-	  
-					communityForce.nodes(data["gephinodes"])
-						.links(data["gephigraph"])
-						.start();
-					communityForce.on("tick", function () {
-						node2.attr("cx", function (d) { return d.x; })
-							.attr("cy", function (d) { return d.y; });
-						link2.attr("x1", function(d) { return d.source.x; })
-							.attr("y1", function(d) { return d.source.y; })
-							.attr("x2", function(d) { return d.target.x; })
-							.attr("y2", function(d) { return d.target.y; });
-					});		
-	
 				});
 			}
 		});
@@ -354,18 +395,15 @@ $(function () {
 				// do something here
 			}
 			else {
-				console.log(comm + "->" + node);
 				var table = $("#track-table").val();
-				var value = parseInt($("#level").val());
-				$("#level").val(value);
-				var level = $("#level").val();
+				var level = $("#level").editable('getValue', true);
+				$("#comm-id").editable('setValue', comm);
 		  
 				$.get("community/settable/" + table)
 					.then(function(){
 						$.get("community/setcomm/" + comm + '/' + level)
 							.then( function() {
-								console.log(comm+":"+level); 
-								refreshFunction() 
+								refreshFunction();
 							});
 					});
 			}
@@ -373,9 +411,20 @@ $(function () {
 		
     
 	};
+	reloadPanels = refreshFunction;
+	resetPanels = function() {
+		var doReset = true;
+		refreshFunction(doReset);
+	}
   
-	$("#refresh").click(refreshFunction);
-	$("#loadCommunitiesFromFilter").click(refreshFunction);  
+	$("#refresh").click(reloadPanels);
+
+	$("#applyCommunityFilter").click(function(e) {
+		e.stopPropagation();
+		e.preventDefault();	
+		updateCommunities();
+	});
+	//$("#loadCommunitiesFromFilter").click(updateConfig);  
   
 	$("#reset").click(function () {
 		Reset(true);
@@ -387,25 +436,30 @@ $(function () {
 		heatmap.setMap(null);    
 	});
 
-	$("#heatmap").click(function () {
-		$.ajax({
-			"url":"heatmap/map",
-			"type" : "GET"
-		}).done(function(data){
-			eval("var heatdata = " + data);
-			heatmap.setMap(null);
-			heatmap.setData(heatdata);
-			heatmap.set('radius', heatmap.get('radius') ? null : 15);
-			heatmap.setMap(map);
-		});
-  });
+	$("#heatmap").click(renderHeatMap);
 
 });
+
+function renderHeatMap() {
+
+	$.ajax({
+		"url":"heatmap/map",
+		"type" : "GET"
+	}).done(function(data){
+		eval("var heatdata = " + data);
+		heatmap.setMap(null);
+		heatmap.setData(heatdata);
+		heatmap.set('radius', heatmap.get('radius') ? null : 15);
+		heatmap.setMap(map);
+	});
+
+}
 
 function Reset(full) {
 	//console.log("Current Bounds: "+map.getBounds());
 
-	d3.select('#community-id').text("ID: None");
+	heatmap.setMap(null);
+	//d3.select('#community-id').text("ID: None");
 	dynamicGraph.select("g#dgnodes").selectAll(".node").remove();
 	dynamicGraph.select("g#dglinks").selectAll(".link").remove();
   
@@ -415,6 +469,7 @@ function Reset(full) {
 	map.setCenter(new google.maps.LatLng(0, 0));
 	map.setZoom(2);
 
+	colorMapping = {};
 	currentGeoJson = [];
 	overlay.draw();
 }
