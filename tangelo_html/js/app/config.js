@@ -86,7 +86,6 @@ function updateCommunities() {
   if (table) {
 	  $.get("community/settable/" + table)
 		.then(function(){
-		  console.log("*"+comm+"*"+level);
 		  if (comm !== "" && level !== "") {
 			$.get("community/setcomm/" + comm + '/' + level)
 				.then(reloadPanels);

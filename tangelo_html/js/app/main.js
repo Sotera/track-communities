@@ -192,8 +192,8 @@ $(function () {
 	
 				$.getJSON('myservice'+serviceCall, function (data) {
 	
-					console.log("Service Call Data Object");
-					console.dir(data);
+					//console.log("Service Call Data Object");
+					//console.dir(data);
 					
 					// Handle heat map overlay...
 					if ($('#heatMapEnabled').is(':checked')) {
