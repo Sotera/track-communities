@@ -40,6 +40,68 @@ def getWholeGephiGraph(comm=None, level=None, host="localhost", port="21000"):
     response["gephigraph"] = gephigraph
     return response
 
+def geoTimeQuery(comm=None, level=None, host="localhost", port="21000", geo=None, time=None):
+    level = cache.get().get("graph_num_levels","")
+    nodetable = cache.get().get("table","") + '_good_nodes'
+    edgestable = cache.get().get("table","") + '_good_graph'
+    trackstable = cache.get().get("table","") + '_tracks_comms_joined'
+
+    query = 'select distinct comm_' + str(level) + ' from ' + trackstable + ' where '
+    geoThere = False
+    if geo["min_lat"] != None:
+        locationquery = ' cast(intersectx as double) >= ' + geo["min_lat"].replace('"','') + ' and cast(intersectx as double) <= ' + geo["max_lat"].replace('"','') + ' and cast(intersecty as double) >= ' + geo["min_lon"].replace('"','') + ' and cast(intersecty as double) <= ' + geo["max_lon"].replace('"','')
+        query = query + locationquery
+        geoThere = True
+
+    if time["min_time"] != None:
+        timequery = ' dt >= ' + time["min_time"] + ' and dt <= ' + time["max_time"] 
+        if geoThere:
+            query = query + ' and '
+        query = query + timequery
+    #print query
+    
+    nodequery = 'select node, comm, num_members, level from ' + nodetable + ' where level = "' + level + '" and node in '
+    edgequery = 'select source, target, weight, level from ' +  edgestable + ' where level = "' + level + '" '
+
+    #print nodequery
+
+    #print edgequery
+    
+    with impalaopen(host + ':' + port) as client:
+        print query
+        qResults = client.execute(query)
+        comm_string = '( ' 
+        for record in qResults.data:
+            comm_string = comm_string + '"' + record.strip() + '", '
+        comm_string = comm_string[0:len(comm_string)-2] + ')'
+        nodequery = nodequery + comm_string
+        edgequery = edgequery + ' and (source in ' + comm_string + ' and target in ' + comm_string + ' )'
+    
+    with impalaopen(host + ':' + port) as client:
+        qResults = client.execute(nodequery)
+        mapping = {}
+        idx = 0
+        for record in qResults.data:
+            node,comm,num_members,level = record.split('\t')
+            mapping[node] = {"index":idx,"nodename":node,"node_comm":comm,"level":level,"num_members":num_members}
+            idx = idx + 1
+    
+    edges = []
+    nodes = []
+    with impalaopen(host + ':' + port) as client:
+        qResults = client.execute(edgequery)
+        for record in qResults.data:
+            source,target,weight,level = record.split('\t')
+            edges.append({"source":mapping[source]["index"],"sourcename":source,"target":mapping[target]["index"],"targetname":target,"weight":weight})
+        for i in mapping.keys():
+            nodes.append({"index":mapping[i]["index"],"nodename":mapping[i]["nodename"],"node_comm":mapping[i]["node_comm"],"level":mapping[i]["level"],"num_members":mapping[i]["num_members"]})
+    
+    response = {}
+    response["gephinodes"] = nodes
+    response["gephigraph"] = edges
+    return response
+        
+
 def getNodes(comm=None, level=None, host="localhost", port="21000"):
     nodetable = cache.get().get("table","") + '_good_nodes'
     node_comm_filter_string = ""
@@ -92,7 +154,11 @@ def linkages(comm=None, level=None, nodemap=None, host="localhost", port="21000"
             edges.append({"source":nodemap[source],"target":nodemap[target],"start":start,"end":end,"value":value})
         return edges
 
-def run(database="default", table="", host="localhost", port="21000", trackId=None, comm=None, lev=None):
+def run(database="default", table="", host="localhost", port="21000", trackId=None, comm=None, lev=None, minlat=None, maxlat=None, minlon=None, maxlon=None, mintime=None, maxtime=None):
+    if mintime != None or minlat != None:
+        geo = {"min_lat":minlat,"max_lat":maxlat,"min_lon":minlon,"max_lon":maxlon}
+        time = {"min_time":mintime,"max_time":maxtime}
+        return geoTimeQuery(comm,lev,host,port,geo,time)
     if comm == None:
         return getWholeGephiGraph(comm,lev,host,port)
     response = {}
