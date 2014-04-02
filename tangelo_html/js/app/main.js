@@ -192,8 +192,8 @@ $(function () {
 	
 				$.getJSON('myservice'+serviceCall, function (data) {
 	
-					console.log("Service Call Data Object");
-					console.dir(data);
+					//console.log("Service Call Data Object");
+					//console.dir(data);
 					
 					// Handle heat map overlay...
 					if ($('#heatMapEnabled').is(':checked')) {
@@ -236,7 +236,7 @@ $(function () {
 						.classed("node", true)
 						.on("dblclick", openCommunity)
 						.attr("r", function(d) { 
-							var r = d.num_members*2+8;
+							var r = d.num_members; //d.num_members*2+8;
 							return r;
 						})
 						.attr("fill",function(d,i){ 
@@ -247,7 +247,7 @@ $(function () {
 					enter2.transition()
 						.duration(transition_time)
 						.attr("r", function(d) { 
-							var r = d.num_members*2+8;
+							var r = d.num_members; //d.num_members*2+8;
 							return r;
 						})
 						.style("stroke", "black")
@@ -396,8 +396,8 @@ $(function () {
 			}
 			else {
 				var table = $("#track-table").val();
-				var level = $("#level").editable('getValue', true);
-				$("#comm-id").editable('setValue', comm);
+				var level = $("#level").val(); //$("#level").editable('getValue', true);
+				$("#comm-id").val(comm); //$("#comm-id").editable('setValue', comm);
 		  
 				$.get("community/settable/" + table)
 					.then(function(){
@@ -462,9 +462,20 @@ function Reset(full) {
 	//d3.select('#community-id').text("ID: None");
 	dynamicGraph.select("g#dgnodes").selectAll(".node").remove();
 	dynamicGraph.select("g#dglinks").selectAll(".link").remove();
-  
+
 	communityBrowser.select("g#cbnodes").selectAll(".node").remove();
 	communityBrowser.select("g#cblinks").selectAll(".link").remove();
+	
+	communityBrowser.call( function() {
+		var zoom = d3.behavior.zoom().translate([0,0]).scale(1);
+		communityBrowser.call(zoom.on("zoom", redrawCommunity));
+		//console.log("reset community browser graph zoom scale");		
+	});
+	dynamicGraph.call( function() {
+		var zoom = d3.behavior.zoom().translate([0,0]).scale(1);
+		dynamicGraph.call(zoom.on("zoom", redraw));
+		//console.log("reset dynamic graph zoom scale");	
+	});	
     
 	map.setCenter(new google.maps.LatLng(0, 0));
 	map.setZoom(2);
