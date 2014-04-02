@@ -5,13 +5,11 @@
 	<meta charset="utf-8">
 	
 	<!-- Stylesheets -->
-	<link rel="stylesheet" href="lib/jquery_ui/css/jquery-ui.css" type="text/css">
+
 	<link rel="stylesheet" href="lib/tangelo/css/tangelo.css" type="text/css">
-	<link rel="stylesheet" href="lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" type="text/css">
-	<link rel="stylesheet" href="lib/bootstrap-checkbox/css/bootstrap-checkbox.css" type="text/css">
-	<link rel="stylesheet" href="lib/bootstrap-editable/css/bootstrap-editable.css" type="text/css">
 	<link rel="stylesheet" href="lib/select2/select2.css" type="text/css">
 	<link rel="stylesheet" href="lib/select2/select2-bootstrap.css" type="text/css">
+	<link rel="stylesheet" href="lib/jquery-toggles/toggles.css" type="text/css">
 	<link rel="stylesheet" href="lib/d3/css/d3.slider.css" type="text/css">
 	<style type="text/css">
 		#map-canvas {
@@ -61,11 +59,8 @@
 	<script type="text/javascript" src="lib/d3/js/d3.v3.min.js"></script>
 	<script type="text/javascript" src="lib/d3/js/d3.slider.js"></script>
 	<script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
-	<script type="text/javascript" src="lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
-	<script type="text/javascript" src="lib/bootstrap-checkbox/js/bootstrap-checkbox.js"></script>	
-	<script type="text/javascript" src="lib/bootstrap-editable/js/bootstrap-editable.min.js"></script>
 	<script type="text/javascript" src="lib/select2/select2.js"></script>
-	<script type="text/javascript" src="lib/jquery-clearsearch/src/jquery.clearsearch.js"></script>
+	<script type="text/javascript" src="lib/jquery-toggles/toggles.min.js"></script>
 	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=visualization"></script>
 	<script type="text/javascript" src="js/Number.js"></script>
 	<script type="text/javascript" src="js/app/config.js"></script> 
@@ -77,16 +72,11 @@
 
 <body>
 	
-	<div class="container-fluid" style="width:95%">
+	<div class="container-fluid" style="width:95%; height: 85%;">
 		<div class="row-fluid">
 			<div class="span12" style="">
 				<!-- Utilize Tangelo utility to construct Bootstrap-based navigation bar -->
 				<div data-tangelo-type="navbar" data-tangelo-brand="XDATA" data-tangelo-brand-href="#" data-tangelo-app="Track Communities" data-config-load="showConfig" data-config-save="updateConfig">
-					<!--
-					<div data-tangelo-type="info">
-						<p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent libero neque, tincidunt in elit non, adipiscing bibendum quam. Duis congue nisl eu erat ullamcorper, non tincidunt felis rutrum. Vivamus dapibus vel metus in commodo. In sagittis erat vel egestas aliquam. In scelerisque, ipsum eget ultricies auctor, felis tortor ullamcorper est, in imperdiet justo dui at eros. Etiam pharetra erat vitae nisl elementum, vel dapibus felis mollis. In sit amet justo eu odio sollicitudin hendrerit. Curabitur nec consequat velit, eget hendrerit sem. In convallis eros id diam sagittis pretium. Aliquam neque quam, malesuada nec ullamcorper a, pulvinar sed ligula. Mauris adipiscing consectetur justo, vel egestas eros auctor ut. Nam viverra adipiscing elementum. Maecenas vitae porttitor neque, non adipiscing orci. Aenean sit amet luctus magna. Donec cursus ac diam quis rutrum. Morbi aliquam vulputate dictum. </p>
-					</div>
-					-->					
 					<div data-tangelo-type="config">
 					
 						<h4> Load </h4>
@@ -101,13 +91,17 @@
 						-->
 
 					</div>
+					
+					<div data-tangelo-type="info">
+						<p> TODO: Description or instructions on how to use the tool goes here. </p>
+					</div>
 
 				</div>
 			</div>
 		</div>
 		<div class="row-fluid" style="padding-top:20px;">
 			<div class="span4" style="">
-				<h3> Community Browser </h3>
+				<h4> Community Browser </h4>
 				
 				<div id="communityBrowserForm">				
 					<div class="alert alert-error">
@@ -118,14 +112,6 @@
 				</div>
 				
 				<div id="communityBrowserGraph" style="display:none;">
-					<small> <div id="graph_stat_string"></div> </small>
-					
-					<p> Search on: 
-						<span class="pull-right"> 
-							<a href="#" id="comm-id"></a> and <a href="#" id="level"></a> &nbsp; &nbsp; &nbsp; <a id="applyCommunityFilter" class="btn btn-mini" href="#"><i class="icon-search"></i> Go</a> 
-						</span> 
-					</p>
-				
 					<div style="height:100%; width:100%">
 						<svg id="community-graph">
 							<rect width="100%" height="100%" style="fill:white;" />
@@ -136,12 +122,12 @@
 				</div>
 
 			</div>
-			<div class="span4" style="">
-				<h3> Map </h3>
+			<div class="span4" style="margin-right: 2px; ">
+				<h4> Map </h4>
 				<div id="map-canvas" class="gmap" style="">***</div>
 			</div>
-			<div class="span4" style="">
-				<h3> Dynamic Graph </h3>
+			<div class="span4" style="margin-left: 2px; ">
+				<h4> Dynamic Graph </h4>
 				<div style="height:100%; width:100%">
 					<svg id="dynamic-graph">
 						<rect width="100%" height="100%" style="fill:black;" />
@@ -158,11 +144,17 @@
 		<div class="container-fluid">
 			<div class="row-fluid">
 				<div class="span4">
-                    <h4> Community </h4>
-					<p>
-					<!-- <a id="refresh" class="btn btn-mini" href="#">Refresh</a> -->
-					<!-- <a id="reset" class="btn btn-mini" href="#">Clear</a> -->
+                    <h5> Community </h5>
+					
+					<p> <small> <strong>INFO:</strong> <span id="graph_stat_string">Data not loaded.</span> </small> </p>
+					<p id="community-info-box" style="display:none;">
+					<strong>ID&nbsp;:</strong> <input id="comm-id" type="text" />
+					<strong>LVL:</strong> 
+					<input id="level" type="text" />
+					<input id="graph_num_levels" type="hidden" />
+					<a id="applyCommunityFilter" class="btn btn-mini" href="#"><i class="icon-search"></i> Go</a>
 					</p>
+
 				</div>
 				<!--
 				<div class="span2">
@@ -176,15 +168,15 @@
 				</div>	
 				-->
 				<div class="span4">
-					<h4>Timeline</h4>
+					<h5>Timeline</h5>
 					<div id="time-slider"></div>
 					<div id="slidertext">0</div>
 				</div>
-				<div class="span4">
-					<h4>Animation</h4>
+				<div class="spa4">
+					<h5>Animation</h5>
 					<a id="play" class="btn btn-mini">Play</a>
 					<div id="speed-slider"></div>
-				</div>					
+				</div>
 			</div>
 
 		</div>
@@ -194,8 +186,6 @@
     <script type="text/javascript" src="js/app/main.js"></script> 
 	<script type="text/javascript">
 		$(document).ready( function() {
-			//$('#startDatetimeFilter').datetimepicker({});
-			//$('#endDatetimeFilter').datetimepicker({});
 			
 			$("#track-table").select2({
 				width: '200',
@@ -220,6 +210,13 @@
 					callback(data);
 				}				
 			});
+			$("#level").select2({
+				width: "resolve",
+				placeholder: "No data set loaded...",
+				allowClear: false,
+				data: []
+			});				
+			
 		});	
 	</script>
 	
