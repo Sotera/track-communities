@@ -70,11 +70,12 @@ function updateConfig() {
 					// Finish up and refresh display.
 					$("#community-info-box").toggle(true);				
 					
-					$("#graph_num_levels").val(levels)
+					$("#graph_num_levels").val(levels);
 					
 					$("#level").select2("val", levels);
 					$("#level").select2("enable", true);
 					
+					$("#comm-id").val("");
 					$("#comm-id").prop("disabled", false );
 					
 					$("#applyCommunityFilter").prop("disabled", false);
