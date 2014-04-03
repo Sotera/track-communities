@@ -9,7 +9,6 @@
 	<link rel="stylesheet" href="lib/tangelo/css/tangelo.css" type="text/css">
 	<link rel="stylesheet" href="lib/select2/select2.css" type="text/css">
 	<link rel="stylesheet" href="lib/select2/select2-bootstrap.css" type="text/css">
-	<link rel="stylesheet" href="lib/jquery-toggles/toggles.css" type="text/css">
 	<link rel="stylesheet" href="lib/d3/css/d3.slider.css" type="text/css">
 	<style type="text/css">
 		#map-canvas {
@@ -60,7 +59,6 @@
 	<script type="text/javascript" src="lib/d3/js/d3.slider.js"></script>
 	<script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="lib/select2/select2.js"></script>
-	<script type="text/javascript" src="lib/jquery-toggles/toggles.min.js"></script>
 	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=visualization"></script>
 	<script type="text/javascript" src="js/Number.js"></script>
 	<script type="text/javascript" src="js/app/config.js"></script> 
@@ -81,7 +79,7 @@
 					
 						<h4> Load </h4>
 						<p> Data Table: <input type="hidden" id="track-table" /> <br/> </p>
-						<p> Enable Heatmap: <input type="checkbox" id="heatMapEnabled" class="bootstrap-checkbox" checked="checked" data-label-prepend="Enable Heatmap  " /> </p>
+						<p>  </p>
 
 						<!--
 						table <input id="track-table" type=text><br/>
@@ -123,6 +121,7 @@
 			</div>
 			<div class="span4" style="margin-right: 2px; ">
 				<h4> Map </h4>
+				Enable Heatmap: <input type="checkbox" id="heatMapEnabled" checked="checked" />
 				<div id="map-canvas" class="gmap" style="">***</div>
 			</div>
 			<div class="span4" style="margin-left: 2px; ">
@@ -145,16 +144,19 @@
 				<div class="span4">
                     <h5> Community </h5>
 					
-					<p> <small> <strong>INFO:</strong> <span id="graph_stat_string">Data not loaded.</span> </small> </p>
-					<p id="community-info-box" style="XXXvisibility:hidden">
-					<strong>ID&nbsp;:</strong> <input id="comm-id" type="text" disabled="true" />
-					<strong>LVL:</strong> 
-					<input id="level" type="text" disabled="true" />
+					<small> <strong>INFO:</strong> <span id="graph_stat_string">Data not loaded.</span> </small> <br/>
+					
+					<small>
+					<strong>ID&nbsp;&nbsp;:</strong> <input id="comm-id" type="text" disabled="true" style="margin-top:12px;"/>
+					<strong>LVL:</strong> <input id="level" type="text" disabled="true" />
 					<input id="graph_num_levels" type="hidden" />
-					<a id="applyCommunityFilter" class="btn btn-mini" href="#" style="display:none"><i class="icon-search"></i> Go</a>
-					</p>
+					<a id="applyCommunityFilter" class="btn btn-mini" href="#" style="display:none"><i class="icon-search"></i> Go</a> <br/>
+					</small>
+					
+					
 
 				</div>
+
 				<!--
 				<div class="span2">
 					<h4> Heatmap </h4>
@@ -170,11 +172,14 @@
 					<h5>Timeline</h5>
 					<div id="time-slider"></div>
 					<div id="slidertext">0</div>
-				</div>
-				<div class="span4">
 					<h5>Animation</h5>
 					<a id="play" class="btn btn-mini">Play</a>
-					<div id="speed-slider"></div>
+					<div id="speed-slider"></div>					
+				</div>
+				<div class="span4">
+					<h5> Display </h5>
+					<p> Labels </p>
+					<p> Heat Map </p>				
 				</div>
 			</div>
 
@@ -185,7 +190,6 @@
     <script type="text/javascript" src="js/app/main.js"></script> 
 	<script type="text/javascript">
 		$(document).ready( function() {
-			
 			$("#track-table").select2({
 				width: '200',
 				placeholder: "Select a data set...",
@@ -214,7 +218,16 @@
 				placeholder: "No data set loaded...",
 				allowClear: false,
 				data: []
-			});				
+			});	
+			$("#heatMapEnabled").on( "change", function() {
+				var hm = $("#heatMapEnabled");
+				if (hm.prop('checked') === true) {
+					renderHeatMap();
+				}
+				else {
+					heatmap.setMap(null);
+				}
+			});
 			
 		});	
 	</script>
