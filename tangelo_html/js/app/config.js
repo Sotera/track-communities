@@ -66,9 +66,17 @@ function updateConfig() {
 				});			
 
 				// Finish up and refresh display.
-				$("#community-info-box").show();				
+				$("#community-info-box").toggle(true);				
+				
 				$("#graph_num_levels").val(levels)
+				
 				$("#level").val(levels);
+				$("#level").select2("enable", true);
+				
+				$("#comm-id").prop( "disabled", false );
+				
+				$("#applyCommunityFilter").show();
+				
 				resetPanels();
 		
 			});
