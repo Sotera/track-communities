@@ -158,8 +158,10 @@ def run(database="default", table="", host="localhost", port="21000", trackId=No
     if mintime != None or minlat != None:
         geo = {"min_lat":minlat,"max_lat":maxlat,"min_lon":minlon,"max_lon":maxlon}
         time = {"min_time":mintime,"max_time":maxtime}
+        cache.update({ "level" : cache.get().get("graph_num_levels","") })
         return geoTimeQuery(comm,lev,host,port,geo,time)
     if comm == None:
+        cache.update({ "level" : lev })
         return getWholeGephiGraph(comm,lev,host,port)
     response = {}
     table = cache.get().get("table", "") + "_tracks_comms_joined"
@@ -248,4 +250,6 @@ def run(database="default", table="", host="localhost", port="21000", trackId=No
     response["graph"] = edges
     response["gephinodes"] = gephinodes
     response["gephigraph"] = gephigraph
+
+    cache.update({ "level" : lev })
     return response
