@@ -111,18 +111,20 @@ def getNodes(comm=None, level=None, host="localhost", port="21000"):
     with impalaopen(host + ':' + port) as client:
         qResults = client.execute(nodequery)
         mapping = {}
+        array_map = []
         idx = 0
         for record in qResults.data:
             node,comm,num_members,level = record.split('\t')
             mapping[node] = {"index":idx,"nodename":node,"node_comm":comm,"level":level,"num_members":num_members}
+            array_map.append({"index":idx,"nodename":node,"node_comm":comm,"level":level,"num_members":num_members})
             idx = idx + 1
-    return mapping
+        return mapping, array_map
 
 
 def subgraph(comm=None, level=None, host="localhost", port="21000"):
     edgetable = cache.get().get("table","") + '_good_graph'
 
-    mapping = getNodes(comm,level,host,port)
+    mapping, array_map = getNodes(comm,level,host,port)
     edge_comm_filter_string = ""
     if comm != None:
         edge_comm_filter_string = " and (source_comm=" + comm + " and target_comm="+ comm + ") "
@@ -136,9 +138,7 @@ def subgraph(comm=None, level=None, host="localhost", port="21000"):
             source,target,weight,level = record.split('\t')
             edges.append({"source":mapping[source]["index"],"sourcename":source,"target":mapping[target]["index"],"targetname":target,"weight":weight})
 
-        for i in mapping.keys():
-            nodes.append({"index":mapping[i]["index"],"nodename":mapping[i]["nodename"],"node_comm":mapping[i]["node_comm"],"level":mapping[i]["level"],"num_members":mapping[i]["num_members"]})
-        return nodes, edges
+        return array_map, edges
 
 
 def linkages(comm=None, level=None, nodemap=None, host="localhost", port="21000"):
