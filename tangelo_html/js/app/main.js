@@ -391,21 +391,25 @@ $(function () {
 			d3.event.preventDefault();
 			var comm = d.node_comm;
 			var node = d.nodename;
-			if (comm === node) {
-				// do something here
-			}
-			else {
-				var table = $("#track-table").val();
-				var level = $("#level").val(); //$("#level").editable('getValue', true);
-				$("#comm-id").val(comm); //$("#comm-id").editable('setValue', comm);
-		  
+			
+			var table = $("#track-table").val();
+			var level = $("#level").val();
+			
+			if (level > 1) {
+				level = level -1;
+
 				$.get("community/settable/" + table)
 					.then(function(){
 						$.get("community/setcomm/" + comm + '/' + level)
 							.then( function() {
+								$("#level").select2("val", level);
+								$("#comm-id").val(comm);
 								refreshFunction();
 							});
 					});
+			}
+			else {
+				// can no longer go deeper into the graph
 			}
 		}	
 		

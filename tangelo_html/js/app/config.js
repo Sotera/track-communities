@@ -70,7 +70,7 @@ function updateConfig() {
 				
 				$("#graph_num_levels").val(levels)
 				
-				$("#level").val(levels);
+				$("#level").select2("val", levels);
 				$("#level").select2("enable", true);
 				
 				$("#comm-id").prop( "disabled", false );
