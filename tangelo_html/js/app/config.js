@@ -2,10 +2,11 @@
 
 function setConfig() {
   $.get("community/current").done(function(cfg){
+	//TODO: Manually force them to pick table on load to avoid GO/RESET/REFRESH issue.
 	
 	// track table information
-    d3.select("#track-table").property("value", cfg.table);
-	$("#track-table").select2("val", cfg.table);
+    //d3.select("#track-table").property("value", cfg.table);
+	//$("#track-table").select2("val", cfg.table);
 	//d3.select("#graph_stat_string").text(cfg.graph_stat_string);
 	
 	// community information
@@ -40,47 +41,49 @@ function updateConfig() {
 	table = $("#track-table").val();
 
 	// Save the selected data set table name...
-	$.get("community/settable/" + table)
-		.then( function(){
-			// ... then get information about that table... 
-			$.get("community/current").done(function(cfg){
-				// ... then update the visualization.
-				d3.select("#graph_stat_string").text(cfg.graph_stat_string);
-				d3.select("#level").property("value", cfg.graph_num_levels);
-				d3.select("#graph_num_levels").property("value", cfg.graph_num_levels);
+	if (table) {
+		$.get("community/settable/" + table)
+			.then( function(){
+				// ... then get information about that table... 
+				$.get("community/current").done(function(cfg){
+					// ... then update the visualization.
+					d3.select("#graph_stat_string").text(cfg.graph_stat_string);
+					d3.select("#level").property("value", cfg.graph_num_levels);
+					d3.select("#graph_num_levels").property("value", cfg.graph_num_levels);
 
-				// Update Community Level List
-				var lvlData = [];
-				var levels = $("#graph_num_levels").val() || 0;
-				for (var i=1; i <= levels; i++) {
-					lvlData.push({
-						id: i.toString(),
-						text: i.toString()
+					// Update Community Level List
+					var lvlData = [];
+					var levels = $("#graph_num_levels").val() || 0;
+					for (var i=1; i <= levels; i++) {
+						lvlData.push({
+							id: i.toString(),
+							text: i.toString()
+						});			
+					}
+					$("#level").select2({
+						width: "resolve",
+						placeholder: "No data set loaded...",
+						allowClear: false,
+						data: lvlData
 					});			
-				}
-				$("#level").select2({
-					width: "resolve",
-					placeholder: "No data set loaded...",
-					allowClear: false,
-					data: lvlData
-				});			
 
-				// Finish up and refresh display.
-				$("#community-info-box").toggle(true);				
-				
-				$("#graph_num_levels").val(levels)
-				
-				$("#level").select2("val", levels);
-				$("#level").select2("enable", true);
-				
-				$("#comm-id").prop( "disabled", false );
-				
-				$("#applyCommunityFilter").show();
-				
-				resetPanels();
-		
+					// Finish up and refresh display.
+					$("#community-info-box").toggle(true);				
+					
+					$("#graph_num_levels").val(levels)
+					
+					$("#level").select2("val", levels);
+					$("#level").select2("enable", true);
+					
+					$("#comm-id").prop("disabled", false );
+					
+					$("#applyCommunityFilter").prop("disabled", false);
+					
+					resetPanels();
+			
+				});
 			});
-		});
+	}
 
 		
 }
