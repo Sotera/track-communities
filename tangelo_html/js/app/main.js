@@ -400,10 +400,10 @@ $(function () {
 
 				$.get("community/settable/" + table)
 					.then(function(){
-						$.get("community/setcomm/" + comm + '/' + level)
+						$.get("community/setcomm/" + node + '/' + level)
 							.then( function() {
 								$("#level").select2("val", level);
-								$("#comm-id").val(comm);
+								$("#comm-id").val(node);
 								refreshFunction();
 							});
 					});
