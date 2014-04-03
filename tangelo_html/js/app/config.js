@@ -63,6 +63,7 @@ function updateConfig() {
 					$("#level").select2({
 						width: "resolve",
 						placeholder: "No data set loaded...",
+						minimumResultsForSearch: -1,
 						allowClear: false,
 						data: lvlData
 					});			
