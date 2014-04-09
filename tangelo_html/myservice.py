@@ -60,8 +60,8 @@ def geoTimeQuery(comm=None, level=None, host="localhost", port="21000", geo=None
         query = query + timequery
     #print query
     
-    nodequery = 'select node, comm, num_members, level from ' + nodetable + ' where level = "' + level + '" and node in '
-    edgequery = 'select source, target, weight, level from ' +  edgestable + ' where level = "' + level + '" '
+    nodequery = 'select node, comm, num_members, level from ' + nodetable + ' where level = "' + str(level) + '" and node in '
+    edgequery = 'select source, target, weight, level from ' +  edgestable + ' where level = "' + str(level) + '" '
 
     #print nodequery
 

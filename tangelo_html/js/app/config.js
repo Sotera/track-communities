@@ -78,8 +78,9 @@ function updateConfig() {
 					
 					$("#comm-id").val("");
 					$("#comm-id").prop("disabled", false );
+					$('#comm-id').clearableTextField();
 					
-					$("#applyCommunityFilter").prop("disabled", false);
+					$("#applyCommunity").prop("disabled", false);
 					
 					resetPanels();
 			
@@ -105,6 +106,33 @@ function updateCommunities() {
 		  }
 		  else {
 			resetPanels();
+		 }
+	  });
+  }
+
+}
+
+function filterCommunities() {
+  var table, comm, level;
+  table = $("#track-table").val();
+  comm = $("#comm-id").val() || "";
+  level = $("#level").val() || "";
+  
+  if (table) {
+	  $.get("community/settable/" + table)
+		.then(function(){
+		
+		  var n = $("#graph_num_levels").val();
+		  $("#level").select2("val", n);
+		  $("#comm-id").val("");
+		  $('#comm-id').clearableTextField();
+		  
+		  if (comm !== "" && level !== "") {
+			$.get("community/setcomm/" + comm + '/' + level)
+				.then(reloadPanels);
+		  }
+		  else {
+			reloadPanels();
 		 }
 	  });
   }

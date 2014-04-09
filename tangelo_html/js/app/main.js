@@ -56,6 +56,9 @@ var timeout = null;
 var reloadPanels = null;
 var resetPanels = null;
 
+var capturedGeo = "";
+var capturedTime = "";
+
 /*	*	*	*	*	*	*	*	*	*	*	*	*	*	*	*/
 
 
@@ -71,6 +74,20 @@ $(function () {
 		mapTypeId: google.maps.MapTypeId.ROADMAP,
 		center: new google.maps.LatLng(0, 0)
 	});
+	
+	google.maps.event.addListener(map, 'idle', function() {
+		//Do something when the user has stopped zooming/panning
+		var lat0 = map.getBounds().getNorthEast().lat();
+		var lng0 = map.getBounds().getNorthEast().lng();
+		var lat1 = map.getBounds().getSouthWest().lat();
+		var lng1 = map.getBounds().getSouthWest().lng();		
+		//bbox = left,bottom,right,top
+		//bbox = min Longitude , min Latitude , max Longitude , max Latitude 		
+		// minlat=”40”&maxlat=”70”&minlon=”20”&maxlon=”70”
+		capturedGeo = 'minlat="'+lat1+'"&maxlat="'+lat0+'"&minlon="'+lng1+'"&maxlon="'+lng0+'"';
+	});
+
+	
 	//create the overlay on which we will draw our heatmap
 	overlay = new google.maps.OverlayView();
 	overlay.onAdd = function () {
@@ -100,9 +117,14 @@ $(function () {
 				.append("svg:path")
 				.attr("opacity", .5)
 				.attr("fill", "none")
-				.attr("stroke", function (d) { 
-					var comm = d.comm;
-					var c = colorMapping[comm] || color(d.index);
+				.attr("stroke", function (d, i) { 
+					var c = color(i);
+					if ( $("#level").val() === "1" ) {
+						c = colorMapping[d.track_id];
+					}
+					else {
+						c = colorMapping[d.comm];
+					}
 					return c;
 				})
 				.attr("d", path);
@@ -129,11 +151,16 @@ $(function () {
 					var coordinates = googleMapProjection([0, d.coordinates[0][1]]);
 					return coordinates[1];
 				})
-				.attr('r', 5)
+				.attr('r', 8)
 				.attr("opacity", 1)
-				.attr("fill", function (d) {
-					var comm = d.comm;
-					var c = colorMapping[comm] || color(d.index);
+				.attr("fill", function (d, i) {
+					var c = color(i);
+					if ( $("#level").val() === "1" ) {
+						c = colorMapping[d.track_id];
+					}
+					else {
+						c = colorMapping[d.comm];
+					}
 					return c;
 				})
 				.attr('stroke', "gray")
@@ -165,7 +192,7 @@ $(function () {
   
 	var refreshFunction = function (doReset) {
 	
-		Reset(false);
+		Reset(doReset);
 		$("#communityBrowserForm").hide();
 		$("#communityBrowserGraph").show();
     
@@ -175,25 +202,41 @@ $(function () {
 			success: function(data) {
 				var comm = data.split("/")[0];
 				var lev = data.split("/")[1]
+				
+				//console.log("Time Boundaries");
+				var capturedQuery = capturedGeo || "";
+
+				try {
+					var dateValues = $("#dateRangeSlider").dateRangeSlider("values");
+					var mintime = moment(dateValues.min.toString().split('(')[0]).format("YYYY-MM-DD 00:00:00");
+					var maxtime = moment(dateValues.max.toString().split('(')[0]).format("YYYY-MM-DD 23:59:59");
+					capturedTime = 'mintime="'+mintime+'"&maxtime="'+maxtime+'"';
+					if (capturedQuery) {
+						capturedQuery = capturedQuery+'&'+capturedTime;
+					}
+				} catch(error) {
+					// console.log("n/a");
+				}
 	  
 				var serviceCall = "";
 				if (doReset === true) {
 					serviceCall = '?lev="'+lev+'"';
 				}
+				else if (capturedGeo) {
+					serviceCall = '?'+capturedQuery;
+				}
 				else if (comm && lev && comm !== "0") {
 					serviceCall = '?comm="'+comm+'"&lev="'+lev+'"';
 				}
 				else {
-					serviceCall = '?lev="'+lev+'"';
+					serviceCall = '?lev="'+lev;
 				}
 				console.log(serviceCall);
 
-				//d3.select('#community-id').text("ID: "+comm);
-	
 				$.getJSON('myservice'+serviceCall, function (data) {
 	
-					//console.log("Service Call Data Object");
-					//console.dir(data);
+					console.log("Request Data Object");
+					console.dir(data);
 					
 					// Handle heat map overlay...
 					if ($('#heatMapEnabled').is(':checked')) {
@@ -241,19 +284,37 @@ $(function () {
 						})
 						.attr("fill",function(d,i){ 
 							var c = color(i);
-							colorMapping[d.node_comm] = c;
+							//if ( $("#level").val() === "1" ) {
+							//	c = color(d.comm_id);
+							//	colorMapping[d.comm_id] = c;
+							//}
+							//else {
+								c = color(d.nodename);
+								colorMapping[d.nodename] = c;
+							//}
 							return c;
 						});
 					enter2.transition()
 						.duration(transition_time)
 						.attr("r", function(d) { 
 							var r = d.num_members; //d.num_members*2+8;
+							if ( $("#level").val() === "1" ) {
+								r = 10;
+							}
 							return r;
 						})
-						.style("stroke", "black")
-						.style("stroke-width", 0.5)
+						.attr('stroke', "gray")
 						.attr("fill",function(d,i){ 
-							return color(i);
+							var c = color(i);
+							//if ( $("#level").val() === "1" ) {
+							//	c = color(d.comm_id);
+							//	colorMapping[d.comm_id] = c;
+							//}
+							//else {
+								c = color(d.nodename);
+								colorMapping[d.nodename] = c;
+							//}
+							return c;
 						});
 					enter2.call(communityForce.drag)
 						.append("title")
@@ -264,7 +325,6 @@ $(function () {
 						.transition()
 						.duration(transition_time)
 						.attr("r", 0.0)
-						.style("fill", "black")
 						.remove();
 	  
 					communityForce.nodes(data["gephinodes"])
@@ -277,8 +337,48 @@ $(function () {
 							.attr("y1", function(d) { return d.source.y; })
 							.attr("x2", function(d) { return d.target.x; })
 							.attr("y2", function(d) { return d.target.y; });
-					});						
-	  
+					});		
+
+					// Handle geo/map filter controls
+					if (data["start"] && data["end"]) {
+						var arr = [];
+					
+						$("#dateRangeSliderMsg").html("<p>&nbsp;</p>");
+					
+						var initDate = new Date();
+						// 2012-03-22 03:39:00 // 2012-03-26 20:21:00, 
+						arr = data["start"].split(' '); arr = arr[0].toString().split('-');
+						var startYear = arr[0];
+						var startMonth = arr[1] - 1;
+						var startDay = arr[2];
+						
+						arr = data["end"].split(' '); arr = arr[0].toString().split('-');
+						var endYear = arr[0];
+						var endMonth = arr[1] - 1;
+						var endDay = arr[2];						
+						
+						$("#dateRangeSlider").dateRangeSlider({
+							valueLabels: "show",
+							bounds:{
+								min: new Date(startYear, startMonth, startDay),
+								max: new Date(endYear, endMonth, endDay)
+							},
+							defaultValues:{
+								min: new Date(startYear, startMonth, startDay),
+								max: new Date(endYear, endMonth, endDay)
+							}				
+						});					
+					
+					}
+					else {
+						$("#dateRangeSliderMsg").html("Not available.");	
+						try {
+							$("#dateRangeSlider").dateRangeSlider("destroy");						
+						} catch (error) {
+						
+						}
+					}
+					
 					// Handle map, dynamic graph render only if there is existing data...
 					if (data["result"]) {
 						currentGeoJson = data["result"];
@@ -310,8 +410,8 @@ $(function () {
 							data["result"][i].y = (height / 4) * Math.sin(i * angle) + (height / 2);
 						});
 						
-						console.log("Color Map:");
-						console.dir(colorMapping);
+						//console.log("Color Map:");
+						//console.dir(colorMapping);
 
 						link = dynamicGraph.select("g#dglinks")
 							.selectAll(".link")
@@ -339,19 +439,30 @@ $(function () {
 							.classed("node", true)
 							.attr("r", 15)
 							.style("opacity", 0.0)
-							.style("fill", function (d) {
-								var comm = d.comm;
-								var c = colorMapping[comm] || color(d.index);
+							.style("fill", function (d, i) {
+								var c = color(i);
+								if ( $("#level").val() === "1" ) {
+									c = colorMapping[d.track_id];
+								}
+								else {
+									c = colorMapping[d.comm];
+								}
 								return c;
+
 							});
 						enter.transition()
 							.duration(transition_time)
 							.attr("r", 10)
 							.style("opacity", 1.0)
 							.style("stroke", "gray")
-							.style("fill", function (d) {
-								var comm = d.comm;
-								var c = colorMapping[comm] || color(d.index);
+							.style("fill", function (d, i) {
+								var c = color(i);
+								if ( $("#level").val() === "1" ) {
+									c = colorMapping[d.track_id];
+								}
+								else {
+									c = colorMapping[d.comm];
+								}
 								return c;
 							});
 						enter.call(force.drag)
@@ -404,6 +515,8 @@ $(function () {
 							.then( function() {
 								$("#level").select2("val", level);
 								$("#comm-id").val(node);
+								$('#comm-id').clearableTextField();
+								capturedGeo = "";
 								refreshFunction();
 							});
 					});
@@ -415,19 +528,29 @@ $(function () {
 		
     
 	};
-	reloadPanels = refreshFunction;
+	reloadPanels = function() {
+		var doReset = false;
+		refreshFunction(doReset);
+	};
 	resetPanels = function() {
 		var doReset = true;
 		refreshFunction(doReset);
-	}
+	};
   
 	$("#refresh").click(reloadPanels);
 
-	$("#applyCommunityFilter").click(function(e) {
+	$("#applyCommunity").click(function(e) {
 		e.stopPropagation();
 		e.preventDefault();	
 		updateCommunities();
 	});
+	
+	$("#captureCommunity").click(function(e) {
+		e.stopPropagation();
+		e.preventDefault();	
+		filterCommunities(); //filterCommunities();
+	});
+
 	//$("#loadCommunitiesFromFilter").click(updateConfig);  
   
 	$("#reset").click(function () {
@@ -459,7 +582,7 @@ function renderHeatMap() {
 
 }
 
-function Reset(full) {
+function Reset(resetMap) {
 	//console.log("Current Bounds: "+map.getBounds());
 
 	heatmap.setMap(null);
@@ -481,8 +604,10 @@ function Reset(full) {
 		//console.log("reset dynamic graph zoom scale");	
 	});	
     
-	map.setCenter(new google.maps.LatLng(0, 0));
-	map.setZoom(2);
+	if (resetMap === true) { 
+		map.setCenter(new google.maps.LatLng(0, 0));
+		map.setZoom(2);
+	}
 
 	colorMapping = {};
 	currentGeoJson = [];
@@ -493,3 +618,6 @@ d3.select('#time-slider').call(timeSlider = d3.slider().on("slide", function(evt
 	SetCircles(value);
 	SetRelationships(value);
 }));
+
+
+
