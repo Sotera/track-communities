@@ -33,6 +33,17 @@ def settable(*args):
                 num_levels = int(level)
             i = i + 1
             graph_stat_string = graph_stat_string + "Level: " + level + ", " + nodes + " nodes "
+        
+        data = client.execute("select min(dt), max(dt), min(cast(intersectx as double)), max(cast(intersectx as double)), min(cast(intersecty as double)), max(cast(intersecty as double)) from " + cache.get().get("table", "") + "_tracks_comms_joined where track_id != 'ship(1.0)' and track_id != 'ais(3.0)'")
+        for line in data.get_data().split('\n'):
+            mindt,maxdt,minlat,maxlat,minlon,maxlon, = line.strip().split('\t')
+            cache.update({ "mindt" : mindt })
+            cache.update({ "maxdt" : maxdt })
+            cache.update({ "minlat" : minlat })
+            cache.update({ "minlon" : minlon })
+            cache.update({ "maxlat" : maxlat })
+            cache.update({ "maxlon" : maxlon })
+
         cache.update({ "graph_stat_string" : graph_stat_string + "" })
         cache.update({"graph_num_levels" : num_levels })
         cache.update({ "level" : str(num_levels) })
@@ -50,7 +61,7 @@ def commkml(*args):
 def getcurrent(*args):
     c = cache.get()
     tangelo.content_type("application/json")    
-    return { "table" : c["table"], "community" : c["community"], "level" : c["level"], "graph_stat_string" : c["graph_stat_string"], "graph_num_levels": c["graph_num_levels"] }
+    return { "table" : c["table"], "community" : c["community"], "level" : c["level"], "graph_stat_string" : c["graph_stat_string"], "graph_num_levels": c["graph_num_levels"], "mindt":c["mindt"],"maxdt":c["maxdt"],"minlat":c["minlat"],"minlon":c["minlon"],"maxlat":c["maxlat"],"maxlon":c["maxlon"] }
 
 #/community/setcomm/<comm_name>/<level>
 def setcomm(*args):
