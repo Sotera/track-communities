@@ -28,8 +28,8 @@ var force2 = d3.layout.force()
 	.linkDistance(200)
 	.linkStrength(2)
 	.gravity(0.1)
-	.friction(0.2);
-	//.size([width. height]);
+	.friction(0.2)
+	.size([width, height]);
 			
 /*** Configure zoom behaviour ***/
 var communityZoomer = d3.behavior.zoom()
@@ -155,12 +155,6 @@ var dynamicGraph = d3.select("#dynamic-graph")
 	.attr("preserveAspectRatio", "xMidYMid meet")
 	.attr("pointer-events", "all")
 	.call(d3.behavior.zoom().on("zoom", redraw));
-var communityBrowser = d3.select("#community-graph")
-	.attr("width", "100%")
-	.attr("height", "100%")
-	.attr("preserveAspectRatio", "xMidYMid meet")
-	.attr("pointer-events", "all")
-	.call(d3.behavior.zoom().on("zoom", redrawCommunity));;
 var force = d3.layout.force()
 	.charge(-500)
 	.linkDistance(200)
@@ -168,13 +162,6 @@ var force = d3.layout.force()
 	.gravity(0.1)
 	.friction(0.2)
 	.size([width, height]); 
-var communityForce = d3.layout.force()
-	.charge(-500)
-	.linkDistance(200)
-	.linkStrength(2)
-	.gravity(0.1)
-	.friction(0.2)
-	.size([width, height]);
 
 var overlay;
 var svg;
@@ -807,19 +794,11 @@ function Reset(resetMap) {
 	//d3.select('#community-id').text("ID: None");
 	dynamicGraph.select("g#dgnodes").selectAll(".node").remove();
 	dynamicGraph.select("g#dglinks").selectAll(".link").remove();
-
-	communityBrowser.select("g#cbnodes").selectAll(".node").remove();
-	communityBrowser.select("g#cblinks").selectAll(".link").remove();
 	
 	communityVis.selectAll("circle.node").remove();
 	communityVis.selectAll("line.link").remove();
 	communityVis.selectAll("text.label").remove();
 	
-	communityBrowser.call( function() {
-		var zoom = d3.behavior.zoom().translate([0,0]).scale(1);
-		communityBrowser.call(zoom.on("zoom", redrawCommunity));
-		//console.log("reset community browser graph zoom scale");		
-	});
 	dynamicGraph.call( function() {
 		var zoom = d3.behavior.zoom().translate([0,0]).scale(1);
 		dynamicGraph.call(zoom.on("zoom", redraw));
