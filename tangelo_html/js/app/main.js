@@ -4,8 +4,150 @@ var color = d3.scale.category20();
 var defaultColors = ["red", "blue", "green", "magenta", "sienna", "teal", "goldenrod", "cyan", "indigo", "springgreen"];
 var colorMapping = {};
 
-var width = 400; //960;
-var height = 400; //480;
+var width = 400, w = 400; //960;
+var height = 400, h = 400; //480;
+
+var nodeCircles,
+	linkLines,
+	circles, labels,
+	root;
+	
+	
+/*** Create scales to handle zoom coordinates ***/
+var xScaleCommunity = d3.scale.linear()
+   .domain([0,w]);
+var yScaleCommunity = d3.scale.linear()
+   .domain([0,h]);
+//ranges will be set later based on the size
+//of the SVG
+
+/*** Configure Force Layout ***/
+var force2 = d3.layout.force()
+	.on("tick", tickCommunity)
+	.charge(-500)
+	.linkDistance(200)
+	.linkStrength(2)
+	.gravity(0.1)
+	.friction(0.2);
+	//.size([width. height]);
+			
+/*** Configure zoom behaviour ***/
+var communityZoomer = d3.behavior.zoom()
+	.scaleExtent([0.01,100])
+	.on("zoom", communityZoom);
+	//define the event handler function
+function communityZoom() {
+	//console.log("zoom", d3.event.translate, d3.event.scale);
+	scaleFactor = d3.event.scale;
+	translation = d3.event.translate;
+	tickCommunity(); //update positions
+}
+
+/*** Configure drag behaviour ***/
+var drag = d3.behavior.drag()
+	.origin(function(d) { return d; }) //center of circle
+	.on("dragstart", dragstarted)
+	.on("drag", dragged)
+	.on("dragend", dragended);
+function dragstarted(d){ 
+	d3.event.sourceEvent.stopPropagation();
+	d3.select(this).classed("dragging", true);
+	force2.stop(); //stop ticks while dragging
+}
+function dragged(d){
+	if (d.fixed) return; //root is fixed
+	//get mouse coordinates relative to the visualization
+	//coordinate system:
+	var mouse = d3.mouse(vis.node());
+	d.x = xScaleCommunity.invert(mouse[0]); 
+	d.y = yScaleCommunity.invert(mouse[1]); 
+	tickCommunity();//re-position this node and any links
+}
+function dragended(d){
+	d3.select(this).classed("dragging", false);
+	force2.resume();
+}
+
+/*** Set the position of the elements based on data ***/
+function tickCommunity() {
+	linkLines.attr("x1", function (d) {
+		return xScaleCommunity(d.source.x);
+	})
+	.attr("y1", function (d) {
+		return yScaleCommunity(d.source.y);
+	})
+	.attr("x2", function (d) {
+		return xScaleCommunity(d.target.x);
+	})
+	.attr("y2", function (d) {
+		return yScaleCommunity(d.target.y);
+	});
+
+	circles.attr("cx", function (d) {
+		return xScaleCommunity(d.x);
+	})
+	.attr("cy", function (d) {
+		return yScaleCommunity(d.y);
+	});
+				
+	labels.attr("dx", function (d) {
+		return xScaleCommunity(d.x);
+	})
+	.attr("dy", function (d) {
+		return yScaleCommunity(d.y);
+	});				
+}
+
+/* Set the display size based on the SVG size and re-draw */
+function setSize() {
+	var svgStyles = window.getComputedStyle(svg.node());
+	var svgW = parseInt(svgStyles["width"]);
+	var svgH = parseInt(svgStyles["height"]);
+			
+	//Set the output range of the scales
+	xScaleCommunity.range([0, svgW]);
+	yScaleCommunity.range([0, svgH]);
+		
+	//re-attach the scales to the zoom behaviour
+	communityZoomer.x(xScaleCommunity)
+	  .y(yScaleCommunity);
+	
+	//resize the background
+	rect.attr("width", svgW)
+		.attr("height", svgH);
+   
+	//console.log(xScaleCommunity.range(), yScaleCommunity.range());
+	tickCommunity();//re-draw
+}
+
+//adapt size to window changes:
+window.addEventListener("resize", setSize, false);
+
+var communitySVG = d3.select("#communityGraph").append("svg:svg")
+	.style("max-width", 2*w)
+	.style("max-height", 2*h);
+
+var communityGraph = communitySVG.append("g")
+	.attr("class", "graph")
+	.call(communityZoomer);
+
+// Add a transparent background rectangle to catch
+// mouse events for the zoom behaviour.
+// Note that the rectangle must be inside the element (graph)
+// which has the zoom behaviour attached, but must be *outside*
+// the group that is going to be transformed.
+var rect = communityGraph.append("rect")
+	.attr("width", w)
+	.attr("height", h)
+	.style("fill", "none") 
+	.style("pointer-events", "all");  
+
+var communityVis = communityGraph.append("svg:g")
+	.attr("class", "plotting-area");
+					
+					
+					
+/* ------- */			
 
 var dynamicGraph = d3.select("#dynamic-graph")
 	.attr("width", "100%")
@@ -250,6 +392,8 @@ $(function () {
 						data["gephinodes"][i].x = (width / 4) * Math.cos(i * angle2) + (width / 2);
 						data["gephinodes"][i].y = (height / 4) * Math.sin(i * angle2) + (height / 2);
 					});
+					
+					/*
 
 					link2 = communityBrowser.select("g#cblinks")
 						.selectAll(".link")
@@ -338,6 +482,80 @@ $(function () {
 							.attr("x2", function(d) { return d.target.x; })
 							.attr("y2", function(d) { return d.target.y; });
 					});		
+					*/
+					
+					var nodes = data["gephinodes"],
+						links = data["gephigraph"];
+
+					// Restart the force layout.
+					force2.nodes(nodes)
+						.links(links)
+						.start();
+
+					// Update the links…
+					linkLines = communityVis.selectAll("line.link")
+						.data(links/*, edgeid*/);
+
+					// Enter any new links.
+					linkLines.enter().insert("svg:line", ".node")
+						.attr("class", "link")
+						.style("stroke-width", function(d) {
+							return d.weight * 0.1;
+						});						;
+
+					// Exit any old links.
+					linkLines.exit().remove();
+
+					// Update the nodes
+					nodeCircles = communityVis.selectAll("circle.node")
+						.data(nodes/*, nodename*/)
+						.style("fill", function(d) {
+							return color(d.nodename);
+						})
+						.enter();
+
+					// Enter any new nodes.
+					circles = nodeCircles.append("svg:circle")
+						.attr("class", "node")
+						.on("dblclick", openCommunity)
+						.attr("r", function (d) {
+							return parseInt(d.num_members) + 4;
+						})
+						.style("fill", function(d,i) {
+							var c = color(i);
+							//if ( $("#level").val() === "1" ) {
+							//	c = color(d.comm_id);
+							//	colorMapping[d.comm_id] = c;
+							//}
+							//else {
+								c = color(d.nodename);
+								colorMapping[d.nodename] = c;
+							//}
+							return c;
+						})
+						.call(drag); //attach drag behaviour
+				
+					labels = nodeCircles.append("svg:text")
+						.attr("class", "label")
+						.style("opacity", function(d, i) {
+							var lab = $("#labelsEnabled");
+							if (lab.prop('checked') === true) {
+								return 1.0;
+							}
+							return 0;						
+						})
+						.text( function(d) { 
+							if (true) {
+								return d.nodename; 
+							}
+							return "";
+						});
+
+					// Exit any old nodes.
+					//nodeCircles.exit().remove();
+
+					// Set initial size and trigger a tickCommunity() function
+					setSize();					
 
 					// Handle geo/map filter controls
 					if (data["start"] && data["end"]) {
@@ -593,6 +811,10 @@ function Reset(resetMap) {
 	communityBrowser.select("g#cbnodes").selectAll(".node").remove();
 	communityBrowser.select("g#cblinks").selectAll(".link").remove();
 	
+	communityVis.selectAll("circle.node").remove();
+	communityVis.selectAll("line.link").remove();
+	communityVis.selectAll("text.label").remove();
+	
 	communityBrowser.call( function() {
 		var zoom = d3.behavior.zoom().translate([0,0]).scale(1);
 		communityBrowser.call(zoom.on("zoom", redrawCommunity));
@@ -618,6 +840,3 @@ d3.select('#time-slider').call(timeSlider = d3.slider().on("slide", function(evt
 	SetCircles(value);
 	SetRelationships(value);
 }));
-
-
-
