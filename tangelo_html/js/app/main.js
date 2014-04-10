@@ -524,6 +524,7 @@ $(function () {
 				
 					labels = nodeCircles.append("svg:text")
 						.attr("class", "label")
+						.on("dblclick", openCommunity)
 						.style("opacity", function(d, i) {
 							var lab = $("#labelsEnabled");
 							if (lab.prop('checked') === true) {
