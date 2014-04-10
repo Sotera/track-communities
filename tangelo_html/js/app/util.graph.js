@@ -48,8 +48,8 @@ function redrawCommunity() {
 
 function SetRelationships(value) {
 	var currentDate = new Date(startTime.getTime() + ((endTime.getTime() - startTime.getTime()) * value / 100));
-	link = dynamicGraph.select("g#dglinks")
-		.selectAll(".link")
+	link = dynamicGraph.selectAll("line.link")//dynamicGraph.select("g#dglinks")
+		//.selectAll(".link")
 		.style("stroke-width", function(d) {
 		return d.value;
 	})

@@ -240,8 +240,16 @@
 				}
 			});
 			$("#labelsEnabled").on( "change", function() {
-				var labels = communityVis.selectAll("text.label")
+				var lab = communityVis.selectAll("text.label")
 					.style("opacity", function(d, i) {
+						var lab = $("#labelsEnabled");
+						if (lab.prop('checked') === true) {
+							return 1.0;
+						}
+						return 0;						
+					});
+				var dyn = dynamicGraph.selectAll("text.label")
+					.style("opacity", function(d,i) {
 						var lab = $("#labelsEnabled");
 						if (lab.prop('checked') === true) {
 							return 1.0;

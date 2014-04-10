@@ -7,9 +7,10 @@ var colorMapping = {};
 var width = 400, w = 400; //960;
 var height = 400, h = 400; //480;
 
-var nodeCircles,
-	linkLines,
+var nodeCircles, dynamicNode,
+	linkLines, dynLines,
 	circles, labels,
+	dynCircles, dynLabels,
 	root;
 	
 	
@@ -616,6 +617,99 @@ $(function () {
 							data["result"][i].y = (height / 4) * Math.sin(i * angle) + (height / 2);
 						});
 						
+						// Restart the force layout.
+						force.nodes(data["result"])
+							.links(data["graph"])
+							.start();
+
+						// Update the links…
+						dynLines = dynamicGraph.selectAll("line.link")
+							.data(data["graph"]/*, edgeid*/);
+
+						// Enter any new links.
+						dynLines.enter().insert("svg:line", ".node")
+							.attr("class", "link")
+							.style("opacity", 0.0)
+							.style("stroke-width", 1.0);
+
+						// Update the nodes
+						dynamicNode = dynamicGraph.selectAll("circle.node")
+							.data(data["result"]/*, nodename*/)
+							.style("fill", function(d) {
+								return color(d.track_id);
+							})
+							.enter();
+
+						// Enter any new nodes.
+						dynCircles = dynamicNode.append("svg:circle")
+							.attr("class", "node")
+							.attr("r", 15)
+							//.style("opacity", 0.0)
+							.style("fill", function (d, i) {
+								var c = color(i);
+								if ( $("#level").val() === "1" ) {
+									c = colorMapping[d.track_id];
+								}
+								else {
+									c = colorMapping[d.comm];
+								}
+								return c;
+							});
+						dynCircles.transition()
+							.duration(transition_time)
+							.attr("r", 10)
+							.style("opacity", 1.0)
+							.style("stroke", "gray")
+							.style("fill", function (d, i) {
+								var c = color(i);
+								if ( $("#level").val() === "1" ) {
+									c = colorMapping[d.track_id];
+								}
+								else {
+									c = colorMapping[d.comm];
+								}
+								return c;
+							});
+						dynCircles.call(force.drag)
+							.append("title")
+							.text(function (d) {
+								return d.track_id;
+							});							
+				
+						dynLabels = dynamicNode.append("svg:text")
+							.attr("class", "label")
+							.attr("fill", "white")
+							.style("opacity", function(d, i) {
+								var lab = $("#labelsEnabled");
+								if (lab.prop('checked') === true) {
+									return 1.0;
+								}
+								return 0;						
+							})
+							.text( function(d) { 
+								if (true) {
+									return d.track_id; 
+								}
+								return "";
+							});
+							
+							force.on("tick", function () {
+								dynCircles.attr("cx", function (d) { return d.x; })
+									.attr("cy", function (d) { return d.y; });
+								dynLines.attr("x1", function(d) { return d.source.x; })
+									.attr("y1", function(d) { return d.source.y; })
+									.attr("x2", function(d) { return d.target.x; })
+									.attr("y2", function(d) { return d.target.y; });
+								dynLabels.attr("dx", function (d) {
+									return d.x;
+								})
+								.attr("dy", function (d) {
+									return d.y;
+								});										
+							});							
+
+						/*
+						
 						//console.log("Color Map:");
 						//console.dir(colorMapping);
 
@@ -640,8 +734,9 @@ $(function () {
 		  
 						node = dynamicGraph.select("g#dgnodes")
 							.selectAll(".node")
-							.data(data["result"], trackid);
-						enter = node.enter().append("circle")
+							.data(data["result"], trackid).enter();
+						
+						dynCircles = node.append("circle")
 							.classed("node", true)
 							.attr("r", 15)
 							.style("opacity", 0.0)
@@ -656,7 +751,7 @@ $(function () {
 								return c;
 
 							});
-						enter.transition()
+						dynCircles.transition()
 							.duration(transition_time)
 							.attr("r", 10)
 							.style("opacity", 1.0)
@@ -671,31 +766,47 @@ $(function () {
 								}
 								return c;
 							});
-						enter.call(force.drag)
+						dynCircles.call(force.drag)
 							.append("title")
 							.text(function (d) {
 								return d.track_id;
 							});
-						node.exit()
-							.transition()
-							.duration(transition_time)
-							.style("opacity", 0.0)
-							.attr("r", 0.0)
-							.style("fill", "black")
-							.remove();
+						//node.exit()
+						//	.transition()
+						//	.duration(transition_time)
+						//	.style("opacity", 0.0)
+						//	.attr("r", 0.0)
+						//	.style("fill", "black")
+						//	.remove();
 		  
-
+					dynLabels = node.append("svg:text")
+						.attr("class", "label")
+						.attr("fill", "white")
+						.style("opacity", function(d, i) {
+							var lab = $("#labelsEnabled");
+							if (lab.prop('checked') === true) {
+								return 1.0;
+							}
+							return 0;						
+						})
+						.text( function(d) { 
+							if (true) {
+								return "jpb"; //d.track_id; 
+							}
+							return "";
+						});
+						
 						force.nodes(data["result"])
 							.links(data["graph"])
 							.start();
 						force.on("tick", function () {
-							node.attr("cx", function (d) { return d.x; })
+							dynCircles.attr("cx", function (d) { return d.x; })
 								.attr("cy", function (d) { return d.y; });
 							link.attr("x1", function(d) { return d.source.x; })
 								.attr("y1", function(d) { return d.source.y; })
 								.attr("x2", function(d) { return d.target.x; })
 								.attr("y2", function(d) { return d.target.y; });
-						});
+						});*/
 						
 					}
 	  
@@ -793,8 +904,9 @@ function Reset(resetMap) {
 
 	heatmap.setMap(null);
 	//d3.select('#community-id').text("ID: None");
-	dynamicGraph.select("g#dgnodes").selectAll(".node").remove();
-	dynamicGraph.select("g#dglinks").selectAll(".link").remove();
+	dynamicGraph.selectAll("circle.node").remove();
+	dynamicGraph.selectAll("line.link").remove();
+	dynamicGraph.selectAll("text.label").remove();
 	
 	communityVis.selectAll("circle.node").remove();
 	communityVis.selectAll("line.link").remove();
