@@ -67,6 +67,45 @@ function updateConfig() {
 						allowClear: false,
 						data: lvlData
 					});			
+					
+					// Handle geo/map filter controls
+					if (cfg.mindt && cfg.maxdt) {
+						var arr = [];
+					
+						$("#dateRangeSliderMsg").html("<p>&nbsp;</p>");
+					
+						// 2012-03-22 03:39:00 // 2012-03-26 20:21:00, 
+						arr = cfg.mindt.split(' '); arr = arr[0].toString().split('-');
+						var startYear = arr[0];
+						var startMonth = arr[1] - 1;
+						var startDay = arr[2];
+						
+						arr = cfg.maxdt.split(' '); arr = arr[0].toString().split('-');
+						var endYear = arr[0];
+						var endMonth = arr[1] - 1;
+						var endDay = arr[2];						
+						
+						$("#dateRangeSlider").dateRangeSlider({
+							valueLabels: "show",
+							bounds:{
+								min: new Date(startYear, startMonth, startDay),
+								max: new Date(endYear, endMonth, endDay)
+							},
+							defaultValues:{
+								min: new Date(startYear, startMonth, startDay),
+								max: new Date(endYear, endMonth, endDay)
+							}				
+						});					
+					
+					}
+					else {
+						$("#dateRangeSliderMsg").html("Not available.");	
+						try {
+							$("#dateRangeSlider").dateRangeSlider("destroy");						
+						} catch (error) {
+						
+						}
+					}					
 
 					// Finish up and refresh display.
 					$("#community-info-box").toggle(true);				

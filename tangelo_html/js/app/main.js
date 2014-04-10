@@ -546,46 +546,6 @@ $(function () {
 					// Set initial size and trigger a tickCommunity() function
 					setSize();					
 
-					// Handle geo/map filter controls
-					if (data["start"] && data["end"]) {
-						var arr = [];
-					
-						$("#dateRangeSliderMsg").html("<p>&nbsp;</p>");
-					
-						var initDate = new Date();
-						// 2012-03-22 03:39:00 // 2012-03-26 20:21:00, 
-						arr = data["start"].split(' '); arr = arr[0].toString().split('-');
-						var startYear = arr[0];
-						var startMonth = arr[1] - 1;
-						var startDay = arr[2];
-						
-						arr = data["end"].split(' '); arr = arr[0].toString().split('-');
-						var endYear = arr[0];
-						var endMonth = arr[1] - 1;
-						var endDay = arr[2];						
-						
-						$("#dateRangeSlider").dateRangeSlider({
-							valueLabels: "show",
-							bounds:{
-								min: new Date(startYear, startMonth, startDay),
-								max: new Date(endYear, endMonth, endDay)
-							},
-							defaultValues:{
-								min: new Date(startYear, startMonth, startDay),
-								max: new Date(endYear, endMonth, endDay)
-							}				
-						});					
-					
-					}
-					else {
-						$("#dateRangeSliderMsg").html("Not available.");	
-						try {
-							$("#dateRangeSlider").dateRangeSlider("destroy");						
-						} catch (error) {
-						
-						}
-					}
-					
 					// Handle map, dynamic graph render only if there is existing data...
 					if (data["result"]) {
 						currentGeoJson = data["result"];
