@@ -487,6 +487,7 @@ $(function () {
 					// Enter any new links.
 					linkLines.enter().insert("svg:line", ".node")
 						.attr("class", "link")
+						.style("stroke", "black")
 						.style("stroke-width", function(d) {
 							return d.weight * 0.1;
 						});						;
@@ -590,6 +591,7 @@ $(function () {
 						dynLines.enter().insert("svg:line", ".node")
 							.attr("class", "link")
 							.style("opacity", 0.0)
+							.style("stroke", "#FFFFFF")
 							.style("stroke-width", 1.0);
 
 						// Update the nodes
