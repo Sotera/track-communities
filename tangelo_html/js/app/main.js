@@ -59,7 +59,7 @@ function dragged(d){
 	if (d.fixed) return; //root is fixed
 	//get mouse coordinates relative to the visualization
 	//coordinate system:
-	var mouse = d3.mouse(vis.node());
+	var mouse = d3.mouse(communityVis.node());
 	d.x = xScaleCommunity.invert(mouse[0]); 
 	d.y = yScaleCommunity.invert(mouse[1]); 
 	tickCommunity();//re-position this node and any links
@@ -779,6 +779,9 @@ $(function () {
 			d3.event.preventDefault();
 			var comm = d.node_comm;
 			var node = d.nodename;
+			
+			console.log("Opening");
+			console.dir(d);
 			
 			var table = $("#track-table").val();
 			var level = $("#level").val();
