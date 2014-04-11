@@ -156,13 +156,10 @@
 				<div class="span4">
                     <h5> Community Info </h5>
 					<input id="graph_num_levels" type="hidden" />
-					<p style="padding-top:4px;"> <small> <strong>INFO:</strong> <span id="graph_stat_string">Data table not loaded.</span> </small> </p>					
-					<p style="padding-top:4px;"> <small> <strong>ID&nbsp;&nbsp;:</strong> </small> <input id="comm-id" type="text" disabled="true" style="padding: 6px; margin:0; height: 28px;" /> </p>
-					<p style="padding-top:4px;"> <small> <strong>LVL:</strong> </small> <input id="level" type="text" disabled="true" />  </p>
-					
-					<p style="margin-top:10px"> <a id="applyCommunity" class="btn btn-mini" href="#"><i class="icon-search"></i> Go</a> </p>
+					<p style="padding-top:0px;"> <small> <strong>INFO:</strong> <span id="graph_stat_string">Data table not loaded.</span> </small> </p>					
+					<p style="padding-top:0px;"> <small> <strong>ID&nbsp;&nbsp;:</strong> </small> <input id="comm-id" type="text" disabled="true" style="padding: 6px; margin:0; height: 28px;" /> <small> <strong>LVL:</strong> </small> <input id="level" type="text" disabled="true" style="width: 75px;" />  <a id="applyCommunity" class="btn btn-mini" href="#"><i class="icon-search"></i> Go</a> </p>
 				</div>
-				
+	
 				<div class="span4">
 					<h5> Find Communities (Time/Geo) </h5>
 					<p style="padding:0; margin:0;"> <small> <strong>WITHIN TIME RANGE:</strong> <div style="margin-left: 30px; width: 80%;" id="dateRangeSliderMsg">Data table not loaded.</div> <div style="margin-left: 30px; width: 80%;" id="dateRangeSlider"></div> </small> </p>
@@ -218,7 +215,7 @@
 			});
 			$("#level").select2({
 				width: "resolve",
-				placeholder: "No data set loaded...",
+				placeholder: "...",
 				minimumResultsForSearch: -1,
 				allowClear: false,
 				data: []
