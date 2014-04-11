@@ -2,7 +2,7 @@
 
 function SetCircles(value) {
   var currentDate = new Date(startTime.getTime() + ((endTime.getTime() - startTime.getTime()) * value / 100));
-  d3.select('#slidertext').text(currentDate);
+  d3.select('#slidertext').text(moment(currentDate).utc().format("YYYY-MM-DDTHH:mm:ss"));
   
   //update circles
   var geocircles = g.selectAll("circle")

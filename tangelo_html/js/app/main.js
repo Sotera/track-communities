@@ -195,7 +195,7 @@ var capturedTime = "";
 $(function () {
 	
 	setConfig();
-	d3.select('#slidertext').text(startTime);
+	d3.select('#slidertext').text(moment(startTime).utc().format("YYYY-MM-DDTHH:mm:ss"));
   
 	//create google map
 	var $map=$("#map-canvas");
@@ -574,7 +574,7 @@ $(function () {
 						startTime = new Date(Date.parse(data["start"]));
 						endTime = new Date(Date.parse(data["end"]));
 		  
-						d3.select('#slidertext').text(startTime);
+						d3.select('#slidertext').text(moment(startTime).utc().format("YYYY-MM-DDTHH:mm:ss"));
 	
 						// Dynamic Graph
 						tau = 2 * Math.PI;
