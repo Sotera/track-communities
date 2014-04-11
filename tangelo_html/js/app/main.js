@@ -523,6 +523,12 @@ $(function () {
 							return c;
 						})
 						.call(drag); //attach drag behaviour
+						
+					circles.call(drag)
+						.append("title")
+						.text(function (d) {
+							return d.nodename;
+						});	
 				
 					labels = nodeCircles.append("svg:text")
 						.attr("class", "label")
