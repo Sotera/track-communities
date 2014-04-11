@@ -823,7 +823,8 @@ $(function () {
 
 	$("#applyCommunity").click(function(e) {
 		e.stopPropagation();
-		e.preventDefault();	
+		e.preventDefault();
+		capturedGeo = "";
 		updateCommunities();
 	});
 	
