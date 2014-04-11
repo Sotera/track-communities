@@ -107,10 +107,10 @@ function SetCircles(value) {
 }
 
 function AnimateTracks() {
-  var currentValue = timeSlider.value()+playSpeed;
-  timeSlider.value(currentValue);
+  var currentValue = timeSlider.slider("option", "value")+playSpeed;
+  timeSlider.slider({value: currentValue });
 
-  if (timeSlider.value() >= 100) {
+  if (timeSlider.slider("option", "value") >= 100) {
     animate = false;
     $("#play").text("Play");
     clearInterval(timeout);
@@ -118,6 +118,6 @@ function AnimateTracks() {
     SetCircles(currentValue);
     SetRelationships(currentValue);
   }
-
+  
   d3.select('#time-slider').selectAll("a").attr("style", "left: "+currentValue+"%;");
 }

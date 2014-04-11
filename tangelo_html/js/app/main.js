@@ -315,8 +315,8 @@ $(function () {
 		}
 		$("#play").text(buttonLabel);
     
-		if (timeSlider.value() >= 100) {
-			timeSlider.value(0);
+		if (timeSlider.slider("option", "value") >= 100) {
+			timeSlider.slider({ value: 0});
 		}
 	});
   
@@ -900,7 +900,13 @@ function Reset(resetMap) {
 	overlay.draw();
 }
 
-d3.select('#time-slider').call(timeSlider = d3.slider().on("slide", function(evt, value) {
-	SetCircles(value);
-	SetRelationships(value);
-}));
+timeSlider = $("#time-slider").slider({
+  slide: function(evt, ui){
+	SetCircles(ui.value);
+	SetRelationships(ui.value);
+  }
+})
+// d3.select('#time-slider').call(timeSlider = d3.slider().on("slide", function(evt, value) {
+// 	SetCircles(value);
+// 	SetRelationships(value);
+// }));
