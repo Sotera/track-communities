@@ -5,7 +5,7 @@
 	<meta charset="utf-8">
 	
 	<!-- Stylesheets -->
-
+        <link rel="stylesheet" href="css/jquery-ui-1.9.1.css">
 	<link rel="stylesheet" href="lib/tangelo/css/tangelo.css" type="text/css">
 	<link rel="stylesheet" href="lib/select2/select2.css" type="text/css">
 	<link rel="stylesheet" href="lib/select2/select2-bootstrap.css" type="text/css">
@@ -166,8 +166,10 @@
 				<div class="span4">
 					<h5> Find Communities (Time/Geo) </h5>
 					<p style="padding-top:0px;"> <small>
+				                <div style="margin-left: 30px; padding-top:0px; width: 75%;" id="range-slider"></div> 
+                                                <div>min:<span id="txt-low-val"></span><br/> max:<span id="txt-high-val"><span></div>
 						<div style="padding-top:0px; width: 75%;" id="dateRangeSliderMsg"><strong>SLIDER:</strong> Data table not loaded.</div> 
-						<div style="margin-left: 30px; padding-top:0px; width: 75%;" id="dateRangeSlider"></div> 
+						<!-- <div style="margin-left: 30px; padding-top:0px; width: 75%;" id="dateRangeSlider"></div>  -->
 					</small> </p>
 					<p style="padding-top:0px;">
 						<a id="captureCommunity" class="btn btn-mini" href="#"><i class="icon-search"></i> Find</a>

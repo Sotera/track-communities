@@ -331,15 +331,16 @@ $(function () {
 			type: 'GET',
 			success: function(data) {
 				var comm = data.split("/")[0];
-				var lev = data.split("/")[1]
+				var lev = data.split("/")[1];
 				
 				//console.log("Time Boundaries");
 				var capturedQuery = capturedGeo || "";
 
 				try {
-					var dateValues = $("#dateRangeSlider").dateRangeSlider("values");
-					var mintime = moment(dateValues.min.toString().split('(')[0]).format("YYYY-MM-DD 00:00:00");
-					var maxtime = moment(dateValues.max.toString().split('(')[0]).format("YYYY-MM-DD 23:59:59");
+					// var dateValues = $("#dateRangeSlider").dateRangeSlider("values");
+                                        var dateValues = $("#range-slider").slider("values");
+					var mintime = moment(dateValues[0]).format("YYYY-MM-DD 00:00:00");
+					var maxtime = moment(dateValues[1]).format("YYYY-MM-DD 23:59:59");
 					capturedTime = 'mintime="'+mintime+'"&maxtime="'+maxtime+'"';
 					if (capturedQuery) {
 						capturedQuery = capturedQuery+'&'+capturedTime;
