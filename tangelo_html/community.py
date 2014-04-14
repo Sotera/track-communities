@@ -47,6 +47,7 @@ def settable(*args):
         cache.update({ "graph_stat_string" : graph_stat_string + "" })
         cache.update({"graph_num_levels" : num_levels })
         cache.update({ "level" : str(num_levels) })
+        cache.update({ "community" : '-' } )
     return "0"
 
 #/community/getcomm/
