@@ -37,17 +37,17 @@ def settable(*args):
         data = client.execute("select min(dt), max(dt), min(cast(intersectx as double)), max(cast(intersectx as double)), min(cast(intersecty as double)), max(cast(intersecty as double)) from " + cache.get().get("table", "") + "_tracks_comms_joined where track_id != 'ship(1.0)' and track_id != 'ais(3.0)'")
         for line in data.get_data().split('\n'):
             mindt,maxdt,minlat,maxlat,minlon,maxlon, = line.strip().split('\t')
-            cache.update({ "mindt" : mindt })
-            cache.update({ "maxdt" : maxdt })
-            cache.update({ "minlat" : minlat })
-            cache.update({ "minlon" : minlon })
-            cache.update({ "maxlat" : maxlat })
-            cache.update({ "maxlon" : maxlon })
+            cache.update({ "mindt" : mindt,
+                           "maxdt" : maxdt,
+                           "minlat" : minlat,
+                           "minlon" : minlon,
+                           "maxlat" : maxlat,
+                           "maxlon" : maxlon })
 
-        cache.update({ "graph_stat_string" : graph_stat_string + "" })
-        cache.update({"graph_num_levels" : num_levels })
-        cache.update({ "level" : str(num_levels) })
-        cache.update({ "community" : '-' } )
+        cache.update({ "graph_stat_string" : graph_stat_string + "" ,
+                       "graph_num_levels" : num_levels,
+                       "level" : str(num_levels), 
+                       "community" : '-' })
     return "0"
 
 #/community/getcomm/
@@ -69,8 +69,9 @@ def setcomm(*args):
     if not args:
         return tangelo.HTTPStatusCode(400, "No community name")
    
-    c = cache.update({ "community" : args[0] })
-    c = cache.update({ "level" : args[1] })
+    c = cache.update({ "community" : args[0], 
+                       "level" : args[1] })
+
     comm = c["community"]
     level = c["level"]
     table = c["table"] + "_tracks_comms_joined"
