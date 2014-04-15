@@ -60,7 +60,7 @@ def geoTimeQuery(comm=None, level=None, host="localhost", port="21000", geo=None
         query = query + timequery
     #print query
     
-    nodequery = 'select node, comm, num_members, level from ' + nodetable + ' where level = "' + str(level) + '" and node in '
+    nodequery = 'select node, comm, num_members, level from ' + nodetable + ' where level = "' + str(level) + '" and comm in '
     edgequery = 'select source, target, weight, level from ' +  edgestable + ' where level = "' + str(level) + '" '
 
     #print nodequery
@@ -68,14 +68,13 @@ def geoTimeQuery(comm=None, level=None, host="localhost", port="21000", geo=None
     #print edgequery
     
     with impalaopen(host + ':' + port) as client:
-        print query
         qResults = client.execute(query)
         comm_string = '( ' 
         for record in qResults.data:
             comm_string = comm_string + '"' + record.strip() + '", '
         comm_string = comm_string[0:len(comm_string)-2] + ')'
         nodequery = nodequery + comm_string
-        edgequery = edgequery + ' and (source in ' + comm_string + ' and target in ' + comm_string + ' )'
+        edgequery = edgequery + ' and (source_comm in ' + comm_string + ' and target_comm in ' + comm_string + ' )'
     
     with impalaopen(host + ':' + port) as client:
         qResults = client.execute(nodequery)
