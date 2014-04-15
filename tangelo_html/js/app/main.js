@@ -1,19 +1,11 @@
 /* Initialization */
 
 var color = d3.scale.category20();
-var defaultColors = ["red", "blue", "green", "magenta", "sienna", "teal", "goldenrod", "cyan", "indigo", "springgreen"];
 var colorMapping = {};
 
-var width = 400, w = 400; //960;
-var height = 400, h = 400; //480;
+var width = 100, w = 100; //960;
+var height = 100, h = 100; //480;
 
-var nodeCircles, dynamicNode,
-	linkLines, dynLines,
-	circles, labels,
-	dynCircles, dynLabels,
-	root;
-	
-	
 /*** Create scales to handle zoom coordinates ***/
 var xScaleCommunity = d3.scale.linear()
    .domain([0,w]);
@@ -36,12 +28,8 @@ var force2 = d3.layout.force()
 var communityZoomer = d3.behavior.zoom()
 	.scaleExtent([0.01,100])
 	.on("zoom", communityZoom);
-	//define the event handler function
 function communityZoom() {
-	//console.log("zoom", d3.event.translate, d3.event.scale);
-	scaleFactor = d3.event.scale;
-	translation = d3.event.translate;
-	tickCommunity(); //update positions
+	 communityVis.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 }
 
 /*** Configure drag behaviour ***/
@@ -50,58 +38,56 @@ var drag = d3.behavior.drag()
 	.on("dragstart", dragstarted)
 	.on("drag", dragged)
 	.on("dragend", dragended);
+
 function dragstarted(d){ 
 	d3.event.sourceEvent.stopPropagation();
+	d3.select(this).classed("fixed", d.fixed = false);
 	d3.select(this).classed("dragging", true);
-	force2.stop(); //stop ticks while dragging
+	//force2.stop(); //stop ticks while dragging
 }
 function dragged(d){
 	if (d.fixed) return; //root is fixed
-	//get mouse coordinates relative to the visualization
-	//coordinate system:
-	var mouse = d3.mouse(communityVis.node());
-	d.x = xScaleCommunity.invert(mouse[0]); 
-	d.y = yScaleCommunity.invert(mouse[1]); 
+	//get mouse coordinates relative to the visualization coordinate system:
+	//var mouse = d3.mouse(communityVis.node());
+	//d.x = xScaleCommunity.invert(mouse[0]); 
+	//d.y = yScaleCommunity.invert(mouse[1]); 
+	d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
+	d.fixed = true;
 	tickCommunity();//re-position this node and any links
+	d.fixed = false;
 }
 function dragended(d){
 	d3.select(this).classed("dragging", false);
-	force2.resume();
+	d3.select(this).classed("fixed", d.fixed = true);
+	//force2.resume();
 }
 
 /*** Set the position of the elements based on data ***/
 function tickCommunity() {
-	linkLines.attr("x1", function (d) {
-		return xScaleCommunity(d.source.x);
-	})
-	.attr("y1", function (d) {
-		return yScaleCommunity(d.source.y);
-	})
-	.attr("x2", function (d) {
-		return xScaleCommunity(d.target.x);
-	})
-	.attr("y2", function (d) {
-		return yScaleCommunity(d.target.y);
-	});
-
-	circles.attr("cx", function (d) {
-		return xScaleCommunity(d.x);
-	})
-	.attr("cy", function (d) {
-		return yScaleCommunity(d.y);
-	});
-				
-	labels.attr("dx", function (d) {
-		return xScaleCommunity(d.x);
-	})
-	.attr("dy", function (d) {
-		return yScaleCommunity(d.y);
-	});				
+	communityLink.attr("x1", function(d) { return d.source.x; })
+		.attr("y1", function(d) { return d.source.y; })
+		.attr("x2", function(d) { return d.target.x; })
+		.attr("y2", function(d) { return d.target.y; });
+	communityNode.attr("cx", function(d) { return d.x; })
+		.attr("cy", function(d) { return d.y; });
+	communityLabel.attr("dx", function(d) { return d.x; })
+		.attr("dy", function(d) { return d.y; });	 			
 }
+
+var communityTooltip = d3.tip()
+	.attr('class', 'd3-tip')
+	.html(function(d) { 
+		var html = '<small>'
+			+ '<strong>Node Name:</strong> '+d.nodename+'<br/>'
+			+ '<strong>Community:</strong> '+d.node_comm+"/"+d.level+'<br/>'
+			+ '<strong>Members:</strong> '+d.num_members+'<br/>'
+			+ '</small>';
+		return html;
+	});
 
 /* Set the display size based on the SVG size and re-draw */
 function setSize() {
-	var svgStyles = window.getComputedStyle(svg.node());
+	var svgStyles = window.getComputedStyle(communitySVG.node());
 	var svgW = parseInt(svgStyles["width"]);
 	var svgH = parseInt(svgStyles["height"]);
 			
@@ -116,6 +102,8 @@ function setSize() {
 	//resize the background
 	rect.attr("width", svgW)
 		.attr("height", svgH);
+		
+	//console.log("Rect size: " + svgW + " x " + svgH);
    
 	//console.log(xScaleCommunity.range(), yScaleCommunity.range());
 	tickCommunity();//re-draw
@@ -125,8 +113,8 @@ function setSize() {
 window.addEventListener("resize", setSize, false);
 
 var communitySVG = d3.select("#communityGraph").append("svg:svg")
-	.style("max-width", 2*w)
-	.style("max-height", 2*h);
+    .attr("width", "100%")
+    .attr("height", "100%");
 
 var communityGraph = communitySVG.append("g")
 	.attr("class", "graph")
@@ -138,14 +126,16 @@ var communityGraph = communitySVG.append("g")
 // which has the zoom behaviour attached, but must be *outside*
 // the group that is going to be transformed.
 var rect = communityGraph.append("rect")
-	.attr("width", w)
-	.attr("height", h)
-	.style("fill", "none") 
-	.style("pointer-events", "all");  
-
+    .attr("width", width)
+    .attr("height", height)
+    .style("fill", "none")
+    .style("pointer-events", "all")
+	.style("cursor", "move")
+	.on("dblclick.zoom", zoomToFit);
+	
 var communityVis = communityGraph.append("svg:g")
 	.attr("class", "plotting-area");
-					
+communityVis.call(communityTooltip);					
 					
 					
 /* ------- */			
@@ -165,7 +155,7 @@ var force = d3.layout.force()
 	.size([width, height]); 
 
 var overlay;
-var svg;
+var mapsvg;
 
 var g;
 var googleMapProjection;
@@ -188,6 +178,11 @@ var resetPanels = null;
 
 var capturedGeo = "";
 var capturedTime = "";
+var lastKnownQuery = "";
+var doLastKnownQuery = false;
+
+var communityNode, communityLabel, communityLink;
+var geolabels, geocircles;
 
 /*	*	*	*	*	*	*	*	*	*	*	*	*	*	*	*/
 
@@ -223,8 +218,8 @@ $(function () {
 	overlay.onAdd = function () {
 	
 		var layer = d3.select(this.getPanes().overlayMouseTarget).append("div").attr("class", "SvgOverlay");
-		svg = layer.append("svg");
-		g = svg.append("g");
+		mapsvg = layer.append("svg");
+		g = mapsvg.append("g");
 
 		overlay.draw = function () {
 			var markerOverlay = this;
@@ -261,13 +256,21 @@ $(function () {
 
 			geodata.exit().remove();
 
-			var geocircles = g.selectAll("circle")
+			geocircles = g.selectAll("circle")
 				.data(currentGeoJson, trackid)
 				.attr('cx', function(d) {
 					var coordinates = googleMapProjection([d.coordinates[0][0], 0]);
 					return coordinates[0];
 				})
 				.attr('cy', function(d) {
+					var coordinates = googleMapProjection([0, d.coordinates[0][1]]);
+					return coordinates[1];
+				})
+				.attr('dx', function(d) {
+					var coordinates = googleMapProjection([d.coordinates[0][0], 0]);
+					return coordinates[0];
+				})
+				.attr('dy', function(d) {
 					var coordinates = googleMapProjection([0, d.coordinates[0][1]]);
 					return coordinates[1];
 				});
@@ -296,8 +299,42 @@ $(function () {
 				.attr('stroke', "gray")
 				.append("svg:title")
 				.text(function(d) { return d.track_id; });
+				
+			geolabels = g.selectAll("text")
+				.data(currentGeoJson, trackid)
+				.attr('dx', function(d) {
+					var coordinates = googleMapProjection([d.coordinates[0][0], 0]);
+					return coordinates[0];
+				})
+				.attr('dy', function(d) {
+					var coordinates = googleMapProjection([0, d.coordinates[0][1]]);
+					return coordinates[1];
+				});		
+			
+			geolabels.enter().append('svg:text')
+				.attr("class", "label")
+				.attr('dx', function(d) {
+					var coordinates = googleMapProjection([d.coordinates[0][0], 0]);
+					return coordinates[0];
+				})
+				.attr('dy', function(d) {
+					var coordinates = googleMapProjection([0, d.coordinates[0][1]]);
+					return coordinates[1];
+				})				
+				.attr("fill", "black")
+				.style("opacity", function(d, i) {
+					var lab = $("#labelsEnabled");
+					if (lab.prop('checked') === true) {
+						return 1.0;
+					}
+					return 0;						
+				})
+				.text( function(d) { 
+					return d.track_id; 
+				});
+
 		  
-			geocircles.exit().remove();
+			//geoenter.exit().remove();
 
 		};
 	};
@@ -333,12 +370,10 @@ $(function () {
 				var comm = data.split("/")[0];
 				var lev = data.split("/")[1];
 				
-				//console.log("Time Boundaries");
 				var capturedQuery = capturedGeo || "";
 
 				try {
-					// var dateValues = $("#dateRangeSlider").dateRangeSlider("values");
-                                        var dateValues = $("#range-slider").slider("values");
+					var dateValues = $("#range-slider").slider("values");
 					var mintime = moment(dateValues[0]).format("YYYY-MM-DD 00:00:00");
 					var maxtime = moment(dateValues[1]).format("YYYY-MM-DD 23:59:59");
 					capturedTime = 'mintime="'+mintime+'"&maxtime="'+maxtime+'"';
@@ -353,8 +388,13 @@ $(function () {
 				if (doReset === true) {
 					serviceCall = '?lev="'+lev+'"';
 				}
+				else if (doLastKnownQuery === true && lastKnownQuery !== "") {
+					serviceCall = '?'+lastKnownQuery;
+					doLastKnownQuery = false;
+				}
 				else if (capturedGeo) {
 					serviceCall = '?'+capturedQuery;
+					lastKnownQuery = capturedQuery.concat(""); // make a new copy of the value stored
 				}
 				else if (comm && lev && comm !== "0") {
 					serviceCall = '?comm="'+comm+'"&lev="'+lev+'"';
@@ -366,7 +406,7 @@ $(function () {
 
 				$.getJSON('myservice'+serviceCall, function (data) {
 	
-					console.log("Request Data Object");
+					console.log("Retrieved Data Object");
 					console.dir(data);
 					
 					// Handle heat map overlay...
@@ -374,164 +414,63 @@ $(function () {
 						renderHeatMap();
 					}		
 
-					// Community Browser
+					// Community Browser	
 					tau2 = 2 * Math.PI;
 					angle2 = tau2 / data["gephinodes"].length;
 					$.each(data["gephinodes"], function (i, v) {
 						data["gephinodes"][i].x = (width / 4) * Math.cos(i * angle2) + (width / 2);
 						data["gephinodes"][i].y = (height / 4) * Math.sin(i * angle2) + (height / 2);
 					});
-					
-					/*
 
-					link2 = communityBrowser.select("g#cblinks")
-						.selectAll(".link")
-						.data(data["gephigraph"], edgeid);
-					enter2 = link2.enter().append("line")
-						.classed("link", true)
-						.style("stroke-width", function(d) {
-							return d.weight * 0.1;
-						})
-					enter2.transition()
-						.duration(transition_time)
-						.style("stroke", "black")
-						.style("stroke-width", function(d) {
-							return d.weight * 0.1;
-						})
-					link2.exit()
-						.transition()
-						.duration(transition_time)
-						.style("opacity", 0.0)
-						.style("stroke-width", 0.0)
-						.remove();
-	  
-					node2 = communityBrowser.select("g#cbnodes")
-						.selectAll(".node")
-						.data(data["gephinodes"], nodename);
-					enter2 = node2.enter().append("circle")
-						.classed("node", true)
-						.on("dblclick", openCommunity)
-						.attr("r", function(d) { 
-							var r = d.num_members; //d.num_members*2+8;
-							return r;
-						})
-						.attr("fill",function(d,i){ 
-							var c = color(i);
-							//if ( $("#level").val() === "1" ) {
-							//	c = color(d.comm_id);
-							//	colorMapping[d.comm_id] = c;
-							//}
-							//else {
-								c = color(d.nodename);
-								colorMapping[d.nodename] = c;
-							//}
-							return c;
-						});
-					enter2.transition()
-						.duration(transition_time)
-						.attr("r", function(d) { 
-							var r = d.num_members; //d.num_members*2+8;
-							if ( $("#level").val() === "1" ) {
-								r = 10;
-							}
-							return r;
-						})
-						.attr('stroke', "gray")
-						.attr("fill",function(d,i){ 
-							var c = color(i);
-							//if ( $("#level").val() === "1" ) {
-							//	c = color(d.comm_id);
-							//	colorMapping[d.comm_id] = c;
-							//}
-							//else {
-								c = color(d.nodename);
-								colorMapping[d.nodename] = c;
-							//}
-							return c;
-						});
-					enter2.call(communityForce.drag)
-						.append("title")
-						.text(function (d) {
-							return d.nodename;
-						});
-					node2.exit()
-						.transition()
-						.duration(transition_time)
-						.attr("r", 0.0)
-						.remove();
-	  
-					communityForce.nodes(data["gephinodes"])
+					communityLink = communitySVG.selectAll("line.link").data(data["gephigraph"]);
+					
+					force2.nodes(data["gephinodes"])
 						.links(data["gephigraph"])
 						.start();
-					communityForce.on("tick", function () {
-						node2.attr("cx", function (d) { return d.x; })
-							.attr("cy", function (d) { return d.y; });
-						link2.attr("x1", function(d) { return d.source.x; })
-							.attr("y1", function(d) { return d.source.y; })
-							.attr("x2", function(d) { return d.target.x; })
-							.attr("y2", function(d) { return d.target.y; });
-					});		
-					*/
-					
-					var nodes = data["gephinodes"],
-						links = data["gephigraph"];
-
-					// Restart the force layout.
-					force2.nodes(nodes)
-						.links(links)
-						.start();
-
-					// Update the links…
-					linkLines = communityVis.selectAll("line.link")
-						.data(links/*, edgeid*/);
-
-					// Enter any new links.
-					linkLines.enter().insert("svg:line", ".node")
+						
+					linkgroup = communityVis.append("g")
+						.attr("class", "linkgroup")
+						.selectAll("link")
+						.data(data["gephigraph"])
+						.enter();
+	
+					communityLink = linkgroup.insert("svg:line", ".node")
 						.attr("class", "link")
-						.style("stroke", "black")
+						.attr("stroke", "black")
 						.style("stroke-width", function(d) {
-							return d.weight * 0.1;
-						});						;
+							return parseInt(d.weight) * 0.1;
+						});		
 
-					// Exit any old links.
-					linkLines.exit().remove();
-
-					// Update the nodes
-					nodeCircles = communityVis.selectAll("circle.node")
-						.data(nodes/*, nodename*/)
-						.style("fill", function(d) {
-							return color(d.nodename);
-						})
+					nodegroup = communityVis.append("g")
+						.attr("class", "nodegroup")
+						.selectAll("circle")
+						.data(data["gephinodes"])
 						.enter();
 
-					// Enter any new nodes.
-					circles = nodeCircles.append("svg:circle")
+					communityNode = nodegroup.append("circle")
 						.attr("class", "node")
+						.style("cursor", "pointer")
 						.on("dblclick", openCommunity)
 						.attr("r", function (d) {
 							return parseInt(d.num_members) + 4;
 						})
-						.style("fill", function(d,i) {
-							var c = color(i);
-							//if ( $("#level").val() === "1" ) {
-							//	c = color(d.comm_id);
-							//	colorMapping[d.comm_id] = c;
-							//}
-							//else {
-								c = color(d.nodename);
-								colorMapping[d.nodename] = c;
-							//}
+						.attr("fill", function(d) {
+							var c = color(d.nodename);
+							colorMapping[d.nodename] = c;
 							return c;
 						})
-						.call(drag); //attach drag behaviour
+						.on('mouseover', communityTooltip.show)
+						.on('mouseout', communityTooltip.hide)						
+						.call(drag);
 						
-					circles.call(drag)
+					/*communityNode.call(drag)
 						.append("title")
 						.text(function (d) {
-							return d.nodename;
-						});	
-				
-					labels = nodeCircles.append("svg:text")
+							return d.nodename + " / " + d.node_comm;
+						});*/							
+					  
+					communityLabel = nodegroup.append("text")
+						.style("pointer-events", "none")
 						.attr("class", "label")
 						.on("dblclick", openCommunity)
 						.style("opacity", function(d, i) {
@@ -543,16 +482,12 @@ $(function () {
 						})
 						.text( function(d) { 
 							if (true) {
-								return d.nodename; 
+								return d.nodename;
 							}
 							return "";
-						});
-
-					// Exit any old nodes.
-					//nodeCircles.exit().remove();
-
-					// Set initial size and trigger a tickCommunity() function
-					setSize();					
+						});		
+						
+					setSize();
 
 					// Handle map, dynamic graph render only if there is existing data...
 					if (data["result"]) {
@@ -676,106 +611,6 @@ $(function () {
 									return d.y;
 								});										
 							});							
-
-						/*
-						
-						//console.log("Color Map:");
-						//console.dir(colorMapping);
-
-						link = dynamicGraph.select("g#dglinks")
-							.selectAll(".link")
-							.data(data["graph"], edgeid);
-						enter = link.enter().append("line")
-							.classed("link", true)
-							.style("opacity", 0.0)
-							.style("stroke-width", 1.0);
-						enter.transition()
-							.duration(transition_time)
-							.style("opacity", 0.0)
-							.style("stroke", "#FFFFFF")
-							.style("stroke-width", 1.0);
-						link.exit()
-							.transition()
-							.duration(transition_time)
-							.style("opacity", 0.0)
-							.style("stroke-width", 0.0)
-							.remove();
-		  
-						node = dynamicGraph.select("g#dgnodes")
-							.selectAll(".node")
-							.data(data["result"], trackid).enter();
-						
-						dynCircles = node.append("circle")
-							.classed("node", true)
-							.attr("r", 15)
-							.style("opacity", 0.0)
-							.style("fill", function (d, i) {
-								var c = color(i);
-								if ( $("#level").val() === "1" ) {
-									c = colorMapping[d.track_id];
-								}
-								else {
-									c = colorMapping[d.comm];
-								}
-								return c;
-
-							});
-						dynCircles.transition()
-							.duration(transition_time)
-							.attr("r", 10)
-							.style("opacity", 1.0)
-							.style("stroke", "gray")
-							.style("fill", function (d, i) {
-								var c = color(i);
-								if ( $("#level").val() === "1" ) {
-									c = colorMapping[d.track_id];
-								}
-								else {
-									c = colorMapping[d.comm];
-								}
-								return c;
-							});
-						dynCircles.call(force.drag)
-							.append("title")
-							.text(function (d) {
-								return d.track_id;
-							});
-						//node.exit()
-						//	.transition()
-						//	.duration(transition_time)
-						//	.style("opacity", 0.0)
-						//	.attr("r", 0.0)
-						//	.style("fill", "black")
-						//	.remove();
-		  
-					dynLabels = node.append("svg:text")
-						.attr("class", "label")
-						.attr("fill", "white")
-						.style("opacity", function(d, i) {
-							var lab = $("#labelsEnabled");
-							if (lab.prop('checked') === true) {
-								return 1.0;
-							}
-							return 0;						
-						})
-						.text( function(d) { 
-							if (true) {
-								return "jpb"; //d.track_id; 
-							}
-							return "";
-						});
-						
-						force.nodes(data["result"])
-							.links(data["graph"])
-							.start();
-						force.on("tick", function () {
-							dynCircles.attr("cx", function (d) { return d.x; })
-								.attr("cy", function (d) { return d.y; });
-							link.attr("x1", function(d) { return d.source.x; })
-								.attr("y1", function(d) { return d.source.y; })
-								.attr("x2", function(d) { return d.target.x; })
-								.attr("y2", function(d) { return d.target.y; });
-						});*/
 						
 					}
 	  
@@ -789,23 +624,21 @@ $(function () {
 			var comm = d.node_comm;
 			var node = d.nodename;
 			
-			console.log("Opening");
-			console.dir(d);
-			
 			var table = $("#track-table").val();
 			var level = $("#level").val();
 			
 			if (level > 1) {
 				level = level -1;
+				
+				$("#level").select2("val", level);
+				$("#comm-id").val(node);
+				$('#comm-id').clearableTextField();	
+				capturedGeo = "";				
 
 				$.get("community/settable/" + table)
 					.then(function(){
 						$.get("community/setcomm/" + node + '/' + level)
 							.then( function() {
-								$("#level").select2("val", level);
-								$("#comm-id").val(node);
-								$('#comm-id').clearableTextField();
-								capturedGeo = "";
 								refreshFunction();
 							});
 					});
@@ -840,8 +673,13 @@ $(function () {
 		e.preventDefault();	
 		filterCommunities(); //filterCommunities();
 	});
-
-	//$("#loadCommunitiesFromFilter").click(updateConfig);  
+	
+	$("#capturePreviousCommunity").click(function(e) {
+		e.stopPropagation();
+		e.preventDefault();
+		doLastKnownQuery = true;
+		filterCommunities(); //filterCommunities();
+	});	
   
 	$("#reset").click(function () {
 		Reset(true);
@@ -854,11 +692,15 @@ $(function () {
 	});
 
 	$("#heatmap").click(renderHeatMap);
+	
+	$("#resetCommunityZoom").click(function(e) {
+		e.preventDefault();
+		zoomToFit();
+	});
 
 });
 
 function renderHeatMap() {
-
 	$.ajax({
 		"url":"heatmap/map",
 		"type" : "GET"
@@ -869,7 +711,6 @@ function renderHeatMap() {
 		heatmap.set('radius', heatmap.get('radius') ? null : 15);
 		heatmap.setMap(map);
 	});
-
 }
 
 function Reset(resetMap) {
@@ -888,17 +729,45 @@ function Reset(resetMap) {
 	dynamicGraph.call( function() {
 		var zoom = d3.behavior.zoom().translate([0,0]).scale(1);
 		dynamicGraph.call(zoom.on("zoom", redraw));
-		//console.log("reset dynamic graph zoom scale");	
 	});	
     
 	if (resetMap === true) { 
 		map.setCenter(new google.maps.LatLng(0, 0));
 		map.setZoom(2);
 	}
+	
+	timeSlider.slider({value: 0 });
 
 	colorMapping = {};
 	currentGeoJson = [];
 	overlay.draw();
+}
+
+function graphBounds() {
+	var nodeWidth = 16, nodeHeight = 16;
+    var x = Number.POSITIVE_INFINITY, X=Number.NEGATIVE_INFINITY, y=Number.POSITIVE_INFINITY, Y=Number.NEGATIVE_INFINITY;
+    communityNode.each(function (v) {
+        x = Math.min(x, v.x - nodeWidth / 2);
+        X = Math.max(X, v.x + nodeWidth / 2);
+        y = Math.min(y, v.y - nodeHeight / 2);
+        Y = Math.max(Y, v.y + nodeHeight / 2);
+    });
+    return { x: x, X: X, y: y, Y: Y };
+}
+
+function zoomToFit() {
+	force2.stop();
+	
+	var outer = rect;
+    var b = graphBounds();
+    var w = b.X - b.x, h = b.Y - b.y;
+    var cw = outer.attr("width"), ch = outer.attr("height");
+    var s = Math.min(cw / w, ch / h);
+    var tx = (-b.x * s + (cw / s - w) * s / 2), ty = (-b.y * s + (ch / s - h) * s / 2);
+    communityZoomer.translate([tx, ty]).scale(s);
+	
+	force2.start();
+	tickCommunity();
 }
 
 timeSlider = $("#time-slider").slider({
@@ -906,8 +775,4 @@ timeSlider = $("#time-slider").slider({
 	SetCircles(ui.value);
 	SetRelationships(ui.value);
   }
-})
-// d3.select('#time-slider').call(timeSlider = d3.slider().on("slide", function(evt, value) {
-// 	SetCircles(value);
-// 	SetRelationships(value);
-// }));
+});
