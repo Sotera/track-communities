@@ -71,7 +71,6 @@ function updateConfig() {
 					if (cfg.mindt && cfg.maxdt) {
 						var arr = [];
 
-						//$("#dateRangeSliderMsg").html("<p>&nbsp;</p>");
 						$("#dateRangeSliderMsg").html("");					
 						// 2012-03-22 03:39:00 // 2012-03-26 20:21:00, 
 						arr = cfg.mindt.split(' '); arr = arr[0].toString().split('-');
@@ -83,51 +82,36 @@ function updateConfig() {
 						var endYear = arr[0];
 						var endMonth = arr[1] - 1;
 						var endDay = arr[2];						
-	                                       var min =  new Date(startYear, startMonth, startDay).getTime();
-					       var max =  new Date(endYear, endMonth, endDay).getTime();
-                                               var update_times = function(low, high){
-                                                 var l = moment(low).utc().format("YYYY-MM-DDTHH:mm:ss");                                   
-                                                 var h = moment(high).utc().format("YYYY-MM-DDTHH:mm:ss");
-                                                 $("#txt-low-val").html(l);
-                                                 $("#txt-high-val").html(h);
-                                               };
-                                               update_times(min, max);
-                                                var slider = $("#range-slider").slider({
-                                                    range: true,
-                                                    change: function(evt, ui){
-                                                      update_times(ui.values[0], ui.values[1]);
-                                                    },
-                                                    slide: function(evt, ui){
-                                                      update_times(ui.values[0], ui.values[1]);
-                                                    },
-                                                    max: max,
-                                                    min: min,
-                                                    values: [min, max]
-                                                });
-
-						// $("#dateRangeSlider").dateRangeSlider({
-						// 	valueLabels: "show",
-						// 	bounds:{
-						// 		min: new Date(startYear, startMonth, startDay),
-						// 		max: new Date(endYear, endMonth, endDay)
-						// 	},
-						// 	defaultValues:{
-						// 		min: new Date(startYear, startMonth, startDay),
-						// 		max: new Date(endYear, endMonth, endDay)
-						// 	}				
-						// });
+						
+						var min =  new Date(startYear, startMonth, startDay).getTime();
+						var max =  new Date(endYear, endMonth, endDay).getTime();
+						var update_times = function(low, high){
+							var l = moment(low).utc().format("YYYY-MM-DDTHH:mm:ss");                                   
+							var h = moment(high).utc().format("YYYY-MM-DDTHH:mm:ss");
+							$("#txt-low-val").html(l);
+							$("#txt-high-val").html(h);
+						};
+						update_times(min, max);
+						var slider = $("#range-slider").slider({
+							range: true,
+								change: function(evt, ui){
+									update_times(ui.values[0], ui.values[1]);
+								},
+								slide: function(evt, ui){
+									update_times(ui.values[0], ui.values[1]);
+								},
+								max: max,
+								min: min,
+								values: [min, max]
+						});
 					}
 					else {
 						$("#dateRangeSliderMsg").html("Not available.");	
-						try {
-							//$("#dateRangeSlider").dateRangeSlider("destroy");						
-						} catch (error) {
-						
-						}
 					}					
 
 					// Finish up and refresh display.
-					$("#community-info-box").toggle(true);				
+					$("#community-info-box").toggle(true);	
+					MAX_GRAPH_SIZE = $("#max-graph-size").val();
 					
 					$("#graph_num_levels").val(levels);
 					

@@ -275,6 +275,7 @@ var dynamicNode, dynamicLabel, dynamicLink;
 var geolabels, geocircles;
 
 var graphStructure = {};
+var MAX_GRAPH_SIZE = 1000; // default, but is configurable in the UI
 
 /*	*	*	*	*	*	*	*	*	*	*	*	*	*	*	*/
 
@@ -456,7 +457,9 @@ $(function () {
 	
 		Reset(doReset);
 		$("#communityBrowserForm").hide();
-		$("#communityBrowserGraph").show();
+		$("#communityBrowserTooLarge").hide();
+		$("#communityBrowserGraph").hide();	
+
     
 		$.ajax({
 			url: 'community/getcomm/',      
@@ -504,273 +507,88 @@ $(function () {
 					console.log("Retrieved Data Object");
 					console.dir(data);
 					
-					// Handle heat map overlay...
-					if ($('#heatMapEnabled').is(':checked')) {
-						renderHeatMap();
-					}		
+					if (data["gephinodes"] && data["gephinodes"].length <= MAX_GRAPH_SIZE) {
+						$("#communityBrowserForm").hide();
+						$("#communityBrowserTooLarge").hide();
+						$("#communityBrowserGraph").show();					
 					
-					if ( $("#level").val() === "1" ) {
-						graphStructure = {};
-					}
-
-					// Community Browser	
-					tau2 = 2 * Math.PI;
-					angle2 = tau2 / data["gephinodes"].length;
-					$.each(data["gephinodes"], function (i, v) {
-						var d = data["gephinodes"][i];
-						d.x = (width / 4) * Math.cos(i * angle2) + (width / 2);
-						d.y = (height / 4) * Math.sin(i * angle2) + (height / 2);
+						// Handle heat map overlay...
+						if ($('#heatMapEnabled').is(':checked')) {
+							renderHeatMap();
+						}		
 						
 						if ( $("#level").val() === "1" ) {
-							graphStructure[d.nodename] = {
-								x: d.x,
-								y: d.y
-							};
+							graphStructure = {};
 						}
-						
-					});
 
-					communityLink = communitySVG.selectAll("line.link").data(data["gephigraph"]);
-					
-					force2.nodes(data["gephinodes"])
-						.links(data["gephigraph"])
-						.start();
-						
-					linkgroup = communityVis.append("g")
-						.attr("class", "linkgroup")
-						.selectAll("link")
-						.data(data["gephigraph"])
-						.enter();
-	
-					communityLink = linkgroup.insert("svg:line", ".node")
-						.attr("class", "link")
-						.attr("stroke", "black")
-						.style("stroke-width", function(d) {
-							return parseInt(d.weight) * 0.1;
-						});		
-
-					nodegroup = communityVis.append("g")
-						.attr("class", "nodegroup")
-						.selectAll("circle")
-						.data(data["gephinodes"])
-						.enter();
-
-					communityNode = nodegroup.append("circle")
-						.attr("class", "node")
-						.style("cursor", "pointer")
-						.on("dblclick", openCommunity)
-						.attr("r", function (d) {
-							return parseInt(d.num_members) + 4;
-						})
-						.attr("fill", function(d) {
-							var c = color(d.nodename);
-							colorMapping[d.nodename] = c;
-							return c;
-						})
-						.on('mouseover', communityTooltip.show)
-						.on('mouseout', communityTooltip.hide)						
-						.call(drag);
-						
-					/*communityNode.call(drag)
-						.append("title")
-						.text(function (d) {
-							return d.nodename + " / " + d.node_comm;
-						});*/							
-					  
-					communityLabel = nodegroup.append("text")
-						.style("pointer-events", "none")
-						.attr("class", "label")
-						.on("dblclick", openCommunity)
-						.style("opacity", function(d, i) {
-							var lab = $("#labelsEnabled");
-							if (lab.prop('checked') === true) {
-								return 1.0;
-							}
-							return 0;						
-						})
-						.text( function(d) { 
-							if (true) {
-								return d.nodename;
-							}
-							return "";
-						});		
-						
-					setSize();
-
-					// Handle map, dynamic graph render only if there is existing data...
-					if (data["result"]) {
-						currentGeoJson = data["result"];
-						
-						var xdiff = data.bounds.east - data.bounds.west;
-						var ydiff = data.bounds.north - data.bounds.south;
-				  
-						var centerx = xdiff / 2 + data.bounds.west;
-						var centery = ydiff / 2 + data.bounds.south;
-				  
-						map.setCenter(new google.maps.LatLng(centery, centerx));
-			  
-						var sw = new google.maps.LatLng(data.bounds.south, data.bounds.west);
-						var ne = new google.maps.LatLng(data.bounds.north, data.bounds.east);
-						map.fitBounds(new google.maps.LatLngBounds(sw, ne));
-
-						overlay.draw();						
-
-						startTime = new Date(Date.parse(data["start"]));
-						endTime = new Date(Date.parse(data["end"]));
-		  
-						d3.select('#slidertext').text(moment(startTime).utc().format("YYYY-MM-DDTHH:mm:ss"));
-						
-						// Dynamic Graph
-						tau = 2 * Math.PI;
-						angle = tau / data["result"].length;
-						$.each(data["result"], function (i, v) {
-							data["result"][i].x = (width / 4) * Math.cos(i * angle) + (width / 2);
-							data["result"][i].y = (height / 4) * Math.sin(i * angle) + (height / 2);
+						// Community Browser	
+						tau2 = 2 * Math.PI;
+						angle2 = tau2 / data["gephinodes"].length;
+						$.each(data["gephinodes"], function (i, v) {
+							var d = data["gephinodes"][i];
+							d.x = (width / 4) * Math.cos(i * angle2) + (width / 2);
+							d.y = (height / 4) * Math.sin(i * angle2) + (height / 2);
 							
 							if ( $("#level").val() === "1" ) {
-								data["result"][i].x = graphStructure[data["result"][i].track_id].x;
-								data["result"][i].y = graphStructure[data["result"][i].track_id].y;
-							}							
+								graphStructure[d.nodename] = {
+									x: d.x,
+									y: d.y
+								};
+							}
 							
 						});
 
-						dynamicLink = dynamicSVG.selectAll("line.link").data(data["graph"]);
+						communityLink = communitySVG.selectAll("line.link").data(data["gephigraph"]);
 						
-						force.nodes(data["result"])
-							.links(data["graph"])
+						force2.nodes(data["gephinodes"])
+							.links(data["gephigraph"])
 							.start();
 							
-						linkgroup = dynamicVis.append("g")
+						linkgroup = communityVis.append("g")
 							.attr("class", "linkgroup")
 							.selectAll("link")
-							.data(data["graph"])
+							.data(data["gephigraph"])
 							.enter();
 		
-						dynamicLink = linkgroup.insert("svg:line", ".node")
+						communityLink = linkgroup.insert("svg:line", ".node")
 							.attr("class", "link")
-							.style("opacity", 0.0)
-							.style("stroke", "#FFFFFF")
-							.style("stroke-width", 1.0);
+							.attr("stroke", "black")
+							.style("stroke-width", function(d) {
+								return parseInt(d.weight) * 0.1;
+							});		
 
-						nodegroup = dynamicVis.append("g")
+						nodegroup = communityVis.append("g")
 							.attr("class", "nodegroup")
 							.selectAll("circle")
-							.data(data["result"])
+							.data(data["gephinodes"])
 							.enter();
 
-						dynamicNode = nodegroup.append("circle")
-							.style("cursor", "pointer")
+						communityNode = nodegroup.append("circle")
 							.attr("class", "node")
-							.attr("r", 15)
-							//.style("opacity", 0.0)
-							.style("fill", function (d, i) {
-								var c = color(i);
-								if ( $("#level").val() === "1" ) {
-									c = colorMapping[d.track_id];
-								}
-								else {
-									c = colorMapping[d.comm];
-								}
+							.style("cursor", "pointer")
+							.on("dblclick", openCommunity)
+							.attr("r", function (d) {
+								return parseInt(d.num_members) + 4;
+							})
+							.attr("fill", function(d) {
+								var c = color(d.nodename);
+								colorMapping[d.nodename] = c;
 								return c;
 							})
-							.call(dyndrag);
+							.on('mouseover', communityTooltip.show)
+							.on('mouseout', communityTooltip.hide)						
+							.call(drag);
 							
-						dynamicNode.call(dyndrag)
+						/*communityNode.call(drag)
 							.append("title")
 							.text(function (d) {
-								return d.track_id;
-							});						
+								return d.nodename + " / " + d.node_comm;
+							});*/							
 						  
-						dynamicLabel = nodegroup.append("text")
+						communityLabel = nodegroup.append("text")
 							.style("pointer-events", "none")
 							.attr("class", "label")
-							.attr("fill", "white")
-							.style("opacity", function(d, i) {
-								var lab = $("#labelsEnabled");
-								if (lab.prop('checked') === true) {
-									return 1.0;
-								}
-								return 0;						
-							})
-							.text( function(d) { 
-								return d.track_id;
-							});		
-							
-						setDynamicSize();						
-						dynrect.style("fill", "black");
-
-/*						
-						// Dynamic Graph
-						tau = 2 * Math.PI;
-						angle = tau / data["result"].length;
-						$.each(data["result"], function (i, v) {
-							data["result"][i].x = (width / 4) * Math.cos(i * angle) + (width / 2);
-							data["result"][i].y = (height / 4) * Math.sin(i * angle) + (height / 2);
-						});
-						
-						// Restart the force layout.
-						force.nodes(data["result"])
-							.links(data["graph"])
-							.start();
-
-						// Update the links…
-						dynLines = dynamicGraph.selectAll("line.link")
-							.data(data["graph"]);
-
-						// Enter any new links.
-						dynLines.enter().insert("svg:line", ".node")
-							.attr("class", "link")
-							.style("opacity", 0.0)
-							.style("stroke", "#FFFFFF")
-							.style("stroke-width", 1.0);
-
-						// Update the nodes
-						dynamicNode = dynamicGraph.selectAll("circle.node")
-							.data(data["result"])
-							.style("fill", function(d) {
-								return color(d.track_id);
-							})
-							.enter();
-
-						// Enter any new nodes.
-						dynCircles = dynamicNode.append("svg:circle")
-							.attr("class", "node")
-							.attr("r", 15)
-							//.style("opacity", 0.0)
-							.style("fill", function (d, i) {
-								var c = color(i);
-								if ( $("#level").val() === "1" ) {
-									c = colorMapping[d.track_id];
-								}
-								else {
-									c = colorMapping[d.comm];
-								}
-								return c;
-							});
-						dynCircles.transition()
-							.duration(transition_time)
-							.attr("r", 10)
-							.style("opacity", 1.0)
-							.style("stroke", "gray")
-							.style("fill", function (d, i) {
-								var c = color(i);
-								if ( $("#level").val() === "1" ) {
-									c = colorMapping[d.track_id];
-								}
-								else {
-									c = colorMapping[d.comm];
-								}
-								return c;
-							});
-						dynCircles.call(force.drag)
-							.append("title")
-							.text(function (d) {
-								return d.track_id;
-							});							
-				
-						dynLabels = dynamicNode.append("svg:text")
-							.attr("class", "label")
-							.attr("fill", "white")
+							.on("dblclick", openCommunity)
 							.style("opacity", function(d, i) {
 								var lab = $("#labelsEnabled");
 								if (lab.prop('checked') === true) {
@@ -780,27 +598,129 @@ $(function () {
 							})
 							.text( function(d) { 
 								if (true) {
-									return d.track_id; 
+									return d.nodename;
 								}
 								return "";
-							});
+							});		
 							
-							force.on("tick", function () {
-								dynCircles.attr("cx", function (d) { return d.x; })
-									.attr("cy", function (d) { return d.y; });
-								dynLines.attr("x1", function(d) { return d.source.x; })
-									.attr("y1", function(d) { return d.source.y; })
-									.attr("x2", function(d) { return d.target.x; })
-									.attr("y2", function(d) { return d.target.y; });
-								dynLabels.attr("dx", function (d) {
-									return d.x;
+						setSize();
+
+						// Handle map, dynamic graph render only if there is existing data...
+						if (data["result"]) {
+							currentGeoJson = data["result"];
+							
+							var xdiff = data.bounds.east - data.bounds.west;
+							var ydiff = data.bounds.north - data.bounds.south;
+					  
+							var centerx = xdiff / 2 + data.bounds.west;
+							var centery = ydiff / 2 + data.bounds.south;
+					  
+							map.setCenter(new google.maps.LatLng(centery, centerx));
+				  
+							var sw = new google.maps.LatLng(data.bounds.south, data.bounds.west);
+							var ne = new google.maps.LatLng(data.bounds.north, data.bounds.east);
+							map.fitBounds(new google.maps.LatLngBounds(sw, ne));
+
+							overlay.draw();						
+
+							startTime = new Date(Date.parse(data["start"]));
+							endTime = new Date(Date.parse(data["end"]));
+			  
+							d3.select('#slidertext').text(moment(startTime).utc().format("YYYY-MM-DDTHH:mm:ss"));
+							
+							// Dynamic Graph
+							tau = 2 * Math.PI;
+							angle = tau / data["result"].length;
+							$.each(data["result"], function (i, v) {
+								data["result"][i].x = (width / 4) * Math.cos(i * angle) + (width / 2);
+								data["result"][i].y = (height / 4) * Math.sin(i * angle) + (height / 2);
+								
+								if ( $("#level").val() === "1" ) {
+									data["result"][i].x = graphStructure[data["result"][i].track_id].x;
+									data["result"][i].y = graphStructure[data["result"][i].track_id].y;
+								}							
+								
+							});
+
+							dynamicLink = dynamicSVG.selectAll("line.link").data(data["graph"]);
+							
+							force.nodes(data["result"])
+								.links(data["graph"])
+								.start();
+								
+							linkgroup = dynamicVis.append("g")
+								.attr("class", "linkgroup")
+								.selectAll("link")
+								.data(data["graph"])
+								.enter();
+			
+							dynamicLink = linkgroup.insert("svg:line", ".node")
+								.attr("class", "link")
+								.style("opacity", 0.0)
+								.style("stroke", "#FFFFFF")
+								.style("stroke-width", 1.0);
+
+							nodegroup = dynamicVis.append("g")
+								.attr("class", "nodegroup")
+								.selectAll("circle")
+								.data(data["result"])
+								.enter();
+
+							dynamicNode = nodegroup.append("circle")
+								.style("cursor", "pointer")
+								.attr("class", "node")
+								.attr("r", 15)
+								//.style("opacity", 0.0)
+								.style("fill", function (d, i) {
+									var c = color(i);
+									if ( $("#level").val() === "1" ) {
+										c = colorMapping[d.track_id];
+									}
+									else {
+										c = colorMapping[d.comm];
+									}
+									return c;
 								})
-								.attr("dy", function (d) {
-									return d.y;
-								});										
-							});							
-						*/
-					}
+								.call(dyndrag);
+								
+							dynamicNode.call(dyndrag)
+								.append("title")
+								.text(function (d) {
+									return d.track_id;
+								});						
+							  
+							dynamicLabel = nodegroup.append("text")
+								.style("pointer-events", "none")
+								.attr("class", "label")
+								.attr("fill", "white")
+								.style("opacity", function(d, i) {
+									var lab = $("#labelsEnabled");
+									if (lab.prop('checked') === true) {
+										return 1.0;
+									}
+									return 0;						
+								})
+								.text( function(d) { 
+									return d.track_id;
+								});		
+								
+							setDynamicSize();						
+							dynrect.style("fill", "black");
+
+							}
+						}
+						else {
+							$("#communityBrowserForm").hide();
+							$("#communityBrowserTooLarge").show();
+							$("#communityBrowserGraph").hide();		
+
+							// Handle heat map overlay...
+							if ($('#heatMapEnabled').is(':checked')) {
+								renderHeatMap();
+							}
+							
+						}
+						
 				});
 			}
 		});
@@ -871,6 +791,7 @@ $(function () {
 	$("#reset").click(function () {
 		Reset(true);
 		$("#communityBrowserForm").show();
+		$("#communityBrowserTooLarge").hide();
 		$("#communityBrowserGraph").hide();		
 	});
 

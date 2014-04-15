@@ -112,6 +112,7 @@
 					<div data-tangelo-type="config">
 						<h4> Load </h4>
 						<p> Data Table: <input type="hidden" id="track-table" /> <br/> </p>
+						<p> Max Graph Size: <input type="text" id="max-graph-size" value="1000" /> <br/> </p>
 					</div>
 					
 					<div data-tangelo-type="info">
@@ -129,6 +130,13 @@
 					<div class="alert alert-error">
 						<h5> Data Set Not Loaded! </h5>
 						<p> Use the Configuration [Config] tab to select a data set to load into your Community Browser. </p>						
+					</div>
+				</div>
+				
+				<div id="communityBrowserTooLarge" style="display:none;">
+					<div class="alert alert-error">
+						<h5> Community Too Large </h5>
+						<p> Use the [Map] and [Find Communities] search in the center pane to filter your graph. </p>						
 					</div>
 				</div>
 				
