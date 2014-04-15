@@ -48,23 +48,20 @@ function redrawCommunity() {
 
 function SetRelationships(value) {
 	var currentDate = new Date(startTime.getTime() + ((endTime.getTime() - startTime.getTime()) * value / 100));
-	link = dynamicGraph.selectAll("line.link")//dynamicGraph.select("g#dglinks")
-		//.selectAll(".link")
+	link = dynamicVis.selectAll("line.link")
+		.style("fill", "white")
 		.style("stroke-width", function(d) {
-		return d.value;
-	})
-	.style("opacity", function(d) {
-		startD = new Date(d.start);
-		endD = new Date(d.end);
-		//console.log(startD + ' <= ' + currentDate + ' < ' + endD);
-      
-		if ( startD <= currentDate && currentDate < endD ) {
-			//console.log("Match");
-			return 1.0;
-		}
-		else {
-			//console.log("Nope");
-			return 0.0;
-		}
-    });
+			return d.value;
+		})
+		.style("opacity", function(d) {
+			startD = new Date(d.start);
+			endD = new Date(d.end);
+			//console.log(startD + ' <= ' + currentDate + ' < ' + endD);
+			if ( startD <= currentDate && currentDate < endD ) {
+				return 1.0;
+			}
+			else {
+				return 0.0;
+			}
+		});
 }

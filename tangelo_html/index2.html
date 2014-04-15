@@ -143,13 +143,9 @@
 			</div>
 			<div class="span4" style="margin-left:2px; margin-right:2px; ">
 				<h4> Dynamic Graph </h4>
-				<div style="background-color:black;">
-					<svg id="dynamic-graph">
-						<rect width="100%" height="100%" style="fill:black;" />
-						<g id="dglinks"></g>
-						<g id="dgnodes"></g>
-					</svg>
-				</div>
+				
+				<div id="dynamicGraph"></div>
+
 			</div>
 		</div>
 	</div>
@@ -261,7 +257,7 @@
 						return 0;						
 					});				
 				
-				var dyn = dynamicGraph.selectAll("text.label")
+				var dyn = dynamicVis.selectAll("text.label")
 					.style("opacity", function(d,i) {
 						var lab = $("#labelsEnabled");
 						if (lab.prop('checked') === true) {

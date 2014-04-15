@@ -3,18 +3,33 @@
 var color = d3.scale.category20();
 var colorMapping = {};
 
-var width = 100, w = 100; //960;
-var height = 100, h = 100; //480;
+var width = 500, w = 500; //960;
+var height = 500, h = 500; //480;
 
 /*** Create scales to handle zoom coordinates ***/
 var xScaleCommunity = d3.scale.linear()
    .domain([0,w]);
 var yScaleCommunity = d3.scale.linear()
    .domain([0,h]);
+   
+var dynxScaleCommunity = d3.scale.linear()
+   .domain([0,w]);
+var dynyScaleCommunity = d3.scale.linear()
+   .domain([0,h]);
+
 //ranges will be set later based on the size
 //of the SVG
 
 /*** Configure Force Layout ***/
+var force = d3.layout.force()
+	.on("tick", tickDynamic)
+	.charge(-500)
+	.linkDistance(200)
+	.linkStrength(2)
+	.gravity(0.1)
+	.friction(0.2)
+	.size([width, height]); 
+	
 var force2 = d3.layout.force()
 	.on("tick", tickCommunity)
 	.charge(-500)
@@ -30,6 +45,13 @@ var communityZoomer = d3.behavior.zoom()
 	.on("zoom", communityZoom);
 function communityZoom() {
 	 communityVis.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+}
+
+var dynamicZoomer = d3.behavior.zoom()
+	.scaleExtent([0.01,100])
+	.on("zoom", dynamicZoom);
+function dynamicZoom() {
+	 dynamicVis.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 }
 
 /*** Configure drag behaviour ***/
@@ -62,6 +84,35 @@ function dragended(d){
 	//force2.resume();
 }
 
+var dyndrag = d3.behavior.drag()
+	.origin(function(d) { return d; }) //center of circle
+	.on("dragstart", dyndragstarted)
+	.on("drag", dyndragged)
+	.on("dragend", dyndragended);
+
+function dyndragstarted(d){ 
+	d3.event.sourceEvent.stopPropagation();
+	d3.select(this).classed("fixed", d.fixed = false);
+	d3.select(this).classed("dragging", true);
+	//force.stop(); //stop ticks while dragging
+}
+function dyndragged(d){
+	if (d.fixed) return; //root is fixed
+	//get mouse coordinates relative to the visualization coordinate system:
+	//var mouse = d3.mouse(communityVis.node());
+	//d.x = xScaleCommunity.invert(mouse[0]); 
+	//d.y = yScaleCommunity.invert(mouse[1]); 
+	d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
+	d.fixed = true;
+	tickDynamic();//re-position this node and any links
+	d.fixed = false;
+}
+function dyndragended(d){
+	d3.select(this).classed("dragging", false);
+	d3.select(this).classed("fixed", d.fixed = true);
+	//force.resume();
+}
+
 /*** Set the position of the elements based on data ***/
 function tickCommunity() {
 	communityLink.attr("x1", function(d) { return d.source.x; })
@@ -71,6 +122,17 @@ function tickCommunity() {
 	communityNode.attr("cx", function(d) { return d.x; })
 		.attr("cy", function(d) { return d.y; });
 	communityLabel.attr("dx", function(d) { return d.x; })
+		.attr("dy", function(d) { return d.y; });	 			
+}
+
+function tickDynamic() {
+	dynamicLink.attr("x1", function(d) { return d.source.x; })
+		.attr("y1", function(d) { return d.source.y; })
+		.attr("x2", function(d) { return d.target.x; })
+		.attr("y2", function(d) { return d.target.y; });
+	dynamicNode.attr("cx", function(d) { return d.x; })
+		.attr("cy", function(d) { return d.y; });
+	dynamicLabel.attr("dx", function(d) { return d.x; })
 		.attr("dy", function(d) { return d.y; });	 			
 }
 
@@ -108,9 +170,32 @@ function setSize() {
 	//console.log(xScaleCommunity.range(), yScaleCommunity.range());
 	tickCommunity();//re-draw
 }
+function setDynamicSize() {
+	var svgStyles = window.getComputedStyle(dynamicSVG.node());
+	var svgW = parseInt(svgStyles["width"]);
+	var svgH = parseInt(svgStyles["height"]);
+			
+	//Set the output range of the scales
+	dynxScaleCommunity.range([0, svgW]);
+	dynyScaleCommunity.range([0, svgH]);
+		
+	//re-attach the scales to the zoom behaviour
+	dynamicZoomer.x(dynxScaleCommunity)
+	  .y(dynyScaleCommunity);
+	
+	//resize the background
+	dynrect.attr("width", svgW)
+		.attr("height", svgH);
+		
+	//console.log("Rect size: " + svgW + " x " + svgH);
+   
+	//console.log(xScaleCommunity.range(), yScaleCommunity.range());
+	tickDynamic();//re-draw
+}
 
 //adapt size to window changes:
 window.addEventListener("resize", setSize, false);
+window.addEventListener("resize", setDynamicSize, false);
 
 var communitySVG = d3.select("#communityGraph").append("svg:svg")
     .attr("width", "100%")
@@ -119,6 +204,14 @@ var communitySVG = d3.select("#communityGraph").append("svg:svg")
 var communityGraph = communitySVG.append("g")
 	.attr("class", "graph")
 	.call(communityZoomer);
+	
+var dynamicSVG = d3.select("#dynamicGraph").append("svg:svg")
+    .attr("width", "100%")
+    .attr("height", "100%");
+
+var dynamicGraph = dynamicSVG.append("g")
+	.attr("class", "graph")
+	.call(dynamicZoomer);	
 
 // Add a transparent background rectangle to catch
 // mouse events for the zoom behaviour.
@@ -133,26 +226,22 @@ var rect = communityGraph.append("rect")
 	.style("cursor", "move")
 	.on("dblclick.zoom", zoomToFit);
 	
+var dynrect = dynamicGraph.append("rect")
+    .attr("width", width)
+    .attr("height", height)
+    .style("fill", "none")
+    .style("pointer-events", "all")
+	.style("cursor", "move")
+	.on("dblclick.zoom", dynzoomToFit);	
+	
 var communityVis = communityGraph.append("svg:g")
 	.attr("class", "plotting-area");
 communityVis.call(communityTooltip);					
-					
+
+var dynamicVis = dynamicGraph.append("svg:g")
+	.attr("class", "plotting-area");				
 					
 /* ------- */			
-
-var dynamicGraph = d3.select("#dynamic-graph")
-	.attr("width", "100%")
-	.attr("height", "100%")
-	.attr("preserveAspectRatio", "xMidYMid meet")
-	.attr("pointer-events", "all")
-	.call(d3.behavior.zoom().on("zoom", redraw));
-var force = d3.layout.force()
-	.charge(-500)
-	.linkDistance(200)
-	.linkStrength(2)
-	.gravity(0.1)
-	.friction(0.2)
-	.size([width, height]); 
 
 var overlay;
 var mapsvg;
@@ -182,7 +271,10 @@ var lastKnownQuery = "";
 var doLastKnownQuery = false;
 
 var communityNode, communityLabel, communityLink;
+var dynamicNode, dynamicLabel, dynamicLink;
 var geolabels, geocircles;
+
+var graphStructure = {};
 
 /*	*	*	*	*	*	*	*	*	*	*	*	*	*	*	*/
 
@@ -300,6 +392,8 @@ $(function () {
 				.append("svg:title")
 				.text(function(d) { return d.track_id; });
 				
+			geocircles.exit().remove();
+				
 			geolabels = g.selectAll("text")
 				.data(currentGeoJson, trackid)
 				.attr('dx', function(d) {
@@ -333,7 +427,8 @@ $(function () {
 					return d.track_id; 
 				});
 
-		  
+			geolabels.exit().remove();
+			
 			//geoenter.exit().remove();
 
 		};
@@ -413,13 +508,26 @@ $(function () {
 					if ($('#heatMapEnabled').is(':checked')) {
 						renderHeatMap();
 					}		
+					
+					if ( $("#level").val() === "1" ) {
+						graphStructure = {};
+					}
 
 					// Community Browser	
 					tau2 = 2 * Math.PI;
 					angle2 = tau2 / data["gephinodes"].length;
 					$.each(data["gephinodes"], function (i, v) {
-						data["gephinodes"][i].x = (width / 4) * Math.cos(i * angle2) + (width / 2);
-						data["gephinodes"][i].y = (height / 4) * Math.sin(i * angle2) + (height / 2);
+						var d = data["gephinodes"][i];
+						d.x = (width / 4) * Math.cos(i * angle2) + (width / 2);
+						d.y = (height / 4) * Math.sin(i * angle2) + (height / 2);
+						
+						if ( $("#level").val() === "1" ) {
+							graphStructure[d.nodename] = {
+								x: d.x,
+								y: d.y
+							};
+						}
+						
 					});
 
 					communityLink = communitySVG.selectAll("line.link").data(data["gephigraph"]);
@@ -511,7 +619,87 @@ $(function () {
 						endTime = new Date(Date.parse(data["end"]));
 		  
 						d3.select('#slidertext').text(moment(startTime).utc().format("YYYY-MM-DDTHH:mm:ss"));
-	
+						
+						// Dynamic Graph
+						tau = 2 * Math.PI;
+						angle = tau / data["result"].length;
+						$.each(data["result"], function (i, v) {
+							data["result"][i].x = (width / 4) * Math.cos(i * angle) + (width / 2);
+							data["result"][i].y = (height / 4) * Math.sin(i * angle) + (height / 2);
+							
+							if ( $("#level").val() === "1" ) {
+								data["result"][i].x = graphStructure[data["result"][i].track_id].x;
+								data["result"][i].y = graphStructure[data["result"][i].track_id].y;
+							}							
+							
+						});
+
+						dynamicLink = dynamicSVG.selectAll("line.link").data(data["graph"]);
+						
+						force.nodes(data["result"])
+							.links(data["graph"])
+							.start();
+							
+						linkgroup = dynamicVis.append("g")
+							.attr("class", "linkgroup")
+							.selectAll("link")
+							.data(data["graph"])
+							.enter();
+		
+						dynamicLink = linkgroup.insert("svg:line", ".node")
+							.attr("class", "link")
+							.style("opacity", 0.0)
+							.style("stroke", "#FFFFFF")
+							.style("stroke-width", 1.0);
+
+						nodegroup = dynamicVis.append("g")
+							.attr("class", "nodegroup")
+							.selectAll("circle")
+							.data(data["result"])
+							.enter();
+
+						dynamicNode = nodegroup.append("circle")
+							.style("cursor", "pointer")
+							.attr("class", "node")
+							.attr("r", 15)
+							//.style("opacity", 0.0)
+							.style("fill", function (d, i) {
+								var c = color(i);
+								if ( $("#level").val() === "1" ) {
+									c = colorMapping[d.track_id];
+								}
+								else {
+									c = colorMapping[d.comm];
+								}
+								return c;
+							})
+							.call(dyndrag);
+							
+						dynamicNode.call(dyndrag)
+							.append("title")
+							.text(function (d) {
+								return d.track_id;
+							});						
+						  
+						dynamicLabel = nodegroup.append("text")
+							.style("pointer-events", "none")
+							.attr("class", "label")
+							.attr("fill", "white")
+							.style("opacity", function(d, i) {
+								var lab = $("#labelsEnabled");
+								if (lab.prop('checked') === true) {
+									return 1.0;
+								}
+								return 0;						
+							})
+							.text( function(d) { 
+								return d.track_id;
+							});		
+							
+						setDynamicSize();						
+						dynrect.style("fill", "black");
+
+/*						
 						// Dynamic Graph
 						tau = 2 * Math.PI;
 						angle = tau / data["result"].length;
@@ -527,7 +715,7 @@ $(function () {
 
 						// Update the links…
 						dynLines = dynamicGraph.selectAll("line.link")
-							.data(data["graph"]/*, edgeid*/);
+							.data(data["graph"]);
 
 						// Enter any new links.
 						dynLines.enter().insert("svg:line", ".node")
@@ -538,7 +726,7 @@ $(function () {
 
 						// Update the nodes
 						dynamicNode = dynamicGraph.selectAll("circle.node")
-							.data(data["result"]/*, nodename*/)
+							.data(data["result"])
 							.style("fill", function(d) {
 								return color(d.track_id);
 							})
@@ -611,9 +799,8 @@ $(function () {
 									return d.y;
 								});										
 							});							
-						
+						*/
 					}
-	  
 				});
 			}
 		});
@@ -726,6 +913,10 @@ function Reset(resetMap) {
 	communityVis.selectAll("line.link").remove();
 	communityVis.selectAll("text.label").remove();
 	
+	communityVis.selectAll("circle.node").remove();
+	communityVis.selectAll("line.link").remove();
+	communityVis.selectAll("text.label").remove();	
+	
 	dynamicGraph.call( function() {
 		var zoom = d3.behavior.zoom().translate([0,0]).scale(1);
 		dynamicGraph.call(zoom.on("zoom", redraw));
@@ -768,6 +959,35 @@ function zoomToFit() {
 	
 	force2.start();
 	tickCommunity();
+}
+
+function dyngraphBounds() {
+	var nodeWidth = 16, nodeHeight = 16;
+    var x = Number.POSITIVE_INFINITY, X=Number.NEGATIVE_INFINITY, y=Number.POSITIVE_INFINITY, Y=Number.NEGATIVE_INFINITY;
+    dynamicNode.each(function (v) {
+        x = Math.min(x, v.x - nodeWidth / 2);
+        X = Math.max(X, v.x + nodeWidth / 2);
+        y = Math.min(y, v.y - nodeHeight / 2);
+        Y = Math.max(Y, v.y + nodeHeight / 2);
+    });
+    return { x: x, X: X, y: y, Y: Y };
+}
+
+function dynzoomToFit() {
+	force.stop();
+	
+	var outer = dynrect;
+    var b = dyngraphBounds();
+    var w = b.X - b.x, h = b.Y - b.y;
+    var cw = outer.attr("width"), ch = outer.attr("height");
+    var s = Math.min(cw / w, ch / h);
+    var tx = (-b.x * s + (cw / s - w) * s / 2), ty = (-b.y * s + (ch / s - h) * s / 2);
+    dynamicZoomer.translate([tx, ty]).scale(s);
+	
+	console.log(tx, ty, s);
+	
+	force.start();
+	tickDynamic();
 }
 
 timeSlider = $("#time-slider").slider({
