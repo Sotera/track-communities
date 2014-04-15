@@ -5,22 +5,25 @@
 	<meta charset="utf-8">
 	
 	<!-- Stylesheets -->
-        <link rel="stylesheet" href="css/jquery-ui-1.9.1.css">
+	<link rel="stylesheet" href="css/jquery-ui-1.9.1.css">
 	<link rel="stylesheet" href="lib/tangelo/css/tangelo.css" type="text/css">
+	
 	<link rel="stylesheet" href="lib/select2/select2.css" type="text/css">
 	<link rel="stylesheet" href="lib/select2/select2-bootstrap.css" type="text/css">
+	
 	<link rel="stylesheet" href="lib/d3/css/d3.slider.css" type="text/css">
 	<link rel="stylesheet" href="lib/d3/css/d3.tip.css" type="text/css">
-	<link rel="stylesheet" href="lib/jQRangeSlider/css/classic-min.css" type="text/css">
+	
 	<link rel="stylesheet" href="lib/clearable_text_field/jquery.clearableTextField.css" type="text/css">
+	
 	<style type="text/css">
 		#map-canvas {
 			width:100%;
 			height:100%;
 		}
-                #slidertext {
-                   font-size: 14px;
-                }
+		#slidertext {
+			font-size: 14px;
+		}
 		svg {
 			display:block; /* required for firefox to give valid
 			height and width used values for getComputedStyle()
@@ -75,18 +78,20 @@
 	<!-- Scripts/Libraries -->
 	<script type="text/javascript" src="lib/jquery/jquery-2.1.0.min.js"></script>
 	<script type="text/javascript" src="lib/jquery-ui/js/jquery-ui-1.10.4.min.js"></script>
-	<script type="text/javascript" src="lib/jquery/jquery.mousewheel.min.js"></script>
-	<script type="text/javascript" src="lib/jQRangeSlider/jQDateRangeSlider-withRuler-min.js"></script>
-	<script type="text/javascript" src="lib/momentjs/moment.min.js"></script>
-	<script type="text/javascript" src="lib/clearable_text_field/jquery.clearableTextField.min.js"></script>
+	
 	<script type="text/javascript" src="lib/tangelo/js/tangelo.js"></script>
 	<script type="text/javascript" src="lib/xdatalogger/draper.activity_logger-2.0.js"></script>
+	
 	<script type="text/javascript" src="lib/d3/js/d3.v3.min.js"></script>
 	<script type="text/javascript" src="lib/d3/js/d3.slider.js"></script>
 	<script type="text/javascript" src="lib/d3/js/d3.tip.js"></script>
+	
 	<script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="lib/select2/select2.js"></script>
+	<script type="text/javascript" src="lib/momentjs/moment.min.js"></script>
+	<script type="text/javascript" src="lib/clearable_text_field/jquery.clearableTextField.min.js"></script>
 	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=visualization"></script>
+	
 	<script type="text/javascript" src="js/Number.js"></script>
 	<script type="text/javascript" src="js/app/config.js"></script> 
 	<script type="text/javascript" src="js/app/util.coordinates.js"></script> 
@@ -102,19 +107,10 @@
 			<div class="span12" style="">
 				<!-- Utilize Tangelo utility to construct Bootstrap-based navigation bar -->
 				<div data-tangelo-type="navbar" data-tangelo-brand="XDATA" data-tangelo-brand-href="#" data-tangelo-app="Track Communities" data-config-load="showConfig" data-config-save="updateConfig">
+				
 					<div data-tangelo-type="config">
-					
 						<h4> Load </h4>
 						<p> Data Table: <input type="hidden" id="track-table" /> <br/> </p>
-						<p>  </p>
-
-						<!--
-						table <input id="track-table" type=text><br/>
-						<div id="graph_stat_string"></div>
-						community id <input id="comm-id" type=text><br/>
-						level <input id="level" type=text><br/>
-						-->
-
 					</div>
 					
 					<div data-tangelo-type="info">
@@ -166,9 +162,8 @@
 					<h5> Find Communities (Time/Geo) </h5>
 					<p style="padding-top:0px;"> <small>
 				                <div style="margin-left: 30px; padding-top:0px; width: 75%;" id="range-slider"></div> 
-                                                <div style="margin-left: 0px; padding-top:0px; width: 92%;"><span id="txt-low-val"></span> <div style="float:right;margin-right: 5px;"><span id="txt-high-val"><span></div></div>
-						<div style="padding-top:0px; width: 75%;" id="dateRangeSliderMsg"><strong>SLIDER:</strong> Data table not loaded.</div> 
-						<!-- <div style="margin-left: 30px; padding-top:0px; width: 75%;" id="dateRangeSlider"></div>  -->
+								<div style="margin-left: 0px; padding-top:0px; width: 92%;"><span id="txt-low-val"></span> <div style="float:right;margin-right: 5px;"><span id="txt-high-val"><span></div></div>
+								<div style="padding-top:0px; width: 75%;" id="dateRangeSliderMsg"><strong>SLIDER:</strong> Data table not loaded.</div> 
 					</small> </p>
 					<p style="padding-top:0px;">
 						<a id="capturePreviousCommunity" class="btn btn-mini" href="#"><i class="icon-backward"></i> Previous</a>
@@ -182,10 +177,6 @@
 					<div id="slidertext">0</div>
 					<a id="play" class="btn btn-mini">Play</a>
 					<div id="speed-slider"></div>					
-				</div>
-				
-				<div class="span4">
-					&nbsp;
 				</div>
 				 
 			</div>
