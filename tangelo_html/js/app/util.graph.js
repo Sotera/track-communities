@@ -1,6 +1,6 @@
 /* Utility Functions, graph and naming helpers */
 
-// Node/edge naming
+// Naming conventions
 function edgeid(edge) { 
 	return edge.source + ':' +  edge.target;
 }
@@ -32,8 +32,47 @@ function SetRelationships(value) {
 		});
 }
 
-// Zoom interactions
+/* Set the display size based on the SVG size and re-draw */
+function setSize() {
+	var svgStyles = window.getComputedStyle(communitySVG.node());
+	var svgW = parseInt(svgStyles["width"]);
+	var svgH = parseInt(svgStyles["height"]);
+			
+	//Set the output range of the scales
+	xScaleCommunity.range([0, svgW]);
+	yScaleCommunity.range([0, svgH]);
+		
+	//re-attach the scales to the zoom behaviour
+	communityZoomer.x(xScaleCommunity)
+	  .y(yScaleCommunity);
+	
+	//resize the background
+	rect.attr("width", svgW)
+		.attr("height", svgH);
 
+	tickCommunity();//re-draw
+}
+function setDynamicSize() {
+	var svgStyles = window.getComputedStyle(dynamicSVG.node());
+	var svgW = parseInt(svgStyles["width"]);
+	var svgH = parseInt(svgStyles["height"]);
+			
+	//Set the output range of the scales
+	dynxScaleCommunity.range([0, svgW]);
+	dynyScaleCommunity.range([0, svgH]);
+		
+	//re-attach the scales to the zoom behaviour
+	dynamicZoomer.x(dynxScaleCommunity)
+	  .y(dynyScaleCommunity);
+	
+	//resize the background
+	dynrect.attr("width", svgW)
+		.attr("height", svgH);
+
+	tickDynamic();//re-draw
+}
+
+// Zoom interactions
 function dyngraphBounds() {
 	var nodeWidth = 16, nodeHeight = 16;
     var x = Number.POSITIVE_INFINITY, X=Number.NEGATIVE_INFINITY, y=Number.POSITIVE_INFINITY, Y=Number.NEGATIVE_INFINITY;
@@ -84,4 +123,72 @@ function zoomToFit() {
 	
 	communityForce.start();
 	tickCommunity();
+}
+
+/*** Set the position of the elements based on data ***/
+function tickCommunity() {
+	communityLink.attr("x1", function(d) { return d.source.x; })
+		.attr("y1", function(d) { return d.source.y; })
+		.attr("x2", function(d) { return d.target.x; })
+		.attr("y2", function(d) { return d.target.y; });
+	communityNode.attr("cx", function(d) { return d.x; })
+		.attr("cy", function(d) { return d.y; });
+	communityLabel.attr("dx", function(d) { return d.x; })
+		.attr("dy", function(d) { return d.y; });	 			
+}
+function tickDynamic() {
+	dynamicLink.attr("x1", function(d) { return d.source.x; })
+		.attr("y1", function(d) { return d.source.y; })
+		.attr("x2", function(d) { return d.target.x; })
+		.attr("y2", function(d) { return d.target.y; });
+	dynamicNode.attr("cx", function(d) { return d.x; })
+		.attr("cy", function(d) { return d.y; });
+	dynamicLabel.attr("dx", function(d) { return d.x; })
+		.attr("dy", function(d) { return d.y; });	 			
+}
+
+/*** Configure drag behaviour ***/
+function dragstarted(d){ 
+	d3.event.sourceEvent.stopPropagation();
+	d3.select(this).classed("fixed", d.fixed = false);
+	d3.select(this).classed("dragging", true);
+	//force2.stop(); //stop ticks while dragging
+}
+function dragged(d){
+	if (d.fixed) return; //root is fixed
+	//get mouse coordinates relative to the visualization coordinate system:
+	//var mouse = d3.mouse(communityVis.node());
+	//d.x = xScaleCommunity.invert(mouse[0]); 
+	//d.y = yScaleCommunity.invert(mouse[1]); 
+	d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
+	d.fixed = true;
+	tickCommunity();//re-position this node and any links
+	d.fixed = false;
+}
+function dragended(d){
+	d3.select(this).classed("dragging", false);
+	d3.select(this).classed("fixed", d.fixed = true);
+	//force2.resume();
+}
+function dyndragstarted(d){ 
+	d3.event.sourceEvent.stopPropagation();
+	d3.select(this).classed("fixed", d.fixed = false);
+	d3.select(this).classed("dragging", true);
+	//force.stop(); //stop ticks while dragging
+}
+function dyndragged(d){
+	if (d.fixed) return; //root is fixed
+	//get mouse coordinates relative to the visualization coordinate system:
+	//var mouse = d3.mouse(communityVis.node());
+	//d.x = xScaleCommunity.invert(mouse[0]); 
+	//d.y = yScaleCommunity.invert(mouse[1]); 
+	d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
+	d.fixed = true;
+	tickDynamic();//re-position this node and any links
+	d.fixed = false;
+}
+function dyndragended(d){
+	d3.select(this).classed("dragging", false);
+	d3.select(this).classed("fixed", d.fixed = true);
+	//force.resume();
 }

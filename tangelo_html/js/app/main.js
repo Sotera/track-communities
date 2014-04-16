@@ -55,78 +55,11 @@ var drag = d3.behavior.drag()
 	.on("dragstart", dragstarted)
 	.on("drag", dragged)
 	.on("dragend", dragended);
-function dragstarted(d){ 
-	d3.event.sourceEvent.stopPropagation();
-	d3.select(this).classed("fixed", d.fixed = false);
-	d3.select(this).classed("dragging", true);
-	//force2.stop(); //stop ticks while dragging
-}
-function dragged(d){
-	if (d.fixed) return; //root is fixed
-	//get mouse coordinates relative to the visualization coordinate system:
-	//var mouse = d3.mouse(communityVis.node());
-	//d.x = xScaleCommunity.invert(mouse[0]); 
-	//d.y = yScaleCommunity.invert(mouse[1]); 
-	d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
-	d.fixed = true;
-	tickCommunity();//re-position this node and any links
-	d.fixed = false;
-}
-function dragended(d){
-	d3.select(this).classed("dragging", false);
-	d3.select(this).classed("fixed", d.fixed = true);
-	//force2.resume();
-}
-
 var dyndrag = d3.behavior.drag()
 	.origin(function(d) { return d; }) //center of circle
 	.on("dragstart", dyndragstarted)
 	.on("drag", dyndragged)
 	.on("dragend", dyndragended);
-function dyndragstarted(d){ 
-	d3.event.sourceEvent.stopPropagation();
-	d3.select(this).classed("fixed", d.fixed = false);
-	d3.select(this).classed("dragging", true);
-	//force.stop(); //stop ticks while dragging
-}
-function dyndragged(d){
-	if (d.fixed) return; //root is fixed
-	//get mouse coordinates relative to the visualization coordinate system:
-	//var mouse = d3.mouse(communityVis.node());
-	//d.x = xScaleCommunity.invert(mouse[0]); 
-	//d.y = yScaleCommunity.invert(mouse[1]); 
-	d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
-	d.fixed = true;
-	tickDynamic();//re-position this node and any links
-	d.fixed = false;
-}
-function dyndragended(d){
-	d3.select(this).classed("dragging", false);
-	d3.select(this).classed("fixed", d.fixed = true);
-	//force.resume();
-}
-
-/*** Set the position of the elements based on data ***/
-function tickCommunity() {
-	communityLink.attr("x1", function(d) { return d.source.x; })
-		.attr("y1", function(d) { return d.source.y; })
-		.attr("x2", function(d) { return d.target.x; })
-		.attr("y2", function(d) { return d.target.y; });
-	communityNode.attr("cx", function(d) { return d.x; })
-		.attr("cy", function(d) { return d.y; });
-	communityLabel.attr("dx", function(d) { return d.x; })
-		.attr("dy", function(d) { return d.y; });	 			
-}
-function tickDynamic() {
-	dynamicLink.attr("x1", function(d) { return d.source.x; })
-		.attr("y1", function(d) { return d.source.y; })
-		.attr("x2", function(d) { return d.target.x; })
-		.attr("y2", function(d) { return d.target.y; });
-	dynamicNode.attr("cx", function(d) { return d.x; })
-		.attr("cy", function(d) { return d.y; });
-	dynamicLabel.attr("dx", function(d) { return d.x; })
-		.attr("dy", function(d) { return d.y; });	 			
-}
 
 var communityTooltip = d3.tip()
 	.attr('class', 'd3-tip')
@@ -138,46 +71,6 @@ var communityTooltip = d3.tip()
 			+ '</small>';
 		return html;
 	});
-
-/* Set the display size based on the SVG size and re-draw */
-function setSize() {
-	var svgStyles = window.getComputedStyle(communitySVG.node());
-	var svgW = parseInt(svgStyles["width"]);
-	var svgH = parseInt(svgStyles["height"]);
-			
-	//Set the output range of the scales
-	xScaleCommunity.range([0, svgW]);
-	yScaleCommunity.range([0, svgH]);
-		
-	//re-attach the scales to the zoom behaviour
-	communityZoomer.x(xScaleCommunity)
-	  .y(yScaleCommunity);
-	
-	//resize the background
-	rect.attr("width", svgW)
-		.attr("height", svgH);
-
-	tickCommunity();//re-draw
-}
-function setDynamicSize() {
-	var svgStyles = window.getComputedStyle(dynamicSVG.node());
-	var svgW = parseInt(svgStyles["width"]);
-	var svgH = parseInt(svgStyles["height"]);
-			
-	//Set the output range of the scales
-	dynxScaleCommunity.range([0, svgW]);
-	dynyScaleCommunity.range([0, svgH]);
-		
-	//re-attach the scales to the zoom behaviour
-	dynamicZoomer.x(dynxScaleCommunity)
-	  .y(dynyScaleCommunity);
-	
-	//resize the background
-	dynrect.attr("width", svgW)
-		.attr("height", svgH);
-
-	tickDynamic();//re-draw
-}
 
 //adapt size to window changes:
 window.addEventListener("resize", setSize, false);
@@ -860,3 +753,85 @@ function Reset(resetMap) {
 }
 
 
+$(document).ready( function() {
+	$("#track-table").select2({
+		width: '200',
+		placeholder: "Select a data set...",
+		minimumResultsForSearch: -1,
+		ajax: {
+			url: "community/tables",
+			dataType: 'json',
+			results: function (data, page) { 
+				var results = [];
+				for (var i=0, len=data.tables.length; i<len; i++) {
+					var t = data.tables[i];
+					results.push({
+						id: t,
+						text: t
+					});
+				}
+				return {"results": results};
+			}
+		},
+		initSelection : function (element, callback) {
+			var data = {id: element.val(), text: element.val()};
+			callback(data);
+		}				
+	});
+	$("#level").select2({
+		width: "resolve",
+		placeholder: "...",
+		minimumResultsForSearch: -1,
+		allowClear: false,
+		data: []
+	});	
+	$("#heatMapEnabled").on( "change", function() {
+		var hm = $("#heatMapEnabled");
+		if (hm.prop('checked') === true) {
+			if ( $("#track-table").val() !== "") {
+				renderHeatMap();
+			}
+		}
+		else {
+			heatmap.setMap(null);
+		}
+	});
+	$("#labelsEnabled").on( "change", function() {
+		var lab = communityVis.selectAll("text.label")
+			.style("opacity", function(d, i) {
+				var lab = $("#labelsEnabled");
+				if (lab.prop('checked') === true) {
+					return 1.0;
+				}
+				return 0;						
+			});
+			
+		var map = g.selectAll("text.label")
+			.style("opacity", function(d,i) {
+				var lab = $("#labelsEnabled");
+				if (lab.prop('checked') === true) {
+					return 1.0;
+				}
+				return 0;						
+			});				
+		
+		var dyn = dynamicVis.selectAll("text.label")
+			.style("opacity", function(d,i) {
+				var lab = $("#labelsEnabled");
+				if (lab.prop('checked') === true) {
+					return 1.0;
+				}
+				return 0;						
+			});
+	});			
+	
+	$('#comm-id').clearableTextField();
+	
+	timeSlider = $("#time-slider").slider({
+	  slide: function(evt, ui){
+		SetCircles(ui.value);
+		SetRelationships(ui.value);
+	  }
+	});			
+	
+});
