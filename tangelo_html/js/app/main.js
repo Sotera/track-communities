@@ -61,6 +61,7 @@ var dyndrag = d3.behavior.drag()
 	.on("drag", dyndragged)
 	.on("dragend", dyndragended);
 
+/*** Stylized tool tip behaviour ***/
 var communityTooltip = d3.tip()
 	.attr('class', 'd3-tip')
 	.html(function(d) { 
@@ -72,7 +73,6 @@ var communityTooltip = d3.tip()
 		return html;
 	});
 
-//adapt size to window changes:
 window.addEventListener("resize", setSize, false);
 window.addEventListener("resize", setDynamicSize, false);
 
@@ -118,7 +118,6 @@ var dynamicVis = dynamicGraph.append("svg:g")
 	.attr("class", "plotting-area");				
 					
 /***	GLOBALS		***/			
-
 var overlay;
 var mapsvg;
 var g;
