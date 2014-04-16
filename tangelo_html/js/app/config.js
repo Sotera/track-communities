@@ -11,10 +11,13 @@ function updateConfig() {
 	table = $("#track-table").val();
 	// Save the selected data set table name...
 	if (table) {
+		XDATA.LOGGER.logUserActivity("User selected data table and maximum graph size.", "select_option",  XDATA.LOGGER.WF_GETDATA);
 		$.get("community/settable/" + table)
 			.then( function(){
+				XDATA.LOGGER.logSystemActivity("System has set data table.");
 				// ... then get information about that table... 
 				$.get("community/current").done(function(cfg){
+					XDATA.LOGGER.logSystemActivity("System has retrieved current community information.");
 					// ... then update the visualization.
 					d3.select("#graph_stat_string").text(cfg.graph_stat_string);
 					d3.select("#level").property("value", cfg.graph_num_levels);
@@ -35,7 +38,8 @@ function updateConfig() {
 						minimumResultsForSearch: -1,
 						allowClear: false,
 						data: lvlData
-					});			
+					});	
+					XDATA.LOGGER.logSystemActivity("System has set community interaction controls.");					
 					// Handle geo/map filter controls
 					if (cfg.mindt && cfg.maxdt) {
 						var arr = [];
@@ -72,11 +76,12 @@ function updateConfig() {
 								max: max,
 								min: min,
 								values: [min, max]
-						});
+						});	
 					}
 					else {
 						$("#dateRangeSliderMsg").html("Not available.");	
-					}					
+					}
+					XDATA.LOGGER.logSystemActivity("System has set geospatial and time bounds information.");					
 
 					// Finish up and refresh display.
 					$("#community-info-box").toggle(true);	
@@ -93,6 +98,8 @@ function updateConfig() {
 					
 					$("#applyCommunity").prop("disabled", false);
 					
+					XDATA.LOGGER.logSystemActivity("System has refreshed interaction controls.");					
+					
 					resetPanels();
 			
 				});
@@ -105,17 +112,26 @@ function updateCommunities() {
   var comm = $("#comm-id").val() || "";
   var level = $("#level").val() || "";
   
+  XDATA.LOGGER.logUserActivity("User has requested a community visualization update.", "write_query",  XDATA.LOGGER.WF_GETDATA);
+  
   if (table) {
 	  $.get("community/settable/" + table)
 		.then(function(){
+		  XDATA.LOGGER.logSystemActivity("System has set data table.");
 		  if (comm !== "" && level !== "") {
 			$.get("community/setcomm/" + comm + '/' + level)
-				.then(reloadPanels);
+				.then( function() {
+					XDATA.LOGGER.logSystemActivity("System has set community and level information.");
+					reloadPanels();
+				});
 		  }
 		  else {
 			resetPanels();
 		 }
 	  });
+  }
+  else {
+	XDATA.LOGGER.logSystemActivity("System cannot process request: data table not set.");
   }
 
 }
@@ -125,23 +141,24 @@ function filterCommunities() {
   var comm = $("#comm-id").val() || "";
   var level = $("#level").val() || "";
   
+	XDATA.LOGGER.logUserActivity("User has requested geo-time community search.", "write_query",  XDATA.LOGGER.WF_GETDATA);  
+  
   if (table) {
 	  $.get("community/settable/" + table)
 		.then(function(){
-
+		  XDATA.LOGGER.logSystemActivity("System has set data table.");
+		  
 		  var n = $("#graph_num_levels").val();
 		  $("#level").select2("val", n);
 		  $("#comm-id").val("");
 		  $('#comm-id').clearableTextField();
+		  XDATA.LOGGER.logSystemActivity("System has refreshed interaction controls.");
 		  
-		  if (comm !== "" && level !== "") {
-			$.get("community/setcomm/" + comm + '/' + level)
-				.then(reloadPanels);
-		  }
-		  else {
-			reloadPanels();
-		 }
+		  reloadPanels();
 	  });
   }
+  else {
+	XDATA.LOGGER.logSystemActivity("System cannot process request: data table not set.");
+  }  
 
 }

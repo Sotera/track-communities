@@ -686,14 +686,14 @@ $(function () {
 	$("#captureCommunity").click(function(e) {
 		e.stopPropagation();
 		e.preventDefault();	
-		filterCommunities(); //filterCommunities();
+		filterCommunities();
 	});
 	
 	$("#capturePreviousCommunity").click(function(e) {
 		e.stopPropagation();
 		e.preventDefault();
 		doLastKnownQuery = true;
-		filterCommunities(); //filterCommunities();
+		filterCommunities();
 	});	
   
 	$("#reset").click(function () {
