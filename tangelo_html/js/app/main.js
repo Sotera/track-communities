@@ -1,27 +1,24 @@
 /* Initialization */
+XDATA.LOGGER.registerActivityLogger(XDATA["LOGGER_URI"], XDATA["LOGGER_COMPONENT"], XDATA["LOGGER_COMPONENT_VER"]);
 
 var color = d3.scale.category20();
 var colorMapping = {};
 
-var width = 500, w = 500; //960;
-var height = 500, h = 500; //480;
+var width = 500;
+var height = 500;
 
 /*** Create scales to handle zoom coordinates ***/
 var xScaleCommunity = d3.scale.linear()
-   .domain([0,w]);
+   .domain([0,width]);
 var yScaleCommunity = d3.scale.linear()
-   .domain([0,h]);
-   
+   .domain([0,height]);
 var dynxScaleCommunity = d3.scale.linear()
-   .domain([0,w]);
+   .domain([0,width]);
 var dynyScaleCommunity = d3.scale.linear()
-   .domain([0,h]);
-
-//ranges will be set later based on the size
-//of the SVG
+   .domain([0,height]);
 
 /*** Configure Force Layout ***/
-var force = d3.layout.force()
+var dynamicForce = d3.layout.force()
 	.on("tick", tickDynamic)
 	.charge(-500)
 	.linkDistance(200)
@@ -29,8 +26,7 @@ var force = d3.layout.force()
 	.gravity(0.1)
 	.friction(0.2)
 	.size([width, height]); 
-	
-var force2 = d3.layout.force()
+var communityForce = d3.layout.force()
 	.on("tick", tickCommunity)
 	.charge(-500)
 	.linkDistance(200)
@@ -46,7 +42,6 @@ var communityZoomer = d3.behavior.zoom()
 function communityZoom() {
 	 communityVis.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 }
-
 var dynamicZoomer = d3.behavior.zoom()
 	.scaleExtent([0.01,100])
 	.on("zoom", dynamicZoom);
@@ -60,7 +55,6 @@ var drag = d3.behavior.drag()
 	.on("dragstart", dragstarted)
 	.on("drag", dragged)
 	.on("dragend", dragended);
-
 function dragstarted(d){ 
 	d3.event.sourceEvent.stopPropagation();
 	d3.select(this).classed("fixed", d.fixed = false);
@@ -89,7 +83,6 @@ var dyndrag = d3.behavior.drag()
 	.on("dragstart", dyndragstarted)
 	.on("drag", dyndragged)
 	.on("dragend", dyndragended);
-
 function dyndragstarted(d){ 
 	d3.event.sourceEvent.stopPropagation();
 	d3.select(this).classed("fixed", d.fixed = false);
@@ -124,7 +117,6 @@ function tickCommunity() {
 	communityLabel.attr("dx", function(d) { return d.x; })
 		.attr("dy", function(d) { return d.y; });	 			
 }
-
 function tickDynamic() {
 	dynamicLink.attr("x1", function(d) { return d.source.x; })
 		.attr("y1", function(d) { return d.source.y; })
@@ -164,10 +156,7 @@ function setSize() {
 	//resize the background
 	rect.attr("width", svgW)
 		.attr("height", svgH);
-		
-	//console.log("Rect size: " + svgW + " x " + svgH);
-   
-	//console.log(xScaleCommunity.range(), yScaleCommunity.range());
+
 	tickCommunity();//re-draw
 }
 function setDynamicSize() {
@@ -186,10 +175,7 @@ function setDynamicSize() {
 	//resize the background
 	dynrect.attr("width", svgW)
 		.attr("height", svgH);
-		
-	//console.log("Rect size: " + svgW + " x " + svgH);
-   
-	//console.log(xScaleCommunity.range(), yScaleCommunity.range());
+
 	tickDynamic();//re-draw
 }
 
@@ -200,7 +186,6 @@ window.addEventListener("resize", setDynamicSize, false);
 var communitySVG = d3.select("#communityGraph").append("svg:svg")
     .attr("width", "100%")
     .attr("height", "100%");
-
 var communityGraph = communitySVG.append("g")
 	.attr("class", "graph")
 	.call(communityZoomer);
@@ -208,7 +193,6 @@ var communityGraph = communitySVG.append("g")
 var dynamicSVG = d3.select("#dynamicGraph").append("svg:svg")
     .attr("width", "100%")
     .attr("height", "100%");
-
 var dynamicGraph = dynamicSVG.append("g")
 	.attr("class", "graph")
 	.call(dynamicZoomer);	
@@ -225,7 +209,6 @@ var rect = communityGraph.append("rect")
     .style("pointer-events", "all")
 	.style("cursor", "move")
 	.on("dblclick.zoom", zoomToFit);
-	
 var dynrect = dynamicGraph.append("rect")
     .attr("width", width)
     .attr("height", height)
@@ -241,11 +224,10 @@ communityVis.call(communityTooltip);
 var dynamicVis = dynamicGraph.append("svg:g")
 	.attr("class", "plotting-area");				
 					
-/* ------- */			
+/***	GLOBALS		***/			
 
 var overlay;
 var mapsvg;
-
 var g;
 var googleMapProjection;
 var currentGeoJson = [];
@@ -540,7 +522,7 @@ $(function () {
 
 						communityLink = communitySVG.selectAll("line.link").data(data["gephigraph"]);
 						
-						force2.nodes(data["gephinodes"])
+						communityForce.nodes(data["gephinodes"])
 							.links(data["gephigraph"])
 							.start();
 							
@@ -612,11 +594,13 @@ $(function () {
 							.on('mouseout', communityTooltip.hide)						
 							.call(drag);
 							
-						/*communityNode.call(drag)
+						/*
+						communityNode.call(drag)
 							.append("title")
 							.text(function (d) {
 								return d.nodename + " / " + d.node_comm;
-							});*/							
+							});
+						*/							
 						  
 						communityLabel = nodegroup.append("text")
 							.style("pointer-events", "none")
@@ -677,7 +661,7 @@ $(function () {
 
 							dynamicLink = dynamicSVG.selectAll("line.link").data(data["graph"]);
 							
-							force.nodes(data["result"])
+							dynamicForce.nodes(data["result"])
 								.links(data["graph"])
 								.start();
 								
@@ -870,11 +854,6 @@ function Reset(resetMap) {
 	communityVis.selectAll("circle.node").remove();
 	communityVis.selectAll("line.link").remove();
 	communityVis.selectAll("text.label").remove();	
-	
-	//dynamicGraph.call( function() {
-	//	var zoom = d3.behavior.zoom().translate([0,0]).scale(1);
-	//	dynamicGraph.call(zoom.on("zoom", redraw));
-	//});	
     
 	if (resetMap === true) { 
 		map.setCenter(new google.maps.LatLng(0, 0));
@@ -905,7 +884,7 @@ function graphBounds() {
 }
 
 function zoomToFit() {
-	force2.stop();
+	communityForce.stop();
 	
 	var outer = rect;
     var b = graphBounds();
@@ -915,7 +894,7 @@ function zoomToFit() {
     var tx = (-b.x * s + (cw / s - w) * s / 2), ty = (-b.y * s + (ch / s - h) * s / 2);
     communityZoomer.translate([tx, ty]).scale(s);
 	
-	force2.start();
+	communityForce.start();
 	tickCommunity();
 }
 
@@ -932,7 +911,7 @@ function dyngraphBounds() {
 }
 
 function dynzoomToFit() {
-	force.stop();
+	dynamicForce.stop();
 	
 	var outer = dynrect;
     var b = dyngraphBounds();
@@ -942,9 +921,7 @@ function dynzoomToFit() {
     var tx = (-b.x * s + (cw / s - w) * s / 2), ty = (-b.y * s + (ch / s - h) * s / 2);
     dynamicZoomer.translate([tx, ty]).scale(s);
 	
-	console.log(tx, ty, s);
-	
-	force.start();
+	dynamicForce.start();
 	tickDynamic();
 }
 
