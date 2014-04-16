@@ -1,5 +1,18 @@
 /* Utility Functions, map and overlay helpers */
 
+function renderHeatMap() {
+	$.ajax({
+		"url":"heatmap/map",
+		"type" : "GET"
+	}).done(function(data){
+		eval("var heatdata = " + data);
+		heatmap.setMap(null);
+		heatmap.setData(heatdata);
+		heatmap.set('radius', heatmap.get('radius') ? null : 15);
+		heatmap.setMap(map);
+	});
+}
+
 function SetCircles(value) {
   var currentDate = new Date(startTime.getTime() + ((endTime.getTime() - startTime.getTime()) * value / 100));
   d3.select('#slidertext').text(moment(currentDate).utc().format("YYYY-MM-DDTHH:mm:ss"));

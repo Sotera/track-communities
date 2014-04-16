@@ -825,18 +825,7 @@ $(function () {
 
 });
 
-function renderHeatMap() {
-	$.ajax({
-		"url":"heatmap/map",
-		"type" : "GET"
-	}).done(function(data){
-		eval("var heatdata = " + data);
-		heatmap.setMap(null);
-		heatmap.setData(heatdata);
-		heatmap.set('radius', heatmap.get('radius') ? null : 15);
-		heatmap.setMap(map);
-	});
-}
+
 
 function Reset(resetMap) {
 	//console.log("Current Bounds: "+map.getBounds());
@@ -871,63 +860,3 @@ function Reset(resetMap) {
 }
 
 
-function graphBounds() {
-	var nodeWidth = 16, nodeHeight = 16;
-    var x = Number.POSITIVE_INFINITY, X=Number.NEGATIVE_INFINITY, y=Number.POSITIVE_INFINITY, Y=Number.NEGATIVE_INFINITY;
-    communityNode.each(function (v) {
-        x = Math.min(x, v.x - nodeWidth / 2);
-        X = Math.max(X, v.x + nodeWidth / 2);
-        y = Math.min(y, v.y - nodeHeight / 2);
-        Y = Math.max(Y, v.y + nodeHeight / 2);
-    });
-    return { x: x, X: X, y: y, Y: Y };
-}
-
-function zoomToFit() {
-	communityForce.stop();
-	
-	var outer = rect;
-    var b = graphBounds();
-    var w = b.X - b.x, h = b.Y - b.y;
-    var cw = outer.attr("width"), ch = outer.attr("height");
-    var s = Math.min(cw / w, ch / h);
-    var tx = (-b.x * s + (cw / s - w) * s / 2), ty = (-b.y * s + (ch / s - h) * s / 2);
-    communityZoomer.translate([tx, ty]).scale(s);
-	
-	communityForce.start();
-	tickCommunity();
-}
-
-function dyngraphBounds() {
-	var nodeWidth = 16, nodeHeight = 16;
-    var x = Number.POSITIVE_INFINITY, X=Number.NEGATIVE_INFINITY, y=Number.POSITIVE_INFINITY, Y=Number.NEGATIVE_INFINITY;
-    dynamicNode.each(function (v) {
-        x = Math.min(x, v.x - nodeWidth / 2);
-        X = Math.max(X, v.x + nodeWidth / 2);
-        y = Math.min(y, v.y - nodeHeight / 2);
-        Y = Math.max(Y, v.y + nodeHeight / 2);
-    });
-    return { x: x, X: X, y: y, Y: Y };
-}
-
-function dynzoomToFit() {
-	dynamicForce.stop();
-	
-	var outer = dynrect;
-    var b = dyngraphBounds();
-    var w = b.X - b.x, h = b.Y - b.y;
-    var cw = outer.attr("width"), ch = outer.attr("height");
-    var s = Math.min(cw / w, ch / h);
-    var tx = (-b.x * s + (cw / s - w) * s / 2), ty = (-b.y * s + (ch / s - h) * s / 2);
-    dynamicZoomer.translate([tx, ty]).scale(s);
-	
-	dynamicForce.start();
-	tickDynamic();
-}
-
-timeSlider = $("#time-slider").slider({
-  slide: function(evt, ui){
-	SetCircles(ui.value);
-	SetRelationships(ui.value);
-  }
-});

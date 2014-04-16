@@ -274,6 +274,13 @@
 			
 			$('#comm-id').clearableTextField();
 			
+			timeSlider = $("#time-slider").slider({
+			  slide: function(evt, ui){
+				SetCircles(ui.value);
+				SetRelationships(ui.value);
+			  }
+			});			
+			
 		});
 	</script>
 	
