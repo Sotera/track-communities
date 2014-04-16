@@ -1,45 +1,14 @@
 /* Tangelo Framework Configuration, Tab Controls */
 
-function setConfig() {
-  $.get("community/current").done(function(cfg){
-	//TODO: Manually force them to pick table on load to avoid GO/RESET/REFRESH issue.
-	
-	// track table information
-    //d3.select("#track-table").property("value", cfg.table);
-	//$("#track-table").select2("val", cfg.table);
-	//d3.select("#graph_stat_string").text(cfg.graph_stat_string);
-	
-	// community information
-    //d3.select("#comm-id").property("value", cfg.community);
-    //d3.select("#level").property("value", cfg.level || cfg.graph_num_levels);
-	//d3.select("#graph_num_levels").property("value", cfg.graph_num_levels);
-	//$("#level").setValue(cfg.graph_num_levels);
-    
-  });
-
-}
-
 function showConfig() {
-  // TODO: THIS DOESN'T APPEAR TO BE NECESSARY GIVEN SETCONFIG()
-  /*
-  $.get("community/current").done(function(cfg){
-	
-	// track table information
-    //d3.select("#track-table").property("value", cfg.table);
-	//d3.select("#graph_stat_string").text(cfg.graph_stat_string);
-	
-	// community information
-    //d3.select("#comm-id").property("value", cfg.community);
-    //d3.select("#level").property("value", cfg.graph_num_levels);
-    
-  });
-  */
+  // NOT NECESSARY FOR ANY ACTIONS GIVEN NON-SERVER RETRIEVE/SAVE USAGE
+  // KEPT HERE DUE TO TANGELO FRAMEWORK REFERENCE.
 }
 
 function updateConfig() {
 	var table, comm, level;
+	
 	table = $("#track-table").val();
-
 	// Save the selected data set table name...
 	if (table) {
 		$.get("community/settable/" + table)
@@ -129,15 +98,12 @@ function updateConfig() {
 				});
 			});
 	}
-
-		
 }
 
 function updateCommunities() {
-  var table, comm, level;
-  table = $("#track-table").val();
-  comm = $("#comm-id").val() || "";
-  level = $("#level").val() || "";
+  var table = $("#track-table").val();
+  var comm = $("#comm-id").val() || "";
+  var level = $("#level").val() || "";
   
   if (table) {
 	  $.get("community/settable/" + table)
@@ -155,15 +121,14 @@ function updateCommunities() {
 }
 
 function filterCommunities() {
-  var table, comm, level;
-  table = $("#track-table").val();
-  comm = $("#comm-id").val() || "";
-  level = $("#level").val() || "";
+  var table = $("#track-table").val();
+  var comm = $("#comm-id").val() || "";
+  var level = $("#level").val() || "";
   
   if (table) {
 	  $.get("community/settable/" + table)
 		.then(function(){
-		
+
 		  var n = $("#graph_num_levels").val();
 		  $("#level").select2("val", n);
 		  $("#comm-id").val("");

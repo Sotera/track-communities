@@ -156,7 +156,6 @@ var MAX_GRAPH_SIZE = 1000; // default, but is configurable in the UI
 
 $(function () {
 	
-	setConfig();
 	d3.select('#slidertext').text(moment(startTime).utc().format("YYYY-MM-DDTHH:mm:ss"));
   
 	//create google map
