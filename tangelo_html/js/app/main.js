@@ -566,6 +566,39 @@ $(function () {
 						communityNode = nodegroup.append("circle")
 							.attr("class", "node")
 							.style("cursor", "pointer")
+							.on("mousedown", function(d) {
+								var html = "";
+								html = "ID="+d.nodename+"; COMM="+d.node_comm+"; LVL="+d.level+"; MEMBERS="+d.num_members;
+								$("#selectedCommunityText").html(html);	
+								html = '&nbsp;&nbsp;(<a id="openSelectedCommunity" class="xbtn xbtn-mini" href="#">Open<i class="icon-play"></i></a>)';
+								$("#selectedCommunityButtonSpan").html(html);
+								
+								$("#openSelectedCommunity").click(function(e) {
+									e.preventDefault();
+									var text = $("#selectedCommunityText").html();
+									var parts = text.split(';');
+									var comm = parts[1].split('=')[1];
+									var level = parts[2].split('=')[1];
+									//if (level === 0) level = 1;
+									//var service = '?comm="'+comm+'"&lev="'+level+'"';
+									var table = $("#track-table").val();
+									
+									$("#level").select2("val", level);
+									$("#comm-id").val(comm.toString());
+									$('#comm-id').clearableTextField();	
+									capturedGeo = "";				
+
+									$.get("community/settable/" + table)
+										.then(function(){
+											$.get("community/setcomm/" + comm + '/' + level)
+												.then( function() {
+													refreshFunction();
+												});
+										});
+			
+								});			
+													
+							})
 							.on("dblclick", openCommunity)
 							.attr("r", function (d) {
 								return parseInt(d.num_members) + 4;
@@ -838,10 +871,10 @@ function Reset(resetMap) {
 	communityVis.selectAll("line.link").remove();
 	communityVis.selectAll("text.label").remove();	
 	
-	dynamicGraph.call( function() {
-		var zoom = d3.behavior.zoom().translate([0,0]).scale(1);
-		dynamicGraph.call(zoom.on("zoom", redraw));
-	});	
+	//dynamicGraph.call( function() {
+	//	var zoom = d3.behavior.zoom().translate([0,0]).scale(1);
+	//	dynamicGraph.call(zoom.on("zoom", redraw));
+	//});	
     
 	if (resetMap === true) { 
 		map.setCenter(new google.maps.LatLng(0, 0));
@@ -849,11 +882,15 @@ function Reset(resetMap) {
 	}
 	
 	timeSlider.slider({value: 0 });
+	
+	$("#selectedCommunityText").html('n/a');	
+	$("#selectedCommunityButtonSpan").html('');	
 
 	colorMapping = {};
 	currentGeoJson = [];
 	overlay.draw();
 }
+
 
 function graphBounds() {
 	var nodeWidth = 16, nodeHeight = 16;

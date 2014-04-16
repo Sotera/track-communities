@@ -29,10 +29,6 @@
 			height and width used values for getComputedStyle()
 			see https://bugzilla.mozilla.org/show_bug.cgi?id=874919 
 			*/
-			//border: solid 1px gray;
-			//margin:1em;
-			<!-- height:calc(100% - 2em); -->
-			<!-- width: calc(100% - 2em); -->
 		}
 		circle.node {
 			stroke: #555;
@@ -139,7 +135,7 @@
 						<p> Use the [Map] and [Find Communities] search in the center pane to filter your graph. </p>						
 					</div>
 				</div>
-				
+
 				<div id="communityGraph"></div>
 
 			</div>
@@ -163,7 +159,15 @@
 				<div class="span4">
                     <h5> Community Info </h5>
 					<input id="graph_num_levels" type="hidden" />
-					<p style="padding-top:0px;"> <small> <strong>INFO:</strong> <span id="graph_stat_string">Data table not loaded.</span> </small> </p>					
+					<p style="padding-top:0px;"> 
+						<small> <strong>INFO:</strong> <span id="graph_stat_string">Data table not loaded.</span> </small> <br/>
+						<span id="selectedCommunityNodeInfo">
+							<small>
+								<strong> LAST SELECT: </strong>
+								<span id="selectedCommunityText">n/a</span><span id="selectedCommunityButtonSpan"></span>
+							</small>
+						</span>						
+					</p>					
 					<p style="padding-top:0px;"> <small> <strong>ID&nbsp;&nbsp;:</strong> </small> <input id="comm-id" type="text" disabled="true" style="padding: 6px; margin:0; height: 28px;" /> <small> <strong>LVL:</strong> </small> <input id="level" type="text" disabled="true" style="width: 75px;" />  <a id="applyCommunity" class="btn btn-mini" href="#"><i class="icon-search"></i> Go</a> </p>
 				</div>
 	
