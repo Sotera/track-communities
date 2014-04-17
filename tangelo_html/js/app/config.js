@@ -112,7 +112,7 @@ function updateCommunities() {
   var comm = $("#comm-id").val() || "";
   var level = $("#level").val() || "";
   
-  XDATA.LOGGER.logUserActivity("User has requested a community visualization update.", "write_query",  XDATA.LOGGER.WF_GETDATA);
+  XDATA.LOGGER.logUserActivity("User has requested a community visualization update.", "execute_query",  XDATA.LOGGER.WF_GETDATA);
   
   if (table) {
 	  $.get("community/settable/" + table)
@@ -141,7 +141,7 @@ function filterCommunities() {
   var comm = $("#comm-id").val() || "";
   var level = $("#level").val() || "";
   
-	XDATA.LOGGER.logUserActivity("User has requested geo-time community search.", "write_query",  XDATA.LOGGER.WF_GETDATA);  
+  XDATA.LOGGER.logUserActivity("User has requested geo-time community search.", "execute_query",  XDATA.LOGGER.WF_GETDATA);  
   
   if (table) {
 	  $.get("community/settable/" + table)

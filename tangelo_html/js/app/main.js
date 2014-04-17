@@ -254,6 +254,12 @@ $(function () {
 					var coordinates = googleMapProjection([0, d.coordinates[0][1]]);
 					return coordinates[1];
 				})
+				.on('mouseover', function(e) {
+					XDATA.LOGGER.logUserActivity("User has requested to read track metadata on map.", "read",  XDATA.LOGGER.WF_EXPLORE);
+				})
+				.on('mouseout', function(e) {
+					XDATA.LOGGER.logUserActivity("User is no longer reading track metadata on map.", "read",  XDATA.LOGGER.WF_EXPLORE);
+				})				
 				.attr('r', 8)
 				.attr("opacity", 1)
 				.attr("fill", function (d, i) {
@@ -333,12 +339,13 @@ $(function () {
   
 	var refreshFunction = function (doReset) {
 	
+		XDATA.LOGGER.logSystemActivity("System is refreshing application based on set options.");
+	
 		Reset(doReset);
 		$("#communityBrowserForm").hide();
 		$("#communityBrowserTooLarge").hide();
 		$("#communityBrowserGraph").hide();	
 
-    
 		$.ajax({
 			url: 'community/getcomm/',      
 			type: 'GET',
@@ -452,24 +459,30 @@ $(function () {
 								$("#selectedCommunityButtonSpan").html(html);
 								
 								$("#openSelectedCommunity").click(function(e) {
+								
+									XDATA.LOGGER.logUserActivity("User has requested to open a node in the community graph.", "select",  XDATA.LOGGER.WF_EXPLORE);
+									
 									e.preventDefault();
 									var text = $("#selectedCommunityText").html();
 									var parts = text.split(';');
 									var comm = parts[1].split('=')[1];
 									var level = parts[2].split('=')[1];
 									//if (level === 0) level = 1;
-									//var service = '?comm="'+comm+'"&lev="'+level+'"';
 									var table = $("#track-table").val();
 									
 									$("#level").select2("val", level);
 									$("#comm-id").val(comm.toString());
 									$('#comm-id').clearableTextField();	
-									capturedGeo = "";				
+									capturedGeo = "";	
+
+									XDATA.LOGGER.logSystemActivity("System has refreshed interaction controls.");
 
 									$.get("community/settable/" + table)
 										.then(function(){
+											XDATA.LOGGER.logSystemActivity("System has set data table.");
 											$.get("community/setcomm/" + comm + '/' + level)
 												.then( function() {
+													XDATA.LOGGER.logSystemActivity("System has set community and level information.");
 													refreshFunction();
 												});
 										});
@@ -486,8 +499,14 @@ $(function () {
 								colorMapping[d.nodename] = c;
 								return c;
 							})
-							.on('mouseover', communityTooltip.show)
-							.on('mouseout', communityTooltip.hide)						
+							.on('mouseover', function(e) {
+								XDATA.LOGGER.logUserActivity("User has requested to read community metadata.", "read",  XDATA.LOGGER.WF_EXPLORE);
+								communityTooltip.show(e);
+							})
+							.on('mouseout', function(e) {
+								XDATA.LOGGER.logUserActivity("User is no longer reading community metadata.", "read",  XDATA.LOGGER.WF_EXPLORE);
+								communityTooltip.hide(e);
+							})
 							.call(drag);
 							
 						/*
@@ -517,6 +536,8 @@ $(function () {
 							});		
 							
 						setSize();
+						
+						XDATA.LOGGER.logSystemActivity("System has generated community browser.");
 
 						// Handle map, dynamic graph render only if there is existing data...
 						if (data["result"]) {
@@ -534,12 +555,16 @@ $(function () {
 							var ne = new google.maps.LatLng(data.bounds.north, data.bounds.east);
 							map.fitBounds(new google.maps.LatLngBounds(sw, ne));
 
-							overlay.draw();						
+							overlay.draw();			
+
+							XDATA.LOGGER.logSystemActivity("System has generated map.");
 
 							startTime = new Date(Date.parse(data["start"]));
 							endTime = new Date(Date.parse(data["end"]));
 			  
 							d3.select('#slidertext').text(moment(startTime).utc().format("YYYY-MM-DDTHH:mm:ss"));
+							
+							XDATA.LOGGER.logSystemActivity("System has refreshed track playback controls.");
 							
 							// Dynamic Graph
 							tau = 2 * Math.PI;
@@ -583,7 +608,12 @@ $(function () {
 								.style("cursor", "pointer")
 								.attr("class", "node")
 								.attr("r", 15)
-								//.style("opacity", 0.0)
+								.on('mouseover', function(e) {
+									XDATA.LOGGER.logUserActivity("User has requested to read track metadata on dynamic graph.", "read",  XDATA.LOGGER.WF_EXPLORE);
+								})
+								.on('mouseout', function(e) {
+									XDATA.LOGGER.logUserActivity("User is no longer reading track metadata on dynamic graph.", "read",  XDATA.LOGGER.WF_EXPLORE);
+								})								
 								.style("fill", function (d, i) {
 									var c = color(i);
 									if ( $("#level").val() === "1" ) {
@@ -619,20 +649,21 @@ $(function () {
 								
 							setDynamicSize();						
 							dynrect.style("fill", "black");
-
-							}
-						}
-						else {
-							$("#communityBrowserForm").hide();
-							$("#communityBrowserTooLarge").show();
-							$("#communityBrowserGraph").hide();		
-
-							// Handle heat map overlay...
-							if ($('#heatMapEnabled').is(':checked')) {
-								renderHeatMap();
-							}
 							
+							XDATA.LOGGER.logSystemActivity("System has generated dynamic graph.");
 						}
+					}
+					else {
+						$("#communityBrowserForm").hide();
+						$("#communityBrowserTooLarge").show();
+						$("#communityBrowserGraph").hide();		
+
+						// Handle heat map overlay...
+						if ($('#heatMapEnabled').is(':checked')) {
+							renderHeatMap();
+						}
+						
+					}
 						
 				});
 			}
@@ -644,21 +675,29 @@ $(function () {
 			var comm = d.node_comm;
 			var node = d.nodename;
 			
+			XDATA.LOGGER.logUserActivity("User has requested to open a node in the community graph.", "select",  XDATA.LOGGER.WF_EXPLORE);
+			
 			var table = $("#track-table").val();
 			var level = $("#level").val();
 			
 			if (level > 1) {
+			
+				XDATA.LOGGER.logUserActivity("User has requested to load a new community.", "execute_query",  XDATA.LOGGER.WF_GETDATA);
+				
 				level = level -1;
 				
 				$("#level").select2("val", level);
 				$("#comm-id").val(node);
 				$('#comm-id').clearableTextField();	
-				capturedGeo = "";				
+				capturedGeo = "";
+				XDATA.LOGGER.logSystemActivity("System has refreshed interaction controls.");
 
 				$.get("community/settable/" + table)
 					.then(function(){
+						XDATA.LOGGER.logSystemActivity("System has set data table.");
 						$.get("community/setcomm/" + node + '/' + level)
 							.then( function() {
+								XDATA.LOGGER.logSystemActivity("System has set community and level information.");
 								refreshFunction();
 							});
 					});
@@ -678,10 +717,9 @@ $(function () {
 		var doReset = true;
 		refreshFunction(doReset);
 	};
-  
-	$("#refresh").click(reloadPanels);
 
 	$("#applyCommunity").click(function(e) {
+		XDATA.LOGGER.logUserActivity("User has requested to load a new community.", "execute_query",  XDATA.LOGGER.WF_GETDATA);
 		e.stopPropagation();
 		e.preventDefault();
 		capturedGeo = "";
@@ -689,35 +727,19 @@ $(function () {
 	});
 	
 	$("#captureCommunity").click(function(e) {
+		XDATA.LOGGER.logUserActivity("User has requested to load searched area/time of interest.", "execute_query",  XDATA.LOGGER.WF_GETDATA);
 		e.stopPropagation();
 		e.preventDefault();	
 		filterCommunities();
 	});
 	
 	$("#capturePreviousCommunity").click(function(e) {
+		XDATA.LOGGER.logUserActivity("User has requested to reload previously searched area/time of interest.", "execute_query",  XDATA.LOGGER.WF_GETDATA);
 		e.stopPropagation();
 		e.preventDefault();
 		doLastKnownQuery = true;
 		filterCommunities();
 	});	
-  
-	$("#reset").click(function () {
-		Reset(true);
-		$("#communityBrowserForm").show();
-		$("#communityBrowserTooLarge").hide();
-		$("#communityBrowserGraph").hide();		
-	});
-
-	$("#heatmap-remove").click(function () {
-		heatmap.setMap(null);    
-	});
-
-	$("#heatmap").click(renderHeatMap);
-	
-	$("#resetCommunityZoom").click(function(e) {
-		e.preventDefault();
-		zoomToFit();
-	});
 
 });
 
@@ -739,7 +761,7 @@ function Reset(resetMap) {
 	communityVis.selectAll("circle.node").remove();
 	communityVis.selectAll("line.link").remove();
 	communityVis.selectAll("text.label").remove();	
-    
+	
 	if (resetMap === true) { 
 		map.setCenter(new google.maps.LatLng(0, 0));
 		map.setZoom(2);
@@ -753,6 +775,8 @@ function Reset(resetMap) {
 	colorMapping = {};
 	currentGeoJson = [];
 	overlay.draw();
+	
+	XDATA.LOGGER.logSystemActivity("System has reset all visualizations.");
 }
 
 
@@ -791,15 +815,25 @@ $(document).ready( function() {
 	$("#heatMapEnabled").on( "change", function() {
 		var hm = $("#heatMapEnabled");
 		if (hm.prop('checked') === true) {
+			XDATA.LOGGER.logUserActivity("User has requested heat map display to be ON.", "toggle_option",  XDATA.LOGGER.WF_EXPLORE);
 			if ( $("#track-table").val() !== "") {
 				renderHeatMap();
 			}
 		}
 		else {
+			XDATA.LOGGER.logUserActivity("User has requested heat map display to be OFF.", "toggle_option",  XDATA.LOGGER.WF_EXPLORE);
 			heatmap.setMap(null);
 		}
 	});
 	$("#labelsEnabled").on( "change", function() {
+		var labl = $("#labelsEnabled");
+		if (labl.prop('checked') === true) {
+			XDATA.LOGGER.logUserActivity("User has requested labels display to be ON.", "toggle_option",  XDATA.LOGGER.WF_EXPLORE);
+		}
+		else {
+			XDATA.LOGGER.logUserActivity("User has requested labels display to be OFF.", "toggle_option",  XDATA.LOGGER.WF_EXPLORE);
+		}
+
 		var lab = communityVis.selectAll("text.label")
 			.style("opacity", function(d, i) {
 				var lab = $("#labelsEnabled");
@@ -835,6 +869,10 @@ $(document).ready( function() {
 		SetCircles(ui.value);
 		SetRelationships(ui.value);
 	  }
-	});			
+	});
+
+	XDATA.LOGGER.logSystemActivity("System has set default interaction controls.");
+
+    XDATA.LOGGER.logSystemActivity("Application startup completed.");	
 	
 });
