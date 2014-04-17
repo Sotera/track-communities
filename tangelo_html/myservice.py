@@ -2,6 +2,7 @@ import json
 import tangelo
 import itertools
 import cache
+import settings
 from utils import *
 
 def convert(value, type):
@@ -33,14 +34,14 @@ def convert_results(results, fields=False):
         converted.append(row)
     return converted
 
-def getWholeGephiGraph(comm=None, level=None, host="localhost", port="21000"):
+def getWholeGephiGraph(comm=None, level=None, host=settings.impala[0], port=settings.impala[1]):
     gephinodes, gephigraph = subgraph(comm, level, host, port)
     response = {}
     response["gephinodes"] = gephinodes
     response["gephigraph"] = gephigraph
     return response
 
-def geoTimeQuery(comm=None, level=None, host="localhost", port="21000", geo=None, time=None):
+def geoTimeQuery(comm=None, level=None, host=settings.impala[0], port=settings.impala[1], geo=None, time=None):
     level = cache.get().get("graph_num_levels","")
     nodetable = cache.get().get("table","") + '_good_nodes'
     edgestable = cache.get().get("table","") + '_good_graph'
@@ -101,7 +102,7 @@ def geoTimeQuery(comm=None, level=None, host="localhost", port="21000", geo=None
     return response
         
 
-def getNodes(comm=None, level=None, host="localhost", port="21000"):
+def getNodes(comm=None, level=None, host=settings.IMPALA[0], port=settings.IMPALA[1]):
     nodetable = cache.get().get("table","") + '_good_nodes'
     node_comm_filter_string = ""
     if comm != None:
@@ -120,7 +121,7 @@ def getNodes(comm=None, level=None, host="localhost", port="21000"):
         return mapping, array_map
 
 
-def subgraph(comm=None, level=None, host="localhost", port="21000"):
+def subgraph(comm=None, level=None, host=settings.IMPALA[0], port=settings.IMPALA[1]):
     edgetable = cache.get().get("table","") + '_good_graph'
 
     mapping, array_map = getNodes(comm,level,host,port)
@@ -140,7 +141,7 @@ def subgraph(comm=None, level=None, host="localhost", port="21000"):
         return array_map, edges
 
 
-def linkages(comm=None, level=None, nodemap=None, host="localhost", port="21000"):
+def linkages(comm=None, level=None, nodemap=None, host=settings.IMPALA[0], port=settings.IMPALA[1]):
     if comm == None:
         return []
     table = cache.get().get("table","") + "_dynamic_graph_w_comms"
@@ -153,7 +154,7 @@ def linkages(comm=None, level=None, nodemap=None, host="localhost", port="21000"
             edges.append({"source":nodemap[source],"target":nodemap[target],"start":start,"end":end,"value":value})
         return edges
 
-def run(database="default", table="", host="localhost", port="21000", trackId=None, comm=None, lev=None, minlat=None, maxlat=None, minlon=None, maxlon=None, mintime=None, maxtime=None):
+def run(database="default", table="", host=settings.IMPALA[0], port=settings.IMPALA[1], trackId=None, comm=None, lev=None, minlat=None, maxlat=None, minlon=None, maxlon=None, mintime=None, maxtime=None):
     if mintime != None or minlat != None:
         geo = {"min_lat":minlat,"max_lat":maxlat,"min_lon":minlon,"max_lon":maxlon}
         time = {"min_time":mintime,"max_time":maxtime}

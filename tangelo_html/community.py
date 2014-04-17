@@ -4,6 +4,7 @@ import json
 import random
 from utils import *
 import cache
+import settings
 
 #/community/gettable
 def gettable(*args):
@@ -11,7 +12,7 @@ def gettable(*args):
 
 #/community/tables
 def tables(*args):
-    with impalaopen('localhost:21000') as client:
+    with impalaopen(":".join(settings.IMPALA)) as client:
         results = client.execute("show tables")        
         rows = results.get_data()
         tangelo.content_type("application/json")
@@ -21,7 +22,7 @@ def tables(*args):
 def settable(*args):
     if args:
         cache.update({ "table" : args[0] })
-    with impalaopen('localhost:21000') as client:
+    with impalaopen(":".join(settings.IMPALA)) as client:
         data = client.execute("select level, count(distinct source) from " + args[0]  + "_good_graph group by level order by level desc limit 50")
         data_result = data.get_data()
         graph_stat_string = ""
@@ -76,7 +77,7 @@ def setcomm(*args):
     level = c["level"]
     table = c["table"] + "_tracks_comms_joined"
     rows = []
-    with impalaopen('localhost:21000') as client:
+    with impalaopen(":".join(settings.IMPALA)) as client:
         count = client.execute("select count(*) from " + table + " where comm_" + str(level) + " = '" + comm + "'")
         count_result = count.get_data()
         print count_result.strip()
