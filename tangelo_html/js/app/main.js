@@ -822,7 +822,10 @@ $(document).ready( function() {
 		minimumResultsForSearch: -1,
 		allowClear: false,
 		data: []
-	});	
+	});
+	$("#comm-id").on("change", function(e) {
+		XDATA.LOGGER.logUserActivity("User has entered a community identifier.", "select_option",  XDATA.LOGGER.GET_DATA);
+	});
 	$("#heatMapEnabled").on( "change", function() {
 		var hm = $("#heatMapEnabled");
 		if (hm.prop('checked') === true) {

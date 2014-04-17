@@ -38,6 +38,9 @@ function updateConfig() {
 						minimumResultsForSearch: -1,
 						allowClear: false,
 						data: lvlData
+					})
+					.on("change", function() {
+						XDATA.LOGGER.logUserActivity("User has adjusted community level.", "select_option",  XDATA.LOGGER.GET_DATA);
 					});	
 					XDATA.LOGGER.logSystemActivity("System has set community interaction controls.");					
 					// Handle geo/map filter controls
