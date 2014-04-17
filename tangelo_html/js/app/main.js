@@ -175,6 +175,7 @@ $(function () {
 		center: new google.maps.LatLng(0, 0)
 	});
 	
+	/*
 	google.maps.event.addListener(map, 'idle', function() {
 		//Do something when the user has stopped zooming/panning
 		var lat0 = map.getBounds().getNorthEast().lat();
@@ -187,7 +188,7 @@ $(function () {
 		capturedGeo = 'minlat="'+lat1+'"&maxlat="'+lat0+'"&minlon="'+lng1+'"&maxlon="'+lng0+'"';
 		//XDATA.LOGGER.logSystemActivity("System has captured current map bounding area.");
 	});
-
+	*/
 	
 	//create the overlay on which we will draw our heatmap
 	overlay = new google.maps.OverlayView();
@@ -380,6 +381,37 @@ $(function () {
 				}
 				else if (doLastKnownQuery === true && lastKnownQuery !== "") {
 					serviceCall = '?'+lastKnownQuery;
+					var parts = lastKnownQuery.split('&');
+					
+					// zoom map to last saved
+					var bounds = {};
+					bounds.north = parseFloat(parts[1].split('=')[1].replace(/"/g, ""));
+					bounds.south = parseFloat(parts[0].split('=')[1].replace(/"/g, ""));
+					bounds.east = parseFloat(parts[3].split('=')[1].replace(/"/g, "")); 
+					bounds.west = parseFloat(parts[2].split('=')[1].replace(/"/g, ""));
+					var low = parts[4].split('=')[1].replace(/"/g, "");
+					var high = parts[5].split('=')[1].replace(/"/g, "");
+					
+					var xdiff = bounds.east - bounds.west;
+					var ydiff = bounds.north - bounds.south;
+					var centerx = xdiff / 2 + bounds.west;
+					var centery = ydiff / 2 + bounds.south;
+					map.setCenter(new google.maps.LatLng(centery, centerx));
+							  
+					var sw = new google.maps.LatLng(bounds.south, bounds.west);
+					var ne = new google.maps.LatLng(bounds.north, bounds.east);
+					map.fitBounds(new google.maps.LatLngBounds(sw, ne));
+					
+					// zoom range slider to last saved
+					var l = moment(low).utc().format("YYYY-MM-DDTHH:mm:ss");                                   
+					var h = moment(high).utc().format("YYYY-MM-DDTHH:mm:ss");
+					$("#txt-low-val").html(l);
+					$("#txt-high-val").html(h);					
+					$("#range-slider").slider({values: [moment(low).utc(), moment(high).utc()]});
+					//timeSlider.slider({value: currentValue })
+					
+					XDATA.LOGGER.logSystemActivity("System has set geospatial and time bounds information.");
+
 					doLastKnownQuery = false;
 				}
 				else if (capturedGeo) {
@@ -741,6 +773,17 @@ $(function () {
 		XDATA.LOGGER.logUserActivity("User has requested to load searched area/time of interest.", "execute_query",  XDATA.LOGGER.WF_GETDATA);
 		e.stopPropagation();
 		e.preventDefault();	
+		
+		var lat0 = map.getBounds().getNorthEast().lat();
+		var lng0 = map.getBounds().getNorthEast().lng();
+		var lat1 = map.getBounds().getSouthWest().lat();
+		var lng1 = map.getBounds().getSouthWest().lng();		
+		//bbox = left,bottom,right,top
+		//bbox = min Longitude , min Latitude , max Longitude , max Latitude 		
+		// minlat=”40”&maxlat=”70”&minlon=”20”&maxlon=”70”
+		capturedGeo = 'minlat="'+lat1+'"&maxlat="'+lat0+'"&minlon="'+lng1+'"&maxlon="'+lng0+'"';
+		//XDATA.LOGGER.logSystemActivity("System has captured current map bounding area.");
+
 		filterCommunities();
 	});
 	
@@ -748,6 +791,7 @@ $(function () {
 		XDATA.LOGGER.logUserActivity("User has requested to reload previously searched location/time of interest.", "execute_query",  XDATA.LOGGER.WF_GETDATA);
 		e.stopPropagation();
 		e.preventDefault();
+
 		doLastKnownQuery = true;
 		filterCommunities();
 	});	
