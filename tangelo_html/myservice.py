@@ -34,14 +34,14 @@ def convert_results(results, fields=False):
         converted.append(row)
     return converted
 
-def getWholeGephiGraph(comm=None, level=None, host=settings.impala[0], port=settings.impala[1]):
+def getWholeGephiGraph(comm=None, level=None, host=settings.IMPALA[0], port=settings.IMPALA[1]):
     gephinodes, gephigraph = subgraph(comm, level, host, port)
     response = {}
     response["gephinodes"] = gephinodes
     response["gephigraph"] = gephigraph
     return response
 
-def geoTimeQuery(comm=None, level=None, host=settings.impala[0], port=settings.impala[1], geo=None, time=None):
+def geoTimeQuery(comm=None, level=None, host=settings.IMPALA[0], port=settings.IMPALA[1], geo=None, time=None):
     level = cache.get().get("graph_num_levels","")
     nodetable = cache.get().get("table","") + '_good_nodes'
     edgestable = cache.get().get("table","") + '_good_graph'
