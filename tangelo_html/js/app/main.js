@@ -878,6 +878,11 @@ $(document).ready( function() {
 	
 	$('#comm-id').clearableTextField();
 	
+	$('#tangelo-config-cancel').on("click", function(e) {
+		XDATA.LOGGER.logUserActivity("User cancelled updating data table and maximum graph size.", "cancel_query",  XDATA.LOGGER.WF_GETDATA);
+	});
+	$('#tangelo-config-defaults').hide(); // hide this since the button doesn't do anything in our application
+	
 	timeSlider = $("#time-slider").slider({
 	  slide: function(evt, ui){
 		SetCircles(ui.value);
