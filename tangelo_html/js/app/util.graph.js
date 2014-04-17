@@ -1,16 +1,5 @@
 /* Utility Functions, graph and naming helpers */
 
-// Naming conventions
-function edgeid(edge) { 
-	return edge.source + ':' +  edge.target;
-}
-function trackid(track) {
-	return track.track_id;
-}
-function nodename(node) {
-	return node.nodename;
-}
-
 // Dynamic Graph interactions
 function SetRelationships(value) {
 	var currentDate = new Date(startTime.getTime() + ((endTime.getTime() - startTime.getTime()) * value / 100));
@@ -30,6 +19,7 @@ function SetRelationships(value) {
 				return 0.0;
 			}
 		});
+	//XDATA.LOGGER.logSystemActivity("System has updated dynamic graph edges.");
 }
 
 /* Set the display size based on the SVG size and re-draw */
@@ -51,6 +41,8 @@ function setSize() {
 		.attr("height", svgH);
 
 	tickCommunity();//re-draw
+	
+	XDATA.LOGGER.logSystemActivity("System has resized community browser.");
 }
 function setDynamicSize() {
 	var svgStyles = window.getComputedStyle(dynamicSVG.node());
@@ -70,18 +62,22 @@ function setDynamicSize() {
 		.attr("height", svgH);
 
 	tickDynamic();//re-draw
+	
+	XDATA.LOGGER.logSystemActivity("System has resized dynamic graph.");
 }
 
 // Zoom interactions
 function dyngraphBounds() {
 	var nodeWidth = 16, nodeHeight = 16;
     var x = Number.POSITIVE_INFINITY, X=Number.NEGATIVE_INFINITY, y=Number.POSITIVE_INFINITY, Y=Number.NEGATIVE_INFINITY;
-    dynamicNode.each(function (v) {
-        x = Math.min(x, v.x - nodeWidth / 2);
-        X = Math.max(X, v.x + nodeWidth / 2);
-        y = Math.min(y, v.y - nodeHeight / 2);
-        Y = Math.max(Y, v.y + nodeHeight / 2);
-    });
+	if (dynamicNode) {
+		dynamicNode.each(function (v) {
+			x = Math.min(x, v.x - nodeWidth / 2);
+			X = Math.max(X, v.x + nodeWidth / 2);
+			y = Math.min(y, v.y - nodeHeight / 2);
+			Y = Math.max(Y, v.y + nodeHeight / 2);
+		});
+	}
     return { x: x, X: X, y: y, Y: Y };
 }
 function dynzoomToFit() {
@@ -97,17 +93,21 @@ function dynzoomToFit() {
 	
 	dynamicForce.start();
 	tickDynamic();
+	
+	XDATA.LOGGER.logUserActivity("User has requested the dynamic graph to center-zoom.", "zoom",  XDATA.LOGGER.WF_EXPLORE);
 }
 
 function graphBounds() {
 	var nodeWidth = 16, nodeHeight = 16;
     var x = Number.POSITIVE_INFINITY, X=Number.NEGATIVE_INFINITY, y=Number.POSITIVE_INFINITY, Y=Number.NEGATIVE_INFINITY;
-    communityNode.each(function (v) {
-        x = Math.min(x, v.x - nodeWidth / 2);
-        X = Math.max(X, v.x + nodeWidth / 2);
-        y = Math.min(y, v.y - nodeHeight / 2);
-        Y = Math.max(Y, v.y + nodeHeight / 2);
-    });
+    if (communityNode) {
+		communityNode.each(function (v) {
+			x = Math.min(x, v.x - nodeWidth / 2);
+			X = Math.max(X, v.x + nodeWidth / 2);
+			y = Math.min(y, v.y - nodeHeight / 2);
+			Y = Math.max(Y, v.y + nodeHeight / 2);
+		});
+	}
     return { x: x, X: X, y: y, Y: Y };
 }
 function zoomToFit() {
@@ -123,6 +123,8 @@ function zoomToFit() {
 	
 	communityForce.start();
 	tickCommunity();
+	
+	XDATA.LOGGER.logUserActivity("User has requested the community browser to center-zoom.", "zoom",  XDATA.LOGGER.WF_EXPLORE);
 }
 
 /*** Set the position of the elements based on data ***/
@@ -149,28 +151,27 @@ function tickDynamic() {
 
 /*** Configure drag behaviour ***/
 function dragstarted(d){ 
+	XDATA.LOGGER.logUserActivity("User has started to drag community browser node.", "drag",  XDATA.LOGGER.WF_EXPLORE);
 	d3.event.sourceEvent.stopPropagation();
 	d3.select(this).classed("fixed", d.fixed = false);
 	d3.select(this).classed("dragging", true);
-	//force2.stop(); //stop ticks while dragging
+	//force.stop(); //stop ticks while dragging
 }
 function dragged(d){
 	if (d.fixed) return; //root is fixed
-	//get mouse coordinates relative to the visualization coordinate system:
-	//var mouse = d3.mouse(communityVis.node());
-	//d.x = xScaleCommunity.invert(mouse[0]); 
-	//d.y = yScaleCommunity.invert(mouse[1]); 
 	d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
 	d.fixed = true;
 	tickCommunity();//re-position this node and any links
 	d.fixed = false;
 }
 function dragended(d){
+	XDATA.LOGGER.logUserActivity("User has stopped dragging community browser node.", "drag",  XDATA.LOGGER.WF_EXPLORE);
 	d3.select(this).classed("dragging", false);
 	d3.select(this).classed("fixed", d.fixed = true);
-	//force2.resume();
+	//force.resume();
 }
 function dyndragstarted(d){ 
+	XDATA.LOGGER.logUserActivity("User has started to drag dynamic graph node.", "drag",  XDATA.LOGGER.WF_EXPLORE);
 	d3.event.sourceEvent.stopPropagation();
 	d3.select(this).classed("fixed", d.fixed = false);
 	d3.select(this).classed("dragging", true);
@@ -178,16 +179,13 @@ function dyndragstarted(d){
 }
 function dyndragged(d){
 	if (d.fixed) return; //root is fixed
-	//get mouse coordinates relative to the visualization coordinate system:
-	//var mouse = d3.mouse(communityVis.node());
-	//d.x = xScaleCommunity.invert(mouse[0]); 
-	//d.y = yScaleCommunity.invert(mouse[1]); 
 	d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
 	d.fixed = true;
 	tickDynamic();//re-position this node and any links
 	d.fixed = false;
 }
 function dyndragended(d){
+	XDATA.LOGGER.logUserActivity("User has stopped dragging dynamic graph node.", "drag",  XDATA.LOGGER.WF_EXPLORE);
 	d3.select(this).classed("dragging", false);
 	d3.select(this).classed("fixed", d.fixed = true);
 	//force.resume();

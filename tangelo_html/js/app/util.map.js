@@ -10,7 +10,12 @@ function renderHeatMap() {
 		heatmap.setData(heatdata);
 		heatmap.set('radius', heatmap.get('radius') ? null : 15);
 		heatmap.setMap(map);
+		XDATA.LOGGER.logSystemActivity("System has displayed heat map.");
 	});
+}
+// Naming conventions
+function trackid(track) {
+	return track.track_id;
 }
 
 function SetCircles(value) {
@@ -119,7 +124,7 @@ function SetCircles(value) {
     });
 	
 	// update labels
-  var geolabels = g.selectAll("text")
+    var geolabels = g.selectAll("text")
     .attr('dx', function(d) {
       var xCoord = 0;
       var yCoord = 0;
@@ -218,6 +223,8 @@ function SetCircles(value) {
       var coordinates = googleMapProjection(newCoords);
       return coordinates[1];
     });	
+	
+	//XDATA.LOGGER.logSystemActivity("System has updated map locations.");
 }
 
 function AnimateTracks() {
@@ -232,6 +239,8 @@ function AnimateTracks() {
     SetCircles(currentValue);
     SetRelationships(currentValue);
   }
+  
+  //XDATA.LOGGER.logSystemActivity("System has updated track information on map.");
   
   d3.select('#time-slider').selectAll("a").attr("style", "left: "+currentValue+"%;");
 }

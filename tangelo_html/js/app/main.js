@@ -1,5 +1,6 @@
 /* Initialization */
 XDATA.LOGGER.registerActivityLogger(XDATA["LOGGER_URI"], XDATA["LOGGER_COMPONENT"], XDATA["LOGGER_COMPONENT_VER"]);
+XDATA.LOGGER.logSystemActivity("Application startup initiated.");
 
 var color = d3.scale.category20();
 var colorMapping = {};
@@ -151,6 +152,8 @@ var geolabels, geocircles;
 var graphStructure = {};
 var MAX_GRAPH_SIZE = 1000; // default, but is configurable in the UI
 
+
+
 /*	*	*	*	*	*	*	*	*	*	*	*	*	*	*	*/
 
 
@@ -176,6 +179,7 @@ $(function () {
 		//bbox = min Longitude , min Latitude , max Longitude , max Latitude 		
 		// minlat=”40”&maxlat=”70”&minlon=”20”&maxlon=”70”
 		capturedGeo = 'minlat="'+lat1+'"&maxlat="'+lat0+'"&minlon="'+lng1+'"&maxlon="'+lng0+'"';
+		//XDATA.LOGGER.logSystemActivity("System has captured current map bounding area.");
 	});
 
 	
@@ -183,7 +187,7 @@ $(function () {
 	overlay = new google.maps.OverlayView();
 	overlay.onAdd = function () {
 	
-		var layer = d3.select(this.getPanes().overlayMouseTarget).append("div").attr("class", "SvgOverlay");
+		var layer = d3.select(this.getPanes().overlayMouseTarget).append("div").attr("class", "mapOverlay");
 		mapsvg = layer.append("svg");
 		g = mapsvg.append("g");
 
@@ -302,21 +306,22 @@ $(function () {
 				});
 
 			geolabels.exit().remove();
-			
-			//geoenter.exit().remove();
 
 		};
 	};
 	overlay.setMap(map);
+	XDATA.LOGGER.logSystemActivity("System has created map component.");
 
 	$("#play").click(function () {
 		animate = !animate;
     
 		var buttonLabel = "Play";
 		if (animate) {
+			XDATA.LOGGER.logUserActivity("User has toggled track playback to ON.", "select_option",  XDATA.LOGGER.WF_EXPLORE);
 			buttonLabel = "Pause";
-		timeout = setInterval(AnimateTracks, animateInterval);
+			timeout = setInterval(AnimateTracks, animateInterval);
 		} else {
+			XDATA.LOGGER.logUserActivity("User has toggled track playback to OFF.", "select_option",  XDATA.LOGGER.WF_EXPLORE);
 			clearInterval(timeout);
 		}
 		$("#play").text(buttonLabel);
