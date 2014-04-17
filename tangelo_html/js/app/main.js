@@ -174,22 +174,17 @@ $(function () {
 		mapTypeId: google.maps.MapTypeId.ROADMAP,
 		center: new google.maps.LatLng(0, 0)
 	});
-	
-	/*
-	google.maps.event.addListener(map, 'idle', function() {
-		//Do something when the user has stopped zooming/panning
-		var lat0 = map.getBounds().getNorthEast().lat();
-		var lng0 = map.getBounds().getNorthEast().lng();
-		var lat1 = map.getBounds().getSouthWest().lat();
-		var lng1 = map.getBounds().getSouthWest().lng();		
-		//bbox = left,bottom,right,top
-		//bbox = min Longitude , min Latitude , max Longitude , max Latitude 		
-		// minlat=”40”&maxlat=”70”&minlon=”20”&maxlon=”70”
-		capturedGeo = 'minlat="'+lat1+'"&maxlat="'+lat0+'"&minlon="'+lng1+'"&maxlon="'+lng0+'"';
-		//XDATA.LOGGER.logSystemActivity("System has captured current map bounding area.");
-	});
-	*/
-	
+
+	map.addListener('dragstart', function(e) {
+		XDATA.LOGGER.logUserActivity("User has requested to pan on map.", "pan",  XDATA.LOGGER.WF_EXPLORE);
+	}, true);
+	$map[0].addEventListener('mousewheel', function(e) {
+		XDATA.LOGGER.logUserActivity("User has requested to zoom on map.", "zoom",  XDATA.LOGGER.WF_EXPLORE);
+	}, true);
+	$map[0].addEventListener('DOMMouseScroll', function(e) {
+		XDATA.LOGGER.logUserActivity("User has requested to zoom on map.", "zoom",  XDATA.LOGGER.WF_EXPLORE);
+	}, true);		
+
 	//create the overlay on which we will draw our heatmap
 	overlay = new google.maps.OverlayView();
 	overlay.onAdd = function () {
