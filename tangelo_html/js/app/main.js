@@ -39,15 +39,21 @@ var communityForce = d3.layout.force()
 /*** Configure zoom behaviour ***/
 var communityZoomer = d3.behavior.zoom()
 	.scaleExtent([0.01,100])
-	.on("zoom", communityZoom);
+	.on("zoom", communityZoom)
+	.on("zoomstart", function() { 
+		XDATA.LOGGER.logUserActivity("User has requested to pan/zoom on community browser.", "scale",  XDATA.LOGGER.WF_EXPLORE);
+	});	
 function communityZoom() {
 	 communityVis.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 }
 var dynamicZoomer = d3.behavior.zoom()
 	.scaleExtent([0.01,100])
-	.on("zoom", dynamicZoom);
+	.on("zoom", dynamicZoom)
+	.on("zoomstart", function() { 
+		XDATA.LOGGER.logUserActivity("User has requested to pan/zoom on dynamic graph.", "scale",  XDATA.LOGGER.WF_EXPLORE);
+	});
 function dynamicZoom() {
-	 dynamicVis.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+	dynamicVis.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 }
 
 /*** Configure drag behaviour ***/
@@ -350,6 +356,7 @@ $(function () {
 			url: 'community/getcomm/',      
 			type: 'GET',
 			success: function(data) {
+				XDATA.LOGGER.logSystemActivity("System has retrieved current community information.");
 				var comm = data.split("/")[0];
 				var lev = data.split("/")[1];
 				
@@ -385,12 +392,13 @@ $(function () {
 				else {
 					serviceCall = '?lev="'+lev;
 				}
-				console.log(serviceCall);
+				//console.log(serviceCall);
+				XDATA.LOGGER.logSystemActivity("System has constructed search service call.");
 
 				$.getJSON('myservice'+serviceCall, function (data) {
-	
-					console.log("Retrieved Data Object");
-					console.dir(data);
+					XDATA.LOGGER.logSystemActivity("System has retrieved search service call results.");
+					//console.log("Retrieved Data Object");
+					//console.dir(data);
 					
 					if (data["gephinodes"] && data["gephinodes"].length <= MAX_GRAPH_SIZE) {
 						$("#communityBrowserForm").hide();
@@ -452,6 +460,9 @@ $(function () {
 							.attr("class", "node")
 							.style("cursor", "pointer")
 							.on("mousedown", function(d) {
+							
+								XDATA.LOGGER.logUserActivity("User has selected a node in the community graph.", "select",  XDATA.LOGGER.WF_EXPLORE);
+							
 								var html = "";
 								html = "ID="+d.nodename+"; COMM="+d.node_comm+"; LVL="+d.level+"; MEMBERS="+d.num_members;
 								$("#selectedCommunityText").html(html);	
@@ -460,7 +471,7 @@ $(function () {
 								
 								$("#openSelectedCommunity").click(function(e) {
 								
-									XDATA.LOGGER.logUserActivity("User has requested to open a node in the community graph.", "select",  XDATA.LOGGER.WF_EXPLORE);
+									XDATA.LOGGER.logUserActivity("User has requested to retrieve a node in the community graph.", "execute_query",  XDATA.LOGGER.WF_GETDATA);
 									
 									e.preventDefault();
 									var text = $("#selectedCommunityText").html();
@@ -719,7 +730,7 @@ $(function () {
 	};
 
 	$("#applyCommunity").click(function(e) {
-		XDATA.LOGGER.logUserActivity("User has requested to load a new community.", "execute_query",  XDATA.LOGGER.WF_GETDATA);
+		XDATA.LOGGER.logUserActivity("User has requested to load a specified community.", "execute_query",  XDATA.LOGGER.WF_GETDATA);
 		e.stopPropagation();
 		e.preventDefault();
 		capturedGeo = "";
@@ -734,7 +745,7 @@ $(function () {
 	});
 	
 	$("#capturePreviousCommunity").click(function(e) {
-		XDATA.LOGGER.logUserActivity("User has requested to reload previously searched area/time of interest.", "execute_query",  XDATA.LOGGER.WF_GETDATA);
+		XDATA.LOGGER.logUserActivity("User has requested to reload previously searched location/time of interest.", "execute_query",  XDATA.LOGGER.WF_GETDATA);
 		e.stopPropagation();
 		e.preventDefault();
 		doLastKnownQuery = true;
