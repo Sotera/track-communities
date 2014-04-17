@@ -868,6 +868,11 @@ $(document).ready( function() {
 	  slide: function(evt, ui){
 		SetCircles(ui.value);
 		SetRelationships(ui.value);
+	  },
+	  change: function(evt, ui){
+		if (evt && evt.handleObj && evt.handleObj.type && evt.handleObj.type === "mouseup") {
+			XDATA.LOGGER.logUserActivity("User has selected new playback display time.", "select",  XDATA.LOGGER.WF_EXPLORE);
+		}
 	  }
 	});
 

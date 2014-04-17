@@ -67,15 +67,16 @@ function updateConfig() {
 						update_times(min, max);
 						var slider = $("#range-slider").slider({
 							range: true,
-								change: function(evt, ui){
-									update_times(ui.values[0], ui.values[1]);
-								},
-								slide: function(evt, ui){
-									update_times(ui.values[0], ui.values[1]);
-								},
-								max: max,
-								min: min,
-								values: [min, max]
+							change: function(evt, ui){
+								XDATA.LOGGER.logUserActivity("User has selected new date range filter parameters.", "select",  XDATA.LOGGER.WF_EXPLORE);
+								update_times(ui.values[0], ui.values[1]);
+							},
+							slide: function(evt, ui){
+								update_times(ui.values[0], ui.values[1]);
+							},
+							max: max,
+							min: min,
+							values: [min, max]
 						});	
 					}
 					else {
