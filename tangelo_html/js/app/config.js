@@ -12,29 +12,6 @@ function getConfig() {
 			
 		}
 	});
-
-	
-//	.done(function(cfg, error){
-  
-//	console.dir(cfg);
-	
-	/*
-	// track table information
-    d3.select("#track-table").property("value", cfg.table);
-	$("#track-table").select2("val", cfg.table);
-	
-	d3.select("#graph_stat_string").text(cfg.graph_stat_string);
-	
-	// community information
-    //d3.select("#comm-id").property("value", cfg.community);
-    d3.select("#level").property("value", cfg.level || cfg.graph_num_levels);
-	//$("#level").setValue(cfg.graph_num_levels);
-	
-	LEVEL = cfg.level || cfg.graph_num_levels;
-	*/
-    
-//  });
-
 }
 
 
