@@ -174,15 +174,28 @@ $(function () {
 		mapTypeId: google.maps.MapTypeId.ROADMAP,
 		center: new google.maps.LatLng(0, 0)
 	});
+	
+	// Note: This is to avoid the geo-circles jumping around the map and back to the initial/start position.
+	google.maps.event.addListener(map, 'bounds_changed', function() {
+		var currentValue = timeSlider.slider("option", "value")
+		SetCircles(currentValue);
+		SetRelationships(currentValue);	
+	});		
 
 	map.addListener('dragstart', function(e) {
 		XDATA.LOGGER.logUserActivity("User has requested to pan on map.", "pan",  XDATA.LOGGER.WF_EXPLORE);
 	}, true);
 	$map[0].addEventListener('mousewheel', function(e) {
 		XDATA.LOGGER.logUserActivity("User has requested to zoom on map.", "zoom",  XDATA.LOGGER.WF_EXPLORE);
+		var currentValue = timeSlider.slider("option", "value")
+		SetCircles(currentValue);
+		SetRelationships(currentValue);		
 	}, true);
 	$map[0].addEventListener('DOMMouseScroll', function(e) {
 		XDATA.LOGGER.logUserActivity("User has requested to zoom on map.", "zoom",  XDATA.LOGGER.WF_EXPLORE);
+		var currentValue = timeSlider.slider("option", "value")
+		SetCircles(currentValue);
+		SetRelationships(currentValue);			
 	}, true);		
 
 	//create the overlay on which we will draw our heatmap
@@ -258,9 +271,11 @@ $(function () {
 				})
 				.on('mouseover', function(e) {
 					XDATA.LOGGER.logUserActivity("User has requested to read track metadata on map.", "read",  XDATA.LOGGER.WF_EXPLORE);
+					XDATA.LOGGER.logSystemActivity("Show metadata: "+e.track_id);
 				})
 				.on('mouseout', function(e) {
 					XDATA.LOGGER.logUserActivity("User is no longer reading track metadata on map.", "read",  XDATA.LOGGER.WF_EXPLORE);
+					XDATA.LOGGER.logSystemActivity("Hide metadata: "+e.track_id);
 				})				
 				.attr('r', 8)
 				.attr("opacity", 1)
@@ -359,10 +374,6 @@ $(function () {
 				var capturedQuery = capturedGeo || "";
 
 				try {
-					var dateValues = $("#range-slider").slider("values");
-					var mintime = moment(dateValues[0]).format("YYYY-MM-DD 00:00:00");
-					var maxtime = moment(dateValues[1]).format("YYYY-MM-DD 23:59:59");
-					capturedTime = 'mintime="'+mintime+'"&maxtime="'+maxtime+'"';
 					if (capturedQuery) {
 						capturedQuery = capturedQuery+'&'+capturedTime;
 					}
@@ -421,6 +432,7 @@ $(function () {
 				}
 				//console.log(serviceCall);
 				XDATA.LOGGER.logSystemActivity("System has constructed search service call.");
+				XDATA.LOGGER.logSystemActivity("Query to execute: "+serviceCall);
 
 				$.getJSON('myservice'+serviceCall, function (data) {
 					XDATA.LOGGER.logSystemActivity("System has retrieved search service call results.");
@@ -489,6 +501,7 @@ $(function () {
 							.on("mousedown", function(d) {
 							
 								XDATA.LOGGER.logUserActivity("User has selected a node in the community graph.", "select",  XDATA.LOGGER.WF_EXPLORE);
+								XDATA.LOGGER.logSystemActivity("Community selected: "+d.nodename);
 							
 								var html = "";
 								html = "ID="+d.nodename+"; COMM="+d.node_comm+"; LVL="+d.level+"; MEMBERS="+d.num_members;
@@ -497,9 +510,6 @@ $(function () {
 								$("#selectedCommunityButtonSpan").html(html);
 								
 								$("#openSelectedCommunity").click(function(e) {
-								
-									XDATA.LOGGER.logUserActivity("User has requested to retrieve a node in the community graph.", "execute_query",  XDATA.LOGGER.WF_GETDATA);
-									
 									e.preventDefault();
 									var text = $("#selectedCommunityText").html();
 									var parts = text.split(';');
@@ -507,6 +517,8 @@ $(function () {
 									var level = parts[2].split('=')[1];
 									//if (level === 0) level = 1;
 									var table = $("#track-table").val();
+									
+									XDATA.LOGGER.logUserActivity("User has requested to retrieve a node in the community graph.", "execute_query",  XDATA.LOGGER.WF_GETDATA);
 									
 									$("#level").select2("val", level);
 									$("#comm-id").val(comm.toString());
@@ -520,7 +532,7 @@ $(function () {
 											XDATA.LOGGER.logSystemActivity("System has set data table.");
 											$.get("community/setcomm/" + comm + '/' + level)
 												.then( function() {
-													XDATA.LOGGER.logSystemActivity("System has set community and level information.");
+													XDATA.LOGGER.logSystemActivity("System has set community and level information: "+comm+"/"+level);
 													refreshFunction();
 												});
 										});
@@ -539,10 +551,12 @@ $(function () {
 							})
 							.on('mouseover', function(e) {
 								XDATA.LOGGER.logUserActivity("User has requested to read community metadata.", "read",  XDATA.LOGGER.WF_EXPLORE);
+								XDATA.LOGGER.logSystemActivity("Show metadata: "+e.nodename);
 								communityTooltip.show(e);
 							})
 							.on('mouseout', function(e) {
 								XDATA.LOGGER.logUserActivity("User is no longer reading community metadata.", "read",  XDATA.LOGGER.WF_EXPLORE);
+								XDATA.LOGGER.logSystemActivity("Hide metadata: "+e.nodename);
 								communityTooltip.hide(e);
 							})
 							.call(drag);
@@ -648,9 +662,11 @@ $(function () {
 								.attr("r", 15)
 								.on('mouseover', function(e) {
 									XDATA.LOGGER.logUserActivity("User has requested to read track metadata on dynamic graph.", "read",  XDATA.LOGGER.WF_EXPLORE);
+									XDATA.LOGGER.logSystemActivity("Show metadata: "+e.track_id);
 								})
 								.on('mouseout', function(e) {
 									XDATA.LOGGER.logUserActivity("User is no longer reading track metadata on dynamic graph.", "read",  XDATA.LOGGER.WF_EXPLORE);
+									XDATA.LOGGER.logSystemActivity("Hide metadata: "+e.track_id);
 								})								
 								.style("fill", function (d, i) {
 									var c = color(i);
@@ -714,6 +730,7 @@ $(function () {
 			var node = d.nodename;
 			
 			XDATA.LOGGER.logUserActivity("User has requested to open a node in the community graph.", "select",  XDATA.LOGGER.WF_EXPLORE);
+			XDATA.LOGGER.logSystemActivity("Community to open: "+node);
 			
 			var table = $("#track-table").val();
 			var level = $("#level").val();
@@ -735,7 +752,7 @@ $(function () {
 						XDATA.LOGGER.logSystemActivity("System has set data table.");
 						$.get("community/setcomm/" + node + '/' + level)
 							.then( function() {
-								XDATA.LOGGER.logSystemActivity("System has set community and level information.");
+								XDATA.LOGGER.logSystemActivity("System has set community and level information: "+node+"/"+level);
 								refreshFunction();
 							});
 					});
@@ -757,15 +774,17 @@ $(function () {
 	};
 
 	$("#applyCommunity").click(function(e) {
-		XDATA.LOGGER.logUserActivity("User has requested to load a specified community.", "execute_query",  XDATA.LOGGER.WF_GETDATA);
 		e.stopPropagation();
 		e.preventDefault();
+		var comm = $("#comm-id").val() || "";
+		var level = $("#level").val() || "";
+		XDATA.LOGGER.logUserActivity("User has requested to load a specified community.", "execute_query",  XDATA.LOGGER.WF_GETDATA);
+		
 		capturedGeo = "";
 		updateCommunities();
 	});
 	
 	$("#captureCommunity").click(function(e) {
-		XDATA.LOGGER.logUserActivity("User has requested to load searched area/time of interest.", "execute_query",  XDATA.LOGGER.WF_GETDATA);
 		e.stopPropagation();
 		e.preventDefault();	
 		
@@ -778,6 +797,13 @@ $(function () {
 		// minlat=”40”&maxlat=”70”&minlon=”20”&maxlon=”70”
 		capturedGeo = 'minlat="'+lat1+'"&maxlat="'+lat0+'"&minlon="'+lng1+'"&maxlon="'+lng0+'"';
 		//XDATA.LOGGER.logSystemActivity("System has captured current map bounding area.");
+		
+		var dateValues = $("#range-slider").slider("values");
+		var mintime = moment(dateValues[0]).format("YYYY-MM-DD 00:00:00");
+		var maxtime = moment(dateValues[1]).format("YYYY-MM-DD 23:59:59");
+		capturedTime = 'mintime="'+mintime+'"&maxtime="'+maxtime+'"';		
+		
+		XDATA.LOGGER.logUserActivity("User has requested to load searched area/time of interest.", "execute_query",  XDATA.LOGGER.WF_GETDATA);
 
 		filterCommunities();
 	});
@@ -864,6 +890,8 @@ $(document).ready( function() {
 	});
 	$("#comm-id").on("change", function(e) {
 		XDATA.LOGGER.logUserActivity("User has entered a community identifier.", "select_option",  XDATA.LOGGER.GET_DATA);
+		var id = e.currentTarget.value || "[blank]";
+		XDATA.LOGGER.logSystemActivity("Updated community id: "+id);
 	});
 	$("#heatMapEnabled").on( "change", function() {
 		var hm = $("#heatMapEnabled");
@@ -930,6 +958,8 @@ $(document).ready( function() {
 	  change: function(evt, ui){
 		if (evt && evt.handleObj && evt.handleObj.type && evt.handleObj.type === "mouseup") {
 			XDATA.LOGGER.logUserActivity("User has selected new playback display time.", "select",  XDATA.LOGGER.WF_EXPLORE);
+			var time = d3.select('#slidertext').text();
+			XDATA.LOGGER.logSystemActivity("Playback time set: "+time);
 		}
 	  }
 	});

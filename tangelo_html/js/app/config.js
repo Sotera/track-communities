@@ -14,7 +14,7 @@ function updateConfig() {
 		XDATA.LOGGER.logUserActivity("User selected data table and maximum graph size.", "select_option",  XDATA.LOGGER.WF_GETDATA);
 		$.get("community/settable/" + table)
 			.then( function(){
-				XDATA.LOGGER.logSystemActivity("System has set data table.");
+				XDATA.LOGGER.logSystemActivity("System has set data table: "+table);
 				// ... then get information about that table... 
 				$.get("community/current").done(function(cfg){
 					XDATA.LOGGER.logSystemActivity("System has retrieved current community information.");
@@ -41,6 +41,7 @@ function updateConfig() {
 					})
 					.on("change", function() {
 						XDATA.LOGGER.logUserActivity("User has adjusted community level.", "select_option",  XDATA.LOGGER.GET_DATA);
+						XDATA.LOGGER.logSystemActivity("Community level set: "+this.value);
 					});	
 					XDATA.LOGGER.logSystemActivity("System has set community interaction controls.");					
 					// Handle geo/map filter controls
@@ -73,6 +74,7 @@ function updateConfig() {
 							change: function(evt, ui){
 								XDATA.LOGGER.logUserActivity("User has selected new date range filter parameters.", "select",  XDATA.LOGGER.WF_EXPLORE);
 								update_times(ui.values[0], ui.values[1]);
+								XDATA.LOGGER.logSystemActivity("Date Range set: "+ui.values[0]+" "+ui.values[1]);
 							},
 							slide: function(evt, ui){
 								update_times(ui.values[0], ui.values[1]);
@@ -85,7 +87,7 @@ function updateConfig() {
 					else {
 						$("#dateRangeSliderMsg").html("Not available.");	
 					}
-					XDATA.LOGGER.logSystemActivity("System has set geospatial and time bounds information.");					
+					XDATA.LOGGER.logSystemActivity("System has set time bounds information.");					
 
 					// Finish up and refresh display.
 					$("#community-info-box").toggle(true);	
@@ -121,11 +123,11 @@ function updateCommunities() {
   if (table) {
 	  $.get("community/settable/" + table)
 		.then(function(){
-		  XDATA.LOGGER.logSystemActivity("System has set data table.");
+		  XDATA.LOGGER.logSystemActivity("System has set data table: "+table);
 		  if (comm !== "" && level !== "") {
 			$.get("community/setcomm/" + comm + '/' + level)
 				.then( function() {
-					XDATA.LOGGER.logSystemActivity("System has set community and level information.");
+					XDATA.LOGGER.logSystemActivity("System has set community and level information: "+comm+"/"+level);
 					reloadPanels();
 				});
 		  }
@@ -150,7 +152,7 @@ function filterCommunities() {
   if (table) {
 	  $.get("community/settable/" + table)
 		.then(function(){
-		  XDATA.LOGGER.logSystemActivity("System has set data table.");
+		  XDATA.LOGGER.logSystemActivity("System has set data table: "+table);
 		  
 		  var n = $("#graph_num_levels").val();
 		  $("#level").select2("val", n);

@@ -151,7 +151,7 @@ function tickDynamic() {
 
 /*** Configure drag behaviour ***/
 function dragstarted(d){ 
-	XDATA.LOGGER.logUserActivity("User has started to drag community browser node.", "drag",  XDATA.LOGGER.WF_EXPLORE);
+	XDATA.LOGGER.logUserActivity("User has started to drag community browser node: "+d.nodename, "drag",  XDATA.LOGGER.WF_EXPLORE);
 	d3.event.sourceEvent.stopPropagation();
 	d3.select(this).classed("fixed", d.fixed = false);
 	d3.select(this).classed("dragging", true);
@@ -165,13 +165,13 @@ function dragged(d){
 	d.fixed = false;
 }
 function dragended(d){
-	XDATA.LOGGER.logUserActivity("User has stopped dragging community browser node.", "drag",  XDATA.LOGGER.WF_EXPLORE);
+	XDATA.LOGGER.logUserActivity("User has stopped dragging community browser node: "+d.nodename, "drag",  XDATA.LOGGER.WF_EXPLORE);
 	d3.select(this).classed("dragging", false);
 	d3.select(this).classed("fixed", d.fixed = true);
 	//force.resume();
 }
 function dyndragstarted(d){ 
-	XDATA.LOGGER.logUserActivity("User has started to drag dynamic graph node.", "drag",  XDATA.LOGGER.WF_EXPLORE);
+	XDATA.LOGGER.logUserActivity("User has started to drag dynamic graph node: "+d.track_id, "drag",  XDATA.LOGGER.WF_EXPLORE);
 	d3.event.sourceEvent.stopPropagation();
 	d3.select(this).classed("fixed", d.fixed = false);
 	d3.select(this).classed("dragging", true);
@@ -185,7 +185,7 @@ function dyndragged(d){
 	d.fixed = false;
 }
 function dyndragended(d){
-	XDATA.LOGGER.logUserActivity("User has stopped dragging dynamic graph node.", "drag",  XDATA.LOGGER.WF_EXPLORE);
+	XDATA.LOGGER.logUserActivity("User has stopped dragging dynamic graph node: "+d.track_id, "drag",  XDATA.LOGGER.WF_EXPLORE);
 	d3.select(this).classed("dragging", false);
 	d3.select(this).classed("fixed", d.fixed = true);
 	//force.resume();
