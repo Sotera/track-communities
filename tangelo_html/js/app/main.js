@@ -164,7 +164,7 @@ var MAX_GRAPH_SIZE = 1000; // default, but is configurable in the UI
 
 
 $(function () {
-	
+
 	d3.select('#slidertext').text(moment(startTime).utc().format("YYYY-MM-DDTHH:mm:ss"));
   
 	//create google map
@@ -965,6 +965,8 @@ $(document).ready( function() {
 	});
 
 	XDATA.LOGGER.logSystemActivity("System has set default interaction controls.");
+	
+	getConfig();
 
     XDATA.LOGGER.logSystemActivity("Application startup completed.");	
 	

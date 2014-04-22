@@ -1,17 +1,60 @@
 /* Tangelo Framework Configuration, Tab Controls */
 
+function getConfig() {
+  $.get("community/current")
+	.done( function(cfg) {
+		if (cfg && cfg.table) {
+			d3.select("#track-table").property("value", cfg.table);
+			$("#track-table").select2("val", cfg.table);
+	
+			var userInitiated = false;
+			updateConfig(userInitiated);			
+			
+		}
+	});
+
+	
+//	.done(function(cfg, error){
+  
+//	console.dir(cfg);
+	
+	/*
+	// track table information
+    d3.select("#track-table").property("value", cfg.table);
+	$("#track-table").select2("val", cfg.table);
+	
+	d3.select("#graph_stat_string").text(cfg.graph_stat_string);
+	
+	// community information
+    //d3.select("#comm-id").property("value", cfg.community);
+    d3.select("#level").property("value", cfg.level || cfg.graph_num_levels);
+	//$("#level").setValue(cfg.graph_num_levels);
+	
+	LEVEL = cfg.level || cfg.graph_num_levels;
+	*/
+    
+//  });
+
+}
+
+
 function showConfig() {
   // NOT NECESSARY FOR ANY ACTIONS GIVEN NON-SERVER RETRIEVE/SAVE USAGE
   // KEPT HERE DUE TO TANGELO FRAMEWORK REFERENCE.
 }
 
-function updateConfig() {
+function updateConfig(userInitiated) {
 	var table, comm, level;
 	
 	table = $("#track-table").val();
 	// Save the selected data set table name...
 	if (table) {
-		XDATA.LOGGER.logUserActivity("User selected data table and maximum graph size.", "select_option",  XDATA.LOGGER.WF_GETDATA);
+		if (userInitiated !== false) {
+			XDATA.LOGGER.logUserActivity("User selected data table and maximum graph size.", "select_option",  XDATA.LOGGER.WF_GETDATA);
+		}
+		else {
+			XDATA.LOGGER.logSystemActivity("System loaded previously used data table.");
+		}
 		$.get("community/settable/" + table)
 			.then( function(){
 				XDATA.LOGGER.logSystemActivity("System has set data table: "+table);
