@@ -967,7 +967,47 @@ $(document).ready( function() {
 	XDATA.LOGGER.logSystemActivity("System has set default interaction controls.");
 	
 	getConfig();
-
+	
+	// Community Info popover //
+	popover_cfg.title = "Community Info";
+	popover_cfg.placement = "top";
+	popover_cfg.content = "<p> View information about your entire community data set. </p>" +
+		"<p>Single click a node in the <span class='small-caps'>COMMUNITY BROWSER</span> to see its details in <span class='small-caps'>LAST SELECT</span>. </p>" +
+		"<p> Enter <span class='small-caps'>COMMUNITY ID</span> and <span class='small-caps'>LEVEL</span> to go directly to a known community. </p>";
+	$("#community-info-help").popover(popover_cfg);	
+	// Find Communities Time/Geo popover //
+	popover_cfg.title = "Find Communities";
+	popover_cfg.placement = "top";
+	popover_cfg.content = "<p> Utilize the <span class='small-caps'>MAP</span> and <span class='small-caps'>RANGE SLIDER</span> to search for communities that fit within your criteria. </p>" +
+		"<p> The <span class='small-caps'>PREVIOUS</span> button allows you to return to your last utilized spatial-temporal search.</p>";
+	$("#find-communities-help").popover(popover_cfg);		
+	// Timeline/Playback popover //
+	popover_cfg.title = "Playback Timeline";
+	popover_cfg.placement = "top";
+	popover_cfg.content = "<p> Use the the <span class='small-caps'>PLAYBACK SLIDER</span> to select a given point in time. </p>" +
+		"<p> Click play or slide it manually to observe which tracks are co-located at specific spatial and temporal points. </p>";
+	$("#timeline-playback-help").popover(popover_cfg);		
+	// Dynamic Graph popover //
+	popover_cfg.title = "Dynamic Graph";
+	popover_cfg.placement = "bottom";
+	popover_cfg.content = "<p> Visualize which tracks are spatially and temporally co-located by observing edges rendered between track nodes.</p>" +
+		"<p> Utilize the <span class='small-caps'>PLAYBACK SLIDER</span> to adjust the time frame of co-location to observe. </p>";
+	$("#dynamic-graph-help").popover(popover_cfg);		
+	// Community Browser popover //
+	popover_cfg.title = "Community Browser";
+	popover_cfg.placement = "bottom";
+	popover_cfg.content = "<p> Visualize communities that are aggregated based on spatial and temporal co-location.</p>" +
+		"<p> Double click a community node to drill further down into a community. </p>" +
+		"<p> Hover over a community node to view meta information about that community.</p>";
+	$("#community-browser-help").popover(popover_cfg);	
+	// Map popover //
+	popover_cfg.title = "Map";
+	popover_cfg.placement = "bottom";
+	popover_cfg.content = "<p> Visualize tracks spatially moving over time. </p>" +
+		"<p> When the heat map is enabled, you can see high volume of track activity in shaded areas. </p>" +
+		"<p> Additionally, you can use the map to help construct a spatial-temporal query for finding communities.</p>";
+	$("#map-help").popover(popover_cfg);		
+	
     XDATA.LOGGER.logSystemActivity("Application startup completed.");	
 	
 });
