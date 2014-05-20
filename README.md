@@ -16,16 +16,17 @@ It then runs [Distributed Louvain Modularity](http://sotera.github.io/distribute
 ## Getting Started
 
 ##### Load VM into Vagrant
-_Note: Version is currently === 0.1_ <br/>
-1.  [change directory to where you placed xdata-0.1.box]
+_Note: Version is currently === 0.1_
 
-2.	> vagrant box add xdata-vm-[version] xdata-0.1.box
+1.  [change directory to where you placed xdata-0.1.box]<br/>
 
-3.  create "VM_Home" directory to store local VM files (ex: C:\Users\<your home directory\Documents\VMs\xdata-vm\)]
+2.	> vagrant box add xdata-vm-[version] xdata-0.1.box <br/>
 
-4.	> cd "VM_Home" directory
+3.  create "VM_Home" directory to store local VM files (ex: C:\Users\<your home directory\Documents\VMs\xdata-vm\)] <br/>
 
-5.	> vagrant init xdata-vm-[version]
+4.	> cd "VM_Home" directory <br/>
+
+5.	> vagrant init xdata-vm-[version] <br/>
 
 
 ##### Option A: Use Vagrant Provisioning
