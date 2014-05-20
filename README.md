@@ -9,9 +9,9 @@ It then runs [Distributed Louvain Modularity](http://sotera.github.io/distribute
 ## Prerequisites
 *	Install Vagrant: http://www.vagrantup.com
 *	Install Virtual Box: https://www.virtualbox.org/wiki/Downloads
-*	Download VM (xdata-0.1.box) from https://drive.google.com/uc?id=0B54T370AV5JDUEF3T21qWXRpeEU&export=download
-  
-_Note: Use IE / Firefox. Chrome fails at the end of the download._
+*	Download VM (xdata-0.1.box) <br/>
+  https://drive.google.com/uc?id=0B54T370AV5JDUEF3T21qWXRpeEU&export=download <br/>
+  _Note: Use IE / Firefox. Chrome fails at the end of the download._
 
 ## Getting Started
 TODO
