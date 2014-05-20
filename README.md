@@ -1,5 +1,17 @@
-track-communities
-=================
-This analytic first assigns relationships between tracks based on a configuarable definition of geo-temporal co-occurrence.  It then runs [Distributed Louvain Modularity](http://sotera.github.io/distributed-louvain-modularity/) on the aggregated network of track relationships to allow user analysis of track communities.
+Track Communities
+===================
+This analytic assigns relationships between tracks based on a configurable definition of geospatial and temporal co-occurrence.  
 
-This project also provides a web-based analysis tool to assist in this analysis.
+It then runs [Distributed Louvain Modularity](http://sotera.github.io/distributed-louvain-modularity/) on the aggregated network of constructed relationships to allow user analysis of tracks within communities.  A web-based tool is provided to browse the networks of communities, view them on a map, and observe co-location highlights within a dynamic graph implementation.
+
+![image][docs/track-communites-example.png]
+
+## Prerequisites
+TODO
+
+## Getting Started
+TODO
+
+## Customization
+TODO
+
