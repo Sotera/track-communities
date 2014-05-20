@@ -6,14 +6,17 @@ It then runs [Distributed Louvain Modularity](http://sotera.github.io/distribute
 
 ![Track Communities UI](https://raw.githubusercontent.com/Sotera/track-communities/master/docs/track-communities-example.png)
 
-## Prerequisites
+## What Does It Do?
+TODO
+
+## Getting Started
+
+##### Prerequisites
 *	Install Vagrant: http://www.vagrantup.com
 *	Install Virtual Box: https://www.virtualbox.org/wiki/Downloads
 *	Download VM (xdata-0.1.box) <br/>
   https://drive.google.com/uc?id=0B54T370AV5JDUEF3T21qWXRpeEU&export=download <br/>
   _Note: Use IE / Firefox. Chrome fails at the end of the download._
-
-## Getting Started
 
 ##### Load VM into Vagrant
 _Note: Version is currently === 0.1_
@@ -30,7 +33,7 @@ _Note: Version is currently === 0.1_
 
 
 ##### Option A: Use Vagrant Provisioning
-
+TODO
 
 ##### Option B: Use Manual Installation
 
