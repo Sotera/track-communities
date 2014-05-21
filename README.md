@@ -12,4 +12,4 @@ This tool is a synthesis of analytic components and visualization techniques tha
 
 ## Easy Start
 
-Get the tool up and running quickly and easily!  Read how at the [wiki](https://github.com/Sotera/track-communities/wiki/Easy-Start).
+Get Track Communities up and running with example data quickly and easily!  Read how at the [wiki](https://github.com/Sotera/track-communities/wiki/).
