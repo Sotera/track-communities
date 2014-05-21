@@ -22,15 +22,15 @@ This tool is a synthesis of analytic components and visualization techniques tha
 _Note: Version is currently === 0.1_
 
 
-1. Add the XDATA VM box definition to Vagrant.
+Add the XDATA VM box definition to Vagrant.
 ```
     $ vagrant box add  xdata-vm-[version]  [path_to_file]\xdata-0.1.box
 ```
-2. Create a location for hosting your VM files.
+Create a location for hosting your VM files.
 ```
     $ mkdir [path_to_virtual_machines_home]\xdata-vm-[version]
 ```
-3. Initialize a new VM based on the XDATA VM box configuration.
+Initialize a new VM based on the XDATA VM box configuration.
 ```
     $ cd [path_to_virtual_machines_home]\xdata-vm-[version]
     $ vagrant init xdata-vm-[version]
@@ -51,7 +51,7 @@ Start your virtual machine.
 ```    
     $ vagrant up
 ```
-SSH into the VM as _bigdata_, then edit the following configuration file to add additional properties.  These configuration changes should allow you to protect your single VM machine from memory and node count issues that may crop up processing example data in later steps.
+SSH into the VM as _bigdata_, then edit the following configuration file to add additional properties.  These configuration changes should allow you to protect your single VM machine from memory and node processing issues that may crop up in later steps.
 ```
     $ vi /etc/hadoop/conf/mapred-site.xml
     
