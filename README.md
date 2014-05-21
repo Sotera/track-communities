@@ -22,11 +22,10 @@ This tool is a synthesis of analytic components and visualization techniques tha
 ##### Load VM into Vagrant
 _Note: Version is currently === 0.1_
 
-1. [change directory to where you placed xdata-0.1.box]
-2. $ vagrant box add xdata-vm-[version] xdata-0.1.box
-3. [create "VM_Home" directory to store local VM files (ex: C:\Users\<your home directory\Documents\VMs\xdata-vm\)]
-4. [change directory to your "VM_HOME" directory]
-5. $ vagrant init xdata-vm-[version]
+1. $ vagrant box add xdata-vm-*[version]* *[path_to]*\xdata-0.1.box
+2. $ mkdir *[path_to_virtual_machines_home]*\xdata-vm-*[version]*
+3. $ cd *[path_to_virtual_machines_home]*\xdata-vm-*[version]*
+4. $ vagrant init xdata-vm-*[version]*
 
 ##### Option A: Use Vagrant Provisioning
 TODO
@@ -37,3 +36,4 @@ TODO
 ## Example Code / Customization
 TODO
 
+*
