@@ -10,22 +10,21 @@ This tool is a synthesis of analytic components and visualization techniques tha
 3. Constructs dynamic graph data to help highlight specific tracks of movement and the co-occurence events in a given geo-temporal frame.
 4. Provides a visualization tool that allows a user to browse aggregated networks of communities, follow tracks of movement on a map, and observe co-location highlights in the form of a dynamic graph.
 
-## Getting Started
+## Easy Start
 
 ##### Prerequisites
-*	Install Vagrant: http://www.vagrantup.com
-*	Install Virtual Box: https://www.virtualbox.org/wiki/Downloads
-*	Download VM (xdata-0.1.box): http://sotera.github.io/xdata-vm/ <br/>
-  https://drive.google.com/uc?id=0B54T370AV5JDUEF3T21qWXRpeEU&export=download <br/>
+*	Install Vagrant:                   http://www.vagrantup.com
+*	Install Virtual Box:               https://www.virtualbox.org/wiki/Downloads
+*	Download XDATA VM (xdata-0.1.box): http://sotera.github.io/xdata-vm/ <br/>
   _Note: Use IE / Firefox. Chrome fails at the end of the download._
 
 ##### Load VM into Vagrant
 _Note: Version is currently === 0.1_
 
-1. $ vagrant box add xdata-vm-*[version]* *[path_to]*\xdata-0.1.box
-2. $ mkdir *[path_to_virtual_machines_home]*\xdata-vm-*[version]*
-3. $ cd *[path_to_virtual_machines_home]*\xdata-vm-*[version]*
-4. $ vagrant init xdata-vm-*[version]*
+1. $ vagrant box add xdata-vm-**[version]** **[path_to_file]**\xdata-0.1.box
+2. $ mkdir **[path_to_virtual_machines_home]**\xdata-vm-**[version]**
+3. $ cd **[path_to_virtual_machines_home]**\xdata-vm-**[version]**
+4. $ vagrant init xdata-vm-**[version]**
 
 ##### Option A: Use Vagrant Provisioning
 TODO
