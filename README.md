@@ -23,22 +23,18 @@ _Note: Version is currently === 0.1_
 
 
 1. Add the XDATA VM box definition to Vagrant.
-
-
-    $ vagrant box add  &nbsp;&nbsp;&nbsp; xdata-vm-**[version]**  &nbsp;&nbsp;&nbsp; **[path_to_file]**\xdata-0.1.box
-
+```
+    $ vagrant box add  xdata-vm-[version]  [path_to_file]\xdata-0.1.box
+```
 2. Create a location for hosting your VM files.
-
-
-    $ mkdir **[path_to_virtual_machines_home]**\xdata-vm-**[version]**
-    
-    
+```
+    $ mkdir [path_to_virtual_machines_home]\xdata-vm-[version]
+```
 3. Initialize a new VM based on the XDATA VM box configuration.
-
-
-    $ cd **[path_to_virtual_machines_home]**\xdata-vm-**[version]** <br/>
-    $ vagrant init xdata-vm-**[version]**
-
+```
+    $ cd [path_to_virtual_machines_home]\xdata-vm-[version]
+    $ vagrant init xdata-vm-[version]
+```
 ##### Install Project Components
 
 _Note: xdata-vm-0.2.box release should have these pre-loaded for you._
