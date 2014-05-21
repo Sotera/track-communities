@@ -15,7 +15,7 @@ This tool is a synthesis of analytic components and visualization techniques tha
 ##### Prerequisites
 *	Install Vagrant: http://www.vagrantup.com
 *	Install Virtual Box: https://www.virtualbox.org/wiki/Downloads
-*	Download VM (xdata-0.1.box) <br/>
+*	Download VM (xdata-0.1.box): http://sotera.github.io/xdata-vm/ <br/>
   https://drive.google.com/uc?id=0B54T370AV5JDUEF3T21qWXRpeEU&export=download <br/>
   _Note: Use IE / Firefox. Chrome fails at the end of the download._
 
