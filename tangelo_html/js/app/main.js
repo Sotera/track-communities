@@ -889,7 +889,7 @@ $(document).ready( function() {
 		data: []
 	});
 	$("#comm-id").on("change", function(e) {
-		XDATA.LOGGER.logUserActivity("User has entered a community identifier.", "select_option",  XDATA.LOGGER.GET_DATA);
+		XDATA.LOGGER.logUserActivity("User has entered a community identifier.", "select_option",  XDATA.LOGGER.WF_GETDATA);
 		var id = e.currentTarget.value || "[blank]";
 		XDATA.LOGGER.logSystemActivity("Updated community id: "+id);
 	});

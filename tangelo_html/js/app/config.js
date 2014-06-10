@@ -60,7 +60,7 @@ function updateConfig(userInitiated) {
 						data: lvlData
 					})
 					.on("change", function() {
-						XDATA.LOGGER.logUserActivity("User has adjusted community level.", "select_option",  XDATA.LOGGER.GET_DATA);
+						XDATA.LOGGER.logUserActivity("User has adjusted community level.", "select_option",  XDATA.LOGGER.WF_GETDATA);
 						XDATA.LOGGER.logSystemActivity("Community level set: "+this.value);
 					});	
 					XDATA.LOGGER.logSystemActivity("System has set community interaction controls.");					
