@@ -26,6 +26,11 @@ Specific formatting and analytic tool configurations for using your own data set
 5. Constructs dynamic graph data to help highlight specific tracks of movement and the co-occurrence events in a given geo-temporal frame.
 6. Provides a visualization tool that allows a user to browse aggregated networks of communities, follow tracks of movement on a map, and observe co-location highlights in the form of a dynamic graph.
 
+## What Do You Need To Know? ##
+In order to utilize your own data sets, some knowledge of the following aspects will be required:
+* HIVE table syntax
+* Python programming language
+
 ## Easy Start
 
 Get Track Communities up and running with example data quickly and easily!  Read how at the **[wiki](https://github.com/Sotera/track-communities/wiki/)**.
