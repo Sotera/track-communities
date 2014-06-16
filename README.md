@@ -28,8 +28,8 @@ Specific formatting and analytic tool configurations for using your own data set
 
 ## What Do You Need To Know? ##
 In order to utilize your own data sets, some knowledge of the following aspects will be required:
-* HIVE table syntax
-* Python programming language
+* [Apache Hive](http://hive.apache.org/) syntax and querying
+* [Python programming language](https://www.python.org/)
 
 ## Easy Start
 
