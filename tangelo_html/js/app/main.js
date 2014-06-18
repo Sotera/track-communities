@@ -885,6 +885,19 @@ function Reset(resetMap) {
 
 
 $(document).ready( function() {
+
+	$.blockUI.defaults.message = null;
+	$.blockUI.defaults.onBlock = function() {
+		$('body').spin();
+		XDATA.LOGGER.logSystemActivity("System has blocked UI interactions.");
+	};
+	$.blockUI.defaults.onUnblock = function() {
+		$('body').spin(false);
+		XDATA.LOGGER.logSystemActivity("System has unblocked UI interactions.");
+	};
+	
+	$(document).ajaxStart($.blockUI).ajaxStop($.unblockUI);
+
 	$("#track-table").select2({
 		width: '200',
 		placeholder: "Select a data set...",
