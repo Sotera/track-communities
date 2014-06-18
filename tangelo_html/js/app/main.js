@@ -270,11 +270,11 @@ $(function () {
 					return coordinates[1];
 				})
 				.on('mouseover', function(e) {
-					XDATA.LOGGER.logUserActivity("User has requested to read track metadata on map.", "read",  XDATA.LOGGER.WF_EXPLORE);
+					XDATA.LOGGER.logUserActivity("User has requested to read track metadata on map.", "hover_start",  XDATA.LOGGER.WF_EXPLORE);
 					XDATA.LOGGER.logSystemActivity("Show metadata: "+e.track_id);
 				})
 				.on('mouseout', function(e) {
-					XDATA.LOGGER.logUserActivity("User is no longer reading track metadata on map.", "read",  XDATA.LOGGER.WF_EXPLORE);
+					XDATA.LOGGER.logUserActivity("User is no longer reading track metadata on map.", "hover_end",  XDATA.LOGGER.WF_EXPLORE);
 					XDATA.LOGGER.logSystemActivity("Hide metadata: "+e.track_id);
 				})				
 				.attr('r', 8)
@@ -350,6 +350,7 @@ $(function () {
 		$("#play").text(buttonLabel);
     
 		if (timeSlider.slider("option", "value") >= 100) {
+			XDATA.LOGGER.logSystemActivity("System has stopped timeline playback.");
 			timeSlider.slider({ value: 0});
 		}
 	});
@@ -550,12 +551,12 @@ $(function () {
 								return c;
 							})
 							.on('mouseover', function(e) {
-								XDATA.LOGGER.logUserActivity("User has requested to read community metadata.", "read",  XDATA.LOGGER.WF_EXPLORE);
+								XDATA.LOGGER.logUserActivity("User has requested to read community metadata.", "hover_start",  XDATA.LOGGER.WF_EXPLORE);
 								XDATA.LOGGER.logSystemActivity("Show metadata: "+e.nodename);
 								communityTooltip.show(e);
 							})
 							.on('mouseout', function(e) {
-								XDATA.LOGGER.logUserActivity("User is no longer reading community metadata.", "read",  XDATA.LOGGER.WF_EXPLORE);
+								XDATA.LOGGER.logUserActivity("User is no longer reading community metadata.", "hover_end",  XDATA.LOGGER.WF_EXPLORE);
 								XDATA.LOGGER.logSystemActivity("Hide metadata: "+e.nodename);
 								communityTooltip.hide(e);
 							})
@@ -661,11 +662,11 @@ $(function () {
 								.attr("class", "node")
 								.attr("r", 15)
 								.on('mouseover', function(e) {
-									XDATA.LOGGER.logUserActivity("User has requested to read track metadata on dynamic graph.", "read",  XDATA.LOGGER.WF_EXPLORE);
+									XDATA.LOGGER.logUserActivity("User has requested to read track metadata on dynamic graph.", "hover_start",  XDATA.LOGGER.WF_EXPLORE);
 									XDATA.LOGGER.logSystemActivity("Show metadata: "+e.track_id);
 								})
 								.on('mouseout', function(e) {
-									XDATA.LOGGER.logUserActivity("User is no longer reading track metadata on dynamic graph.", "read",  XDATA.LOGGER.WF_EXPLORE);
+									XDATA.LOGGER.logUserActivity("User is no longer reading track metadata on dynamic graph.", "hover_end",  XDATA.LOGGER.WF_EXPLORE);
 									XDATA.LOGGER.logSystemActivity("Hide metadata: "+e.track_id);
 								})								
 								.style("fill", function (d, i) {

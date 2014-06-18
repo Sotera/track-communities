@@ -234,6 +234,7 @@ function AnimateTracks() {
   if (timeSlider.slider("option", "value") >= 100) {
     animate = false;
     $("#play").text("Play");
+	XDATA.LOGGER.logSystemActivity("System has stopped timeline playback.");
     clearInterval(timeout);
   } else {
     SetCircles(currentValue);
