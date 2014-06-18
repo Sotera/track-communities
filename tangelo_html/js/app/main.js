@@ -79,6 +79,24 @@ var communityTooltip = d3.tip()
 			+ '</small>';
 		return html;
 	});
+var dynamicTooltip = d3.tip()
+	.attr('class', 'd3-tip')
+	.html(function(d) { 
+		var html = '<small>'
+			+ '<strong>Track Name:</strong> '+d.track_id+'<br/>'
+			+ '<strong>Community:</strong> '+d.comm+'<br/>'
+			+ '</small>';
+		return html;
+	});
+var mapTooltip = d3.tip()
+	.attr('class', 'd3-tip')
+	.html(function(d) { 
+		var html = '<small>'
+			+ '<strong>Track Name:</strong> '+d.track_id+'<br/>'
+			+ '<strong>Community:</strong> '+d.comm+'<br/>'
+			+ '</small>';
+		return html;
+	});
 
 window.addEventListener("resize", setSize, false);
 window.addEventListener("resize", setDynamicSize, false);
@@ -123,7 +141,8 @@ communityVis.call(communityTooltip);
 
 var dynamicVis = dynamicGraph.append("svg:g")
 	.attr("class", "plotting-area");				
-					
+dynamicVis.call(dynamicTooltip);
+	
 /***	GLOBALS		***/			
 var overlay;
 var mapsvg;
@@ -205,6 +224,8 @@ $(function () {
 		var layer = d3.select(this.getPanes().overlayMouseTarget).append("div").attr("class", "mapOverlay");
 		mapsvg = layer.append("svg");
 		g = mapsvg.append("g");
+		
+		mapsvg.call(mapTooltip);	
 
 		overlay.draw = function () {
 			var markerOverlay = this;
@@ -272,10 +293,12 @@ $(function () {
 				.on('mouseover', function(e) {
 					XDATA.LOGGER.logUserActivity("User has requested to read track metadata on map.", "hover_start",  XDATA.LOGGER.WF_EXPLORE);
 					XDATA.LOGGER.logSystemActivity("Show metadata: "+e.track_id);
+					mapTooltip.show(e);
 				})
 				.on('mouseout', function(e) {
 					XDATA.LOGGER.logUserActivity("User is no longer reading track metadata on map.", "hover_end",  XDATA.LOGGER.WF_EXPLORE);
 					XDATA.LOGGER.logSystemActivity("Hide metadata: "+e.track_id);
+					mapTooltip.hide(e);
 				})				
 				.attr('r', 8)
 				.attr("opacity", 1)
@@ -289,9 +312,9 @@ $(function () {
 					}
 					return c;
 				})
-				.attr('stroke', "gray")
-				.append("svg:title")
-				.text(function(d) { return d.track_id; });
+				.attr('stroke', "black")
+				.append("svg:title");
+				//.text(function(d) { return d.track_id; });
 				
 			geocircles.exit().remove();
 				
@@ -550,6 +573,7 @@ $(function () {
 								colorMapping[d.nodename] = c;
 								return c;
 							})
+							.attr("stroke", "black")
 							.on('mouseover', function(e) {
 								XDATA.LOGGER.logUserActivity("User has requested to read community metadata.", "hover_start",  XDATA.LOGGER.WF_EXPLORE);
 								XDATA.LOGGER.logSystemActivity("Show metadata: "+e.nodename);
@@ -648,7 +672,7 @@ $(function () {
 							dynamicLink = linkgroup.insert("svg:line", ".node")
 								.attr("class", "link")
 								.style("opacity", 0.0)
-								.style("stroke", "#FFFFFF")
+								.style("stroke", "black")
 								.style("stroke-width", 1.0);
 
 							nodegroup = dynamicVis.append("g")
@@ -664,10 +688,12 @@ $(function () {
 								.on('mouseover', function(e) {
 									XDATA.LOGGER.logUserActivity("User has requested to read track metadata on dynamic graph.", "hover_start",  XDATA.LOGGER.WF_EXPLORE);
 									XDATA.LOGGER.logSystemActivity("Show metadata: "+e.track_id);
+									dynamicTooltip.show(e);
 								})
 								.on('mouseout', function(e) {
 									XDATA.LOGGER.logUserActivity("User is no longer reading track metadata on dynamic graph.", "hover_end",  XDATA.LOGGER.WF_EXPLORE);
 									XDATA.LOGGER.logSystemActivity("Hide metadata: "+e.track_id);
+									dynamicTooltip.hide(e);
 								})								
 								.style("fill", function (d, i) {
 									var c = color(i);
@@ -679,18 +705,19 @@ $(function () {
 									}
 									return c;
 								})
+								.attr("stroke", "black")
 								.call(dyndrag);
 								
-							dynamicNode.call(dyndrag)
-								.append("title")
-								.text(function (d) {
-									return d.track_id;
-								});						
+							//dynamicNode.call(dyndrag)
+							//	.append("title")
+							//	.text(function (d) {
+							//		return d.track_id;
+							//	});						
 							  
 							dynamicLabel = nodegroup.append("text")
 								.style("pointer-events", "none")
 								.attr("class", "label")
-								.attr("fill", "white")
+								.attr("fill", "black")
 								.style("opacity", function(d, i) {
 									var lab = $("#labelsEnabled");
 									if (lab.prop('checked') === true) {
@@ -703,7 +730,7 @@ $(function () {
 								});		
 								
 							setDynamicSize();						
-							dynrect.style("fill", "black");
+							//dynrect.style("fill", "black");
 							
 							XDATA.LOGGER.logSystemActivity("System has generated dynamic graph.");
 						}

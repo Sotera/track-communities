@@ -4,7 +4,7 @@
 function SetRelationships(value) {
 	var currentDate = new Date(startTime.getTime() + ((endTime.getTime() - startTime.getTime()) * value / 100));
 	link = dynamicVis.selectAll("line.link")
-		.style("fill", "white")
+		.style("fill", "black")
 		.style("stroke-width", function(d) {
 			return d.value;
 		})
