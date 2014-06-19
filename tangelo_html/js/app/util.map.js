@@ -1,6 +1,7 @@
 /* Utility Functions, map and overlay helpers */
 
 function renderHeatMap() {
+	$.blockUI();
 	$.ajax({
 		"url":"heatmap/map",
 		"type" : "GET"
@@ -11,6 +12,7 @@ function renderHeatMap() {
 		heatmap.set('radius', heatmap.get('radius') ? null : 15);
 		heatmap.setMap(map);
 		XDATA.LOGGER.logSystemActivity("System has displayed heat map.");
+		$.unblockUI();
 	});
 }
 // Naming conventions

@@ -32,6 +32,7 @@ function updateConfig(userInitiated) {
 		else {
 			XDATA.LOGGER.logSystemActivity("System loaded previously used data table.");
 		}
+		$.blockUI
 		$.get("community/settable/" + table)
 			.then( function(){
 				XDATA.LOGGER.logSystemActivity("System has set data table: "+table);
@@ -143,6 +144,7 @@ function updateCommunities() {
   XDATA.LOGGER.logUserActivity("User has requested a community visualization update.", "execute_query",  XDATA.LOGGER.WF_GETDATA);
   
   if (table) {
+      $.blockUI();
 	  $.get("community/settable/" + table)
 		.then(function(){
 		  XDATA.LOGGER.logSystemActivity("System has set data table: "+table);
@@ -172,6 +174,7 @@ function filterCommunities() {
   XDATA.LOGGER.logUserActivity("User has requested geo-time community search.", "execute_query",  XDATA.LOGGER.WF_GETDATA);  
   
   if (table) {
+	  $.blockUI();
 	  $.get("community/settable/" + table)
 		.then(function(){
 		  XDATA.LOGGER.logSystemActivity("System has set data table: "+table);

@@ -386,6 +386,8 @@ $(function () {
 		$("#communityBrowserForm").hide();
 		$("#communityBrowserTooLarge").hide();
 		$("#communityBrowserGraph").hide();	
+		
+		$.blockUI();
 
 		$.ajax({
 			url: 'community/getcomm/',      
@@ -748,6 +750,7 @@ $(function () {
 					}
 						
 				});
+				$.unblockUI();
 			}
 		});
 	
@@ -764,6 +767,8 @@ $(function () {
 			var level = $("#level").val();
 			
 			if (level > 1) {
+			
+				$.blockUI();
 			
 				XDATA.LOGGER.logUserActivity("User has requested to load a new community.", "execute_query",  XDATA.LOGGER.WF_GETDATA);
 				
@@ -896,7 +901,7 @@ $(document).ready( function() {
 		XDATA.LOGGER.logSystemActivity("System has unblocked UI interactions.");
 	};
 	
-	$(document).ajaxStart($.blockUI).ajaxStop($.unblockUI);
+	//$(document).ajaxStart($.blockUI).ajaxStop($.unblockUI);
 
 	$("#track-table").select2({
 		width: '200',
