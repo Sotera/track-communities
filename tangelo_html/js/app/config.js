@@ -124,7 +124,9 @@ function updateConfig(userInitiated) {
 					
 					$("#applyCommunity").prop("disabled", false);
 					
-					XDATA.LOGGER.logSystemActivity("System has refreshed interaction controls.");					
+					XDATA.LOGGER.logSystemActivity("System has refreshed interaction controls.");	
+
+					renderHeatMap();
 					
 					resetPanels();
 			

@@ -470,7 +470,7 @@ $(function () {
 					
 						// Handle heat map overlay...
 						if ($('#heatMapEnabled').is(':checked')) {
-							renderHeatMap();
+							//renderHeatMap();
 						}		
 						
 						if ( $("#level").val() === "1" ) {
@@ -742,7 +742,7 @@ $(function () {
 
 						// Handle heat map overlay...
 						if ($('#heatMapEnabled').is(':checked')) {
-							renderHeatMap();
+							//renderHeatMap();
 						}
 						
 					}
@@ -852,7 +852,7 @@ $(function () {
 function Reset(resetMap) {
 	//console.log("Current Bounds: "+map.getBounds());
 
-	heatmap.setMap(null);
+	//heatmap.setMap(null);
 	//d3.select('#community-id').text("ID: None");
 	dynamicGraph.selectAll("circle.node").remove();
 	dynamicGraph.selectAll("line.link").remove();
