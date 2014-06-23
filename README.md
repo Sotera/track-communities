@@ -35,8 +35,8 @@ In order to utilize your own data sets, some knowledge of the following aspects 
 * **[Cloudera CDH 4.x](http://www.cloudera.com/content/cloudera/en/products-and-services/cdh.html)**
 * **[Cloudera Impala](http://www.cloudera.com/content/cloudera/en/products-and-services/cdh/impala.html)**
 * **[Tangelo Web Framework](http://tangelo.kitware.com/)**
-* **[Python 2.7](https://www.python.org/download/releases/2.7/)
-* **[Impyla 0.7.0](https://pypi.python.org/pypi/impyla/0.7)
+* **[Python 2.7](https://www.python.org/download/releases/2.7/)**
+* **[Impyla 0.7.0](https://pypi.python.org/pypi/impyla/0.7)**
 
 
 ## Easy Start
