@@ -20,7 +20,7 @@ Specific formatting and analytic tool configurations for using your own data set
 
 ## What Does This Do?
 1. Utilizes **[Aggregate Micro Paths](http://sotera.github.io/aggregate-micro-paths/)** to infer movement patterns based on given geo-temporal data and build tracks (or paths) of movement for each unique object in your collection.
-2. Determine spacial and temporal co-occurrence for your objects based off the inferred movement patterns.
+2. Determine spatial and temporal co-occurrence for your objects based off the inferred movement patterns.
 3. Produce a graph object where relationships are based off the (configurable) definition of geospatial and temporal co-occurrence.
 4. Scales the data with **[Distributed Louvain Modularity](http://sotera.github.io/distributed-louvain-modularity/)**, building hierarchical levels of community that can be browsed and visualized as a series of expanding networks of community.
 5. Constructs dynamic graph data to help highlight specific tracks of movement and the co-occurrence events in a given geo-temporal frame.
