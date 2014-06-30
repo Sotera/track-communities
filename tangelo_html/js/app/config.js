@@ -150,6 +150,10 @@ function updateCommunities() {
 		  XDATA.LOGGER.logSystemActivity("System has set data table: "+table);
 		  if (comm !== "" && level !== "") {
 			$.get("community/setcomm/" + comm + '/' + level)
+				.error(function() {
+					$.unblockUI();
+					alert("Requested COMMUNITY_ID/LEVEL does not exist.");		
+				})
 				.then( function() {
 					XDATA.LOGGER.logSystemActivity("System has set community and level information: "+comm+"/"+level);
 					reloadPanels();
