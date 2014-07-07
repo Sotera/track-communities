@@ -200,10 +200,19 @@ $(function () {
 		SetCircles(currentValue);
 		SetRelationships(currentValue);	
 	});		
-
+	
+	google.maps.event.addListener(map, 'zoom_changed', function() {
+		XDATA.LOGGER.logUserActivity("User has requested to zoom on map.", "zoom",  XDATA.LOGGER.WF_EXPLORE);
+	});
+	/*
+	google.maps.event.addListener(map, 'center_changed', function() {
+		XDATA.LOGGER.logUserActivity("User has requested to pan on map.", "pan",  XDATA.LOGGER.WF_EXPLORE);
+	});	
+	*/
 	map.addListener('dragstart', function(e) {
 		XDATA.LOGGER.logUserActivity("User has requested to pan on map.", "pan",  XDATA.LOGGER.WF_EXPLORE);
 	}, true);
+	/*
 	$map[0].addEventListener('mousewheel', function(e) {
 		XDATA.LOGGER.logUserActivity("User has requested to zoom on map.", "zoom",  XDATA.LOGGER.WF_EXPLORE);
 		var currentValue = timeSlider.slider("option", "value")
@@ -215,7 +224,8 @@ $(function () {
 		var currentValue = timeSlider.slider("option", "value")
 		SetCircles(currentValue);
 		SetRelationships(currentValue);			
-	}, true);		
+	}, true);
+	*/	
 
 	//create the overlay on which we will draw our heatmap
 	overlay = new google.maps.OverlayView();
