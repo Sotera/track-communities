@@ -11,7 +11,6 @@ function SetRelationships(value) {
 		.style("opacity", function(d) {
 			startD = new Date(d.start);
 			endD = new Date(d.end);
-			//console.log(startD + ' <= ' + currentDate + ' < ' + endD);
 			if ( startD <= currentDate && currentDate < endD ) {
 				return 1.0;
 			}
@@ -19,11 +18,10 @@ function SetRelationships(value) {
 				return 0.0;
 			}
 		});
-	//XDATA.LOGGER.logSystemActivity("System has updated dynamic graph edges.");
 }
 
 /* Set the display size based on the SVG size and re-draw */
-function setSize() {
+function setSize(userInitiated) {
 	var svgStyles = window.getComputedStyle(communitySVG.node());
 	var svgW = parseInt(svgStyles["width"]);
 	var svgH = parseInt(svgStyles["height"]);
@@ -42,9 +40,14 @@ function setSize() {
 
 	tickCommunity();//re-draw
 	
-	XDATA.LOGGER.logSystemActivity("System has resized community browser.");
+	if (userInitiated===false) {
+		XDATA.LOGGER.logSystemActivity("System has resized community browser.");
+	}
+	else {
+		XDATA.LOGGER.logUserActivity("User has resized community browser.", "resize_component", XDATA.LOGGER.WF_CREATE);
+	}
 }
-function setDynamicSize() {
+function setDynamicSize(userInitiated) {
 	var svgStyles = window.getComputedStyle(dynamicSVG.node());
 	var svgW = parseInt(svgStyles["width"]);
 	var svgH = parseInt(svgStyles["height"]);
@@ -63,7 +66,12 @@ function setDynamicSize() {
 
 	tickDynamic();//re-draw
 	
-	XDATA.LOGGER.logSystemActivity("System has resized dynamic graph.");
+	if (userInitiated===false) {
+		XDATA.LOGGER.logSystemActivity("System has resized dynamic graph.");
+	}
+	else {
+		XDATA.LOGGER.logUserActivity("User has resized dynamic graph.", "resize_component", XDATA.LOGGER.WF_CREATE);
+	}
 }
 
 // Zoom interactions
@@ -129,6 +137,7 @@ function zoomToFit() {
 
 /*** Set the position of the elements based on data ***/
 function tickCommunity() {
+	if (!communityLink) return;
 	communityLink.attr("x1", function(d) { return d.source.x; })
 		.attr("y1", function(d) { return d.source.y; })
 		.attr("x2", function(d) { return d.target.x; })
@@ -139,6 +148,7 @@ function tickCommunity() {
 		.attr("dy", function(d) { return d.y; });	 			
 }
 function tickDynamic() {
+	if (!dynamicLink) return;
 	dynamicLink.attr("x1", function(d) { return d.source.x; })
 		.attr("y1", function(d) { return d.source.y; })
 		.attr("x2", function(d) { return d.target.x; })
@@ -151,7 +161,7 @@ function tickDynamic() {
 
 /*** Configure drag behaviour ***/
 function dragstarted(d){ 
-	XDATA.LOGGER.logUserActivity("User has started to drag community browser node: "+d.nodename, "drag_start",  XDATA.LOGGER.WF_EXPLORE);
+	XDATA.LOGGER.logUserActivity("User has started to drag community browser node.", "drag__object_start",  XDATA.LOGGER.WF_EXPLORE, {"id":d.nodename});
 	d3.event.sourceEvent.stopPropagation();
 	d3.select(this).classed("fixed", d.fixed = false);
 	d3.select(this).classed("dragging", true);
@@ -165,13 +175,13 @@ function dragged(d){
 	d.fixed = false;
 }
 function dragended(d){
-	XDATA.LOGGER.logUserActivity("User has stopped dragging community browser node: "+d.nodename, "drag_end",  XDATA.LOGGER.WF_EXPLORE);
+	XDATA.LOGGER.logUserActivity("User has stopped dragging community browser node.", "drag_object_end",  XDATA.LOGGER.WF_EXPLORE, {"id":d.nodename});
 	d3.select(this).classed("dragging", false);
 	d3.select(this).classed("fixed", d.fixed = true);
 	//force.resume();
 }
 function dyndragstarted(d){ 
-	XDATA.LOGGER.logUserActivity("User has started to drag dynamic graph node: "+d.track_id, "drag_start",  XDATA.LOGGER.WF_EXPLORE);
+	XDATA.LOGGER.logUserActivity("User has started to drag dynamic graph node.", "drag_object_start",  XDATA.LOGGER.WF_EXPLORE, {"id":d.track_id});
 	d3.event.sourceEvent.stopPropagation();
 	d3.select(this).classed("fixed", d.fixed = false);
 	d3.select(this).classed("dragging", true);
@@ -185,7 +195,7 @@ function dyndragged(d){
 	d.fixed = false;
 }
 function dyndragended(d){
-	XDATA.LOGGER.logUserActivity("User has stopped dragging dynamic graph node: "+d.track_id, "drag_end",  XDATA.LOGGER.WF_EXPLORE);
+	XDATA.LOGGER.logUserActivity("User has stopped dragging dynamic graph node.", "drag_object_end",  XDATA.LOGGER.WF_EXPLORE, {"id":d.track_id});
 	d3.select(this).classed("dragging", false);
 	d3.select(this).classed("fixed", d.fixed = true);
 	//force.resume();

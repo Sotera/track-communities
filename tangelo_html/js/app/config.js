@@ -27,7 +27,7 @@ function updateConfig(userInitiated) {
 	// Save the selected data set table name...
 	if (table) {
 		if (userInitiated !== false) {
-			XDATA.LOGGER.logUserActivity("User selected data table and maximum graph size.", "select_option",  XDATA.LOGGER.WF_GETDATA);
+			XDATA.LOGGER.logUserActivity("User updated data table and maximum graph size.", "execute_query_filter",  XDATA.LOGGER.WF_GETDATA);
 		}
 		else {
 			XDATA.LOGGER.logSystemActivity("System loaded previously used data table.");
@@ -61,8 +61,7 @@ function updateConfig(userInitiated) {
 						data: lvlData
 					})
 					.on("change", function() {
-						XDATA.LOGGER.logUserActivity("User has adjusted community level.", "select_option",  XDATA.LOGGER.WF_GETDATA);
-						XDATA.LOGGER.logSystemActivity("Community level set: "+this.value);
+						XDATA.LOGGER.logUserActivity("User has adjusted selected community level.", "select_filter_menu_option",  XDATA.LOGGER.WF_GETDATA, {"lvl":this.value} );
 					});	
 					XDATA.LOGGER.logSystemActivity("System has set community interaction controls.");					
 					// Handle geo/map filter controls
@@ -93,9 +92,8 @@ function updateConfig(userInitiated) {
 						var slider = $("#range-slider").slider({
 							range: true,
 							change: function(evt, ui){
-								XDATA.LOGGER.logUserActivity("User has selected new date range filter parameters.", "select",  XDATA.LOGGER.WF_EXPLORE);
+								XDATA.LOGGER.logUserActivity("User has selected new date range filter parameters.", "set_visual_filter_parameters",  XDATA.LOGGER.WF_GETDATA, {"start":ui.values[0], "end": ui.values[1]} );
 								update_times(ui.values[0], ui.values[1]);
-								XDATA.LOGGER.logSystemActivity("Date Range set: "+ui.values[0]+" "+ui.values[1]);
 							},
 							slide: function(evt, ui){
 								update_times(ui.values[0], ui.values[1]);
@@ -141,7 +139,7 @@ function updateCommunities() {
   var comm = $("#comm-id").val() || "";
   var level = $("#level").val() || "";
   
-  XDATA.LOGGER.logUserActivity("User has requested a community visualization update.", "execute_query",  XDATA.LOGGER.WF_GETDATA);
+  //XDATA.LOGGER.logUserActivity("User has requested a community visualization update.", "execute_query_search",  XDATA.LOGGER.WF_GETDATA);
   
   if (table) {
       $.blockUI();
@@ -175,7 +173,7 @@ function filterCommunities() {
   var comm = $("#comm-id").val() || "";
   var level = $("#level").val() || "";
   
-  XDATA.LOGGER.logUserActivity("User has requested geo-time community search.", "execute_query",  XDATA.LOGGER.WF_GETDATA);  
+  //XDATA.LOGGER.logUserActivity("User has requested geospatial-temporal community search.", "execute_visual_filter",  XDATA.LOGGER.WF_GETDATA);  
   
   if (table) {
 	  $.blockUI();

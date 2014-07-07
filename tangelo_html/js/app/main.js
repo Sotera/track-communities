@@ -291,13 +291,11 @@ $(function () {
 					return coordinates[1];
 				})
 				.on('mouseover', function(e) {
-					XDATA.LOGGER.logUserActivity("User has requested to read track metadata on map.", "hover_start",  XDATA.LOGGER.WF_EXPLORE);
-					XDATA.LOGGER.logSystemActivity("Show metadata: "+e.track_id);
+					XDATA.LOGGER.logUserActivity("User has requested to read track metadata on map.", "hover_start",  XDATA.LOGGER.WF_EXPLORE, {"id": e.track_id});
 					mapTooltip.show(e);
 				})
 				.on('mouseout', function(e) {
-					XDATA.LOGGER.logUserActivity("User is no longer reading track metadata on map.", "hover_end",  XDATA.LOGGER.WF_EXPLORE);
-					XDATA.LOGGER.logSystemActivity("Hide metadata: "+e.track_id);
+					XDATA.LOGGER.logUserActivity("User is no longer reading track metadata on map.", "hover_end",  XDATA.LOGGER.WF_EXPLORE, {"id": e.track_id});
 					mapTooltip.hide(e);
 				})				
 				.attr('r', 8)
@@ -363,11 +361,11 @@ $(function () {
     
 		var buttonLabel = "Play";
 		if (animate) {
-			XDATA.LOGGER.logUserActivity("User has toggled track playback to ON.", "select_option",  XDATA.LOGGER.WF_EXPLORE);
+			XDATA.LOGGER.logUserActivity("User has toggled track playback to ON.", "start_animation",  XDATA.LOGGER.WF_CREATE);
 			buttonLabel = "Pause";
 			timeout = setInterval(AnimateTracks, animateInterval);
 		} else {
-			XDATA.LOGGER.logUserActivity("User has toggled track playback to OFF.", "select_option",  XDATA.LOGGER.WF_EXPLORE);
+			XDATA.LOGGER.logUserActivity("User has toggled track playback to OFF.", "stop_animation",  XDATA.LOGGER.WF_CREATE);
 			clearInterval(timeout);
 		}
 		$("#play").text(buttonLabel);
@@ -526,8 +524,7 @@ $(function () {
 							.style("cursor", "pointer")
 							.on("mousedown", function(d) {
 							
-								XDATA.LOGGER.logUserActivity("User has selected a node in the community graph.", "select",  XDATA.LOGGER.WF_EXPLORE);
-								XDATA.LOGGER.logSystemActivity("Community selected: "+d.nodename);
+								XDATA.LOGGER.logUserActivity("User has selected a node in the community graph.", "show_data_info",  XDATA.LOGGER.WF_EXPLORE, {"id":d.nodename});
 							
 								var html = "";
 								html = "ID="+d.nodename+"; COMM="+d.node_comm+"; LVL="+d.level+"; MEMBERS="+d.num_members;
@@ -544,7 +541,7 @@ $(function () {
 									//if (level === 0) level = 1;
 									var table = $("#track-table").val();
 									
-									XDATA.LOGGER.logUserActivity("User has requested to retrieve a node in the community graph.", "execute_query",  XDATA.LOGGER.WF_GETDATA);
+									XDATA.LOGGER.logUserActivity("User has requested to retrieve a node in the community graph.", "execute_query_search",  XDATA.LOGGER.WF_GETDATA, {"id":comm, "level":level});
 									
 									$("#level").select2("val", level);
 									$("#comm-id").val(comm.toString());
@@ -581,13 +578,11 @@ $(function () {
 							})
 							.attr("stroke", "black")
 							.on('mouseover', function(e) {
-								XDATA.LOGGER.logUserActivity("User has requested to read community metadata.", "hover_start",  XDATA.LOGGER.WF_EXPLORE);
-								XDATA.LOGGER.logSystemActivity("Show metadata: "+e.nodename);
+								XDATA.LOGGER.logUserActivity("User has requested to read community metadata.", "hover_start",  XDATA.LOGGER.WF_EXPLORE, {"id": e.nodename});
 								communityTooltip.show(e);
 							})
 							.on('mouseout', function(e) {
-								XDATA.LOGGER.logUserActivity("User is no longer reading community metadata.", "hover_end",  XDATA.LOGGER.WF_EXPLORE);
-								XDATA.LOGGER.logSystemActivity("Hide metadata: "+e.nodename);
+								XDATA.LOGGER.logUserActivity("User is no longer reading community metadata.", "hover_end",  XDATA.LOGGER.WF_EXPLORE, {"id": e.nodename});
 								communityTooltip.hide(e);
 							})
 							.call(drag);
@@ -618,7 +613,7 @@ $(function () {
 								return "";
 							});		
 							
-						setSize();
+						setSize(false);
 						
 						XDATA.LOGGER.logSystemActivity("System has generated community browser.");
 
@@ -692,13 +687,11 @@ $(function () {
 								.attr("class", "node")
 								.attr("r", 15)
 								.on('mouseover', function(e) {
-									XDATA.LOGGER.logUserActivity("User has requested to read track metadata on dynamic graph.", "hover_start",  XDATA.LOGGER.WF_EXPLORE);
-									XDATA.LOGGER.logSystemActivity("Show metadata: "+e.track_id);
+									XDATA.LOGGER.logUserActivity("User has requested to read track metadata on dynamic graph.", "hover_start",  XDATA.LOGGER.WF_EXPLORE, {"id": e.track_id});
 									dynamicTooltip.show(e);
 								})
 								.on('mouseout', function(e) {
-									XDATA.LOGGER.logUserActivity("User is no longer reading track metadata on dynamic graph.", "hover_end",  XDATA.LOGGER.WF_EXPLORE);
-									XDATA.LOGGER.logSystemActivity("Hide metadata: "+e.track_id);
+									XDATA.LOGGER.logUserActivity("User is no longer reading track metadata on dynamic graph.", "hover_end",  XDATA.LOGGER.WF_EXPLORE, {"id": e.track_id});
 									dynamicTooltip.hide(e);
 								})								
 								.style("fill", function (d, i) {
@@ -735,7 +728,7 @@ $(function () {
 									return d.track_id;
 								});		
 								
-							setDynamicSize();						
+							setDynamicSize(false);						
 							//dynrect.style("fill", "black");
 							
 							XDATA.LOGGER.logSystemActivity("System has generated dynamic graph.");
@@ -764,19 +757,16 @@ $(function () {
 			var comm = d.node_comm;
 			var node = d.nodename;
 			
-			XDATA.LOGGER.logUserActivity("User has requested to open a node in the community graph.", "select",  XDATA.LOGGER.WF_EXPLORE);
-			XDATA.LOGGER.logSystemActivity("Community to open: "+node);
-			
 			var table = $("#track-table").val();
 			var level = $("#level").val();
 			
 			if (level > 1) {
 			
 				$.blockUI();
-			
-				XDATA.LOGGER.logUserActivity("User has requested to load a new community.", "execute_query",  XDATA.LOGGER.WF_GETDATA);
 				
 				level = level -1;
+				
+				XDATA.LOGGER.logUserActivity("User has requested to load a new community.", "execute_query_search",  XDATA.LOGGER.WF_GETDATA, {"id":node, "level":level});
 				
 				$("#level").select2("val", level);
 				$("#comm-id").val(node);
@@ -819,7 +809,7 @@ $(function () {
 		e.preventDefault();
 		var comm = $("#comm-id").val() || "";
 		var level = $("#level").val() || "";
-		XDATA.LOGGER.logUserActivity("User has requested to load a specified community.", "execute_query",  XDATA.LOGGER.WF_GETDATA);
+		XDATA.LOGGER.logUserActivity("User has requested to load a specified community.", "execute_query_search",  XDATA.LOGGER.WF_GETDATA, {"id":comm, "level":level});
 		
 		capturedGeo = "";
 		updateCommunities();
@@ -844,15 +834,17 @@ $(function () {
 		var maxtime = moment(dateValues[1]).format("YYYY-MM-DD 23:59:59");
 		capturedTime = 'mintime="'+mintime+'"&maxtime="'+maxtime+'"';		
 		
-		XDATA.LOGGER.logUserActivity("User has requested to load searched area/time of interest.", "execute_query",  XDATA.LOGGER.WF_GETDATA);
+		XDATA.LOGGER.logUserActivity("User has requested to load searched area/time of interest.", "execute_visual_filter",  XDATA.LOGGER.WF_GETDATA);
 
 		filterCommunities();
 	});
 	
 	$("#capturePreviousCommunity").click(function(e) {
-		XDATA.LOGGER.logUserActivity("User has requested to reload previously searched location/time of interest.", "execute_query",  XDATA.LOGGER.WF_GETDATA);
+		
 		e.stopPropagation();
 		e.preventDefault();
+		
+		XDATA.LOGGER.logUserActivity("User has requested to reload previously searched location/time of interest.", "execute_visual_filter",  XDATA.LOGGER.WF_GETDATA);
 
 		doLastKnownQuery = true;
 		filterCommunities();
@@ -935,6 +927,14 @@ $(document).ready( function() {
 			callback(data);
 		}				
 	});
+	$("#track-table").on("change", function(e) {
+		XDATA.LOGGER.logUserActivity("User has adjusted selected data set.", "select_filter_menu_option",  XDATA.LOGGER.WF_GETDATA, {"table":this.value} );
+	});
+	
+	$("#max-graph-size").on("change", function(e) {
+		XDATA.LOGGER.logUserActivity("User has adjusted maximum graph size.", "enter_filter_text",  XDATA.LOGGER.WF_GETDATA, {"size":this.value} );	
+	});
+	
 	$("#level").select2({
 		width: "resolve",
 		placeholder: "...",
@@ -943,30 +943,29 @@ $(document).ready( function() {
 		data: []
 	});
 	$("#comm-id").on("change", function(e) {
-		XDATA.LOGGER.logUserActivity("User has entered a community identifier.", "select_option",  XDATA.LOGGER.WF_GETDATA);
 		var id = e.currentTarget.value || "[blank]";
-		XDATA.LOGGER.logSystemActivity("Updated community id: "+id);
+		XDATA.LOGGER.logUserActivity("User has adjusted community identifier.", "enter_filter_text",  XDATA.LOGGER.WF_GETDATA, {"id":id} );
 	});
 	$("#heatMapEnabled").on( "change", function() {
 		var hm = $("#heatMapEnabled");
 		if (hm.prop('checked') === true) {
-			XDATA.LOGGER.logUserActivity("User has requested heat map display to be ON.", "toggle_option",  XDATA.LOGGER.WF_EXPLORE);
+			XDATA.LOGGER.logUserActivity("User has requested heat map display to be ON.", "add_map_layer",  XDATA.LOGGER.WF_CREATE);
 			if ( $("#track-table").val() !== "") {
 				renderHeatMap();
 			}
 		}
 		else {
-			XDATA.LOGGER.logUserActivity("User has requested heat map display to be OFF.", "toggle_option",  XDATA.LOGGER.WF_EXPLORE);
+			XDATA.LOGGER.logUserActivity("User has requested heat map display to be OFF.", "remove_map_layer",  XDATA.LOGGER.WF_CREATE);
 			heatmap.setMap(null);
 		}
 	});
 	$("#labelsEnabled").on( "change", function() {
 		var labl = $("#labelsEnabled");
 		if (labl.prop('checked') === true) {
-			XDATA.LOGGER.logUserActivity("User has requested labels display to be ON.", "toggle_option",  XDATA.LOGGER.WF_EXPLORE);
+			XDATA.LOGGER.logUserActivity("User has requested labels display to be ON.", "set_graph_properties",  XDATA.LOGGER.WF_CREATE);
 		}
 		else {
-			XDATA.LOGGER.logUserActivity("User has requested labels display to be OFF.", "toggle_option",  XDATA.LOGGER.WF_EXPLORE);
+			XDATA.LOGGER.logUserActivity("User has requested labels display to be OFF.", "set_graph_properties",  XDATA.LOGGER.WF_CREATE);
 		}
 
 		var lab = communityVis.selectAll("text.label")
@@ -1000,9 +999,50 @@ $(document).ready( function() {
 	$('#comm-id').clearableTextField();
 	
 	$('#tangelo-config-cancel').on("click", function(e) {
-		XDATA.LOGGER.logUserActivity("User cancelled updating data table and maximum graph size.", "cancel_query",  XDATA.LOGGER.WF_GETDATA);
+		XDATA.LOGGER.logUserActivity("User cancelled updating data table and maximum graph size.", "close_modal_tools",  XDATA.LOGGER.WF_CREATE);
+	});
+	$('div#tangelo-config-panel > div.modal-header > button.close').on("click", function(e) {
+		XDATA.LOGGER.logUserActivity("User cancelled updating data table and maximum graph size.", "close_modal_tools",  XDATA.LOGGER.WF_CREATE);
 	});
 	$('#tangelo-config-defaults').hide(); // hide this since the button doesn't do anything in our application
+	
+	$('div.navbar a.pointer').on("click", function(e) {
+		var v = e.target.attributes["data-target"].value;
+		if (v === "#tangelo-config-panel") {
+			XDATA.LOGGER.logUserActivity("User opened Track Communities configuration panel.", "open_modal_tools",  XDATA.LOGGER.WF_CREATE);
+		}
+		else if (v === "#tangelo-info-panel") {
+			XDATA.LOGGER.logUserActivity("User opened Track Communities information panel.", "show_instructional_material",  XDATA.LOGGER.WF_CREATE);
+		}
+		else {
+			console.log("somehting opened");
+		}
+	});
+
+	$('#tangelo-info-panel > div.modal-footer > a.btn').on("click", function(e) {
+		XDATA.LOGGER.logUserActivity("User closed Track Communities information panel.", "hide_instructional_material",  XDATA.LOGGER.WF_CREATE);
+	});
+	$('div#tangelo-info-panel > div.modal-header > button.close').on("click", function(e) {
+		XDATA.LOGGER.logUserActivity("User closed Track Communities information panel.", "hide_instructional_material",  XDATA.LOGGER.WF_CREATE);
+	});	
+	
+	$('div#tangelo-control-panel > div#tangelo-drawer-handle').on("click", function(e) {
+		try {
+			var icon = e.currentTarget.firstChild.className;
+			if (icon === "icon-chevron-up") {
+				XDATA.LOGGER.logUserActivity("User closed the toolbar control panel.", "close_tools",  XDATA.LOGGER.WF_CREATE);
+			}
+			else if (icon === "icon-chevron-down") {
+				XDATA.LOGGER.logUserActivity("User opened the toolbar control panel.", "open_tools",  XDATA.LOGGER.WF_CREATE);
+			}
+			else {
+				// n/a?
+			}
+		}
+		catch (e) {
+			// n/a?
+		}
+	});
 	
 	timeSlider = $("#time-slider").slider({
 	  slide: function(evt, ui){
@@ -1011,9 +1051,8 @@ $(document).ready( function() {
 	  },
 	  change: function(evt, ui){
 		if (evt && evt.handleObj && evt.handleObj.type && evt.handleObj.type === "mouseup") {
-			XDATA.LOGGER.logUserActivity("User has selected new playback display time.", "select",  XDATA.LOGGER.WF_EXPLORE);
 			var time = d3.select('#slidertext').text();
-			XDATA.LOGGER.logSystemActivity("Playback time set: "+time);
+			XDATA.LOGGER.logUserActivity("User has selected new playback display time.", "set_animation_properties",  XDATA.LOGGER.WF_CREATE, {"time": time});
 		}
 	  }
 	});
@@ -1029,24 +1068,52 @@ $(document).ready( function() {
 		"<p>Single click a node in the <span class='small-caps'>COMMUNITY BROWSER</span> to see its details in <span class='small-caps'>LAST SELECT</span>. </p>" +
 		"<p> Enter <span class='small-caps'>COMMUNITY ID</span> and <span class='small-caps'>LEVEL</span> to go directly to a known community. </p>";
 	$("#community-info-help").popover(popover_cfg);	
+	$("#community-info-help").on("show.bs.popover", function(e) {
+		XDATA.LOGGER.logUserActivity("User is viewing Community Info help.", "show_instructional_material",  XDATA.LOGGER.WF_CREATE);
+	});
+	$("#community-info-help").on("hide.bs.popover", function(e) {
+		XDATA.LOGGER.logUserActivity("User is finished viewing Community Info help.", "hide_instructional_material",  XDATA.LOGGER.WF_CREATE);
+	});
+	
 	// Find Communities Time/Geo popover //
 	popover_cfg.title = "Find Communities";
 	popover_cfg.placement = "top";
 	popover_cfg.content = "<p> Utilize the <span class='small-caps'>MAP</span> and <span class='small-caps'>RANGE SLIDER</span> to search for communities that fit within your criteria. </p>" +
 		"<p> The <span class='small-caps'>PREVIOUS</span> button allows you to return to your last utilized spatial-temporal search.</p>";
-	$("#find-communities-help").popover(popover_cfg);		
+	$("#find-communities-help").popover(popover_cfg);	
+	$("#find-communities-help").on("show.bs.popover", function(e) {
+		XDATA.LOGGER.logUserActivity("User is viewing Find Communities help.", "show_instructional_material",  XDATA.LOGGER.WF_CREATE);
+	});
+	$("#find-communities-help").on("hide.bs.popover", function(e) {
+		XDATA.LOGGER.logUserActivity("User is finished viewing Find Communities help.", "hide_instructional_material",  XDATA.LOGGER.WF_CREATE);
+	});
+	
 	// Timeline/Playback popover //
 	popover_cfg.title = "Playback Timeline";
 	popover_cfg.placement = "top";
 	popover_cfg.content = "<p> Use the the <span class='small-caps'>PLAYBACK SLIDER</span> to select a given point in time. </p>" +
 		"<p> Click play or slide it manually to observe which tracks are co-located at specific spatial and temporal points. </p>";
 	$("#timeline-playback-help").popover(popover_cfg);		
+	$("#timeline-playback-help").on("show.bs.popover", function(e) {
+		XDATA.LOGGER.logUserActivity("User is viewing Timeline Playback help.", "show_instructional_material",  XDATA.LOGGER.WF_CREATE);
+	});
+	$("#timeline-playback-help").on("hide.bs.popover", function(e) {
+		XDATA.LOGGER.logUserActivity("User is finished viewing Timeline Playback help.", "hide_instructional_material",  XDATA.LOGGER.WF_CREATE);
+	});	
+	
 	// Dynamic Graph popover //
 	popover_cfg.title = "Dynamic Graph";
 	popover_cfg.placement = "bottom";
 	popover_cfg.content = "<p> Visualize which tracks are spatially and temporally co-located by observing edges rendered between track nodes.</p>" +
 		"<p> Utilize the <span class='small-caps'>PLAYBACK SLIDER</span> to adjust the time frame of co-location to observe. </p>";
-	$("#dynamic-graph-help").popover(popover_cfg);		
+	$("#dynamic-graph-help").popover(popover_cfg);
+	$("#dynamic-graph-help").on("show.bs.popover", function(e) {
+		XDATA.LOGGER.logUserActivity("User is viewing Dynamic Graph help.", "show_instructional_material",  XDATA.LOGGER.WF_CREATE);
+	});
+	$("#dynamic-graph-help").on("hide.bs.popover", function(e) {
+		XDATA.LOGGER.logUserActivity("User is finished viewing Dynamic Graph help.", "hide_instructional_material",  XDATA.LOGGER.WF_CREATE);
+	});
+	
 	// Community Browser popover //
 	popover_cfg.title = "Community Browser";
 	popover_cfg.placement = "bottom";
@@ -1054,13 +1121,26 @@ $(document).ready( function() {
 		"<p> Double click a community node to drill further down into a community. </p>" +
 		"<p> Hover over a community node to view meta information about that community.</p>";
 	$("#community-browser-help").popover(popover_cfg);	
+	$("#community-browser-help").on("show.bs.popover", function(e) {
+		XDATA.LOGGER.logUserActivity("User is viewing Community Browser help.", "show_instructional_material",  XDATA.LOGGER.WF_CREATE);
+	});
+	$("#community-browser-help").on("hide.bs.popover", function(e) {
+		XDATA.LOGGER.logUserActivity("User is finished viewing Community Browser help.", "hide_instructional_material",  XDATA.LOGGER.WF_CREATE);
+	});
+	
 	// Map popover //
 	popover_cfg.title = "Map";
 	popover_cfg.placement = "bottom";
 	popover_cfg.content = "<p> Visualize tracks spatially moving over time. </p>" +
 		"<p> When the heat map is enabled, you can see high volume of track activity in shaded areas. </p>" +
 		"<p> Additionally, you can use the map to help construct a spatial-temporal query for finding communities.</p>";
-	$("#map-help").popover(popover_cfg);		
+	$("#map-help").popover(popover_cfg);	
+	$("#map-help").on("show.bs.popover", function(e) {
+		XDATA.LOGGER.logUserActivity("User is viewing Map help.", "show_instructional_material",  XDATA.LOGGER.WF_CREATE);
+	});
+	$("#map-help").on("hide.bs.popover", function(e) {
+		XDATA.LOGGER.logUserActivity("User is finished viewing Map help.", "hide_instructional_material",  XDATA.LOGGER.WF_CREATE);
+	});
 	
     XDATA.LOGGER.logSystemActivity("Application startup completed.");	
 	
