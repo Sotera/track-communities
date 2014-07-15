@@ -161,7 +161,7 @@ function tickDynamic() {
 
 /*** Configure drag behaviour ***/
 function dragstarted(d){ 
-	XDATA.LOGGER.logUserActivity("User has started to drag community browser node.", "drag__object_start",  XDATA.LOGGER.WF_EXPLORE, {"id":d.nodename});
+	XDATA.LOGGER.logUserActivity("User has started to drag community browser node.", "drag_object_start",  XDATA.LOGGER.WF_EXPLORE, {"id":d.nodename});
 	d3.event.sourceEvent.stopPropagation();
 	d3.select(this).classed("fixed", d.fixed = false);
 	d3.select(this).classed("dragging", true);
