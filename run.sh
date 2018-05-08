@@ -21,13 +21,15 @@ set -e
 ini_file=$1
 
 
+export ROOT=/share/staging1_disk1/users/gzheng
 #aggregate-micro-paths location
-AMP=/srv/software/aggregate-micro-paths
+AMP=$ROOT/aggregate-micro-paths
 #track-communities
-TRACK_COMMS=/srv/software/track-communities
+TRACK_COMMS=$ROOT/track-communities
 #distributed-louvain-modularity
-LOUVAIN=/srv/software/distributed-louvain-modularity
+LOUVAIN=$ROOT/distributed-louvain-modularity
 
+database=$(sed -n 's/.*database_name *: *\([^ ]*.*\)/\1/p' < $AMP/hive-streaming/conf/${ini_file})
 table=$(sed -n 's/.*table_name *: *\([^ ]*.*\)/\1/p' < $AMP/hive-streaming/conf/${ini_file})
 id=$(sed -n 's/.*table_schema_id *: *\([^ ]*.*\)/\1/p' < $AMP/hive-streaming/conf/${ini_file})
 latitude=$(sed -n 's/.*table_schema_lat *: *\([^ ]*.*\)/\1/p' < $AMP/hive-streaming/conf/${ini_file})
@@ -41,7 +43,7 @@ cd $AMP/hive-streaming
 python AggregateMicroPath.py -c ${ini_file}
 
 cd $TRACK_COMMS
-hive -hiveconf ts=${temporal_split} -hiveconf table=${table} -f query.sql
+hive --hiveconf ts=${temporal_split} --hiveconf database=${database} --hiveconf table=${table} -f query.sql
 
 if hadoop fs -test -d /tmp/trackcomms/${table}/output; then
     hadoop fs -rm -r /tmp/trackcomms/${table}/output
