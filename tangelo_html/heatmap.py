@@ -1,7 +1,7 @@
 #
 # Copyright 2016 Sotera Defense Solutions Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License”);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -20,14 +20,15 @@ import cache
 import settings
 from utils import *
 
+database = cache.get().get("database", "")
+
 def getCurrentHeatMap(*args):
     table = cache.get().get("table");
-    query = "select x, y, sum(value) from micro_path_intersect_counts_%s group by x, y" % table
-    with impalaopen(":".join(settings.IMPALA)) as client:
-        results = client.execute(query);
-        data = results.get_data()
-        fmt = lambda row : "{ location: new google.maps.LatLng(%s, %s), weight: %s }" % tuple(row.split("\t"))
-        return "[" + ",".join([fmt(row) for row in data.split("\n")]) + "]"
+    query = "select x, y, log10(sum(value)+1) as sv from " + database + ".micro_path_intersect_counts_%s group by x, y" % table
+    with impalaopen(":".join(settings.IMPALA)) as curr:
+        curr.execute(query);
+        fmt = lambda row : "{ location: new google.maps.LatLng(%s, %s), weight: %s }" % row
+        return "[" + ",".join([fmt(row) for row in curr]) + "]"
     
 actions = {
     "map" : getCurrentHeatMap,
