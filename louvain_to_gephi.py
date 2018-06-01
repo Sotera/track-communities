@@ -1,7 +1,7 @@
 #
 # Copyright 2016 Sotera Defense Solutions Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License”);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -18,9 +18,9 @@
 import os
 
 os.system("mkdir louvain_to_gephi")
-os.system("cat output/giraph_1/part-m* > output/giraph_1/output")
+os.system("cat output/giraph_0/part-m* > output/giraph_0/output")
 
-f = open('output/giraph_1/output','r')
+f = open('output/giraph_0/output','r')
 o = open('louvain_to_gephi/community_itr_1.nodes','w')
 
 for line in f:
