@@ -10,6 +10,7 @@ function renderHeatMap() {
 		heatmap.setMap(null);
 		heatmap.setData(heatdata);
 		heatmap.set('radius', heatmap.get('radius') ? null : 15);
+		heatmap.set('maxIntensity', heatmap.get('maxIntensity') ? null : 100);
 		heatmap.setMap(map);
 		XDATA.LOGGER.logSystemActivity("System has displayed heat map.");
 		$.unblockUI();
