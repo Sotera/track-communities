@@ -1,7 +1,7 @@
 #
 # Copyright 2016 Sotera Defense Solutions Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License”);
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -21,38 +21,41 @@ from utils import *
 import cache
 import settings
 
+database = cache.get().get("database", "")
+table = cache.get().get("table", "")
+
 #/community/gettable
 def gettable(*args):
-    return cache.get().get("table", "")
+    return cache.get().get("database", ""), cache.get().get("table", "")
 
 #/community/tables
 def tables(*args):
-    with impalaopen(":".join(settings.IMPALA)) as client:
-        results = client.execute("show tables")        
-        rows = results.get_data()
+    with impalaopen(":".join(settings.IMPALA)) as curr:
+        curr.execute("show tables")        
         tangelo.content_type("application/json")
-        return json.dumps({ 'tables' : [ table[:-20] for table in rows.split('\n') if table.endswith("tracks_comms_joined") ]})
+        return json.dumps({ 'tables' : [ table[:-20] for table in curr if table[0].endswith("tracks_comms_joined") ]})
 
 #/community/settable/<name>
 def settable(*args):
     if args:
         cache.update({ "table" : args[0] })
-    with impalaopen(":".join(settings.IMPALA)) as client:
-        data = client.execute("select level, count(distinct source) from " + args[0]  + "_good_graph group by level order by level desc limit 50")
-        data_result = data.get_data()
+    with impalaopen(":".join(settings.IMPALA)) as curr:
+        query = "select level, count(distinct source) from " + database + "." + args[0]  + "_good_graph group by level order by level desc limit 50;"
+        curr.execute(query)
         graph_stat_string = ""
         num_levels = 2
         i = 0
-        for line in data_result.split('\n'):
-            level,nodes, = line.strip().split('\t')
+        for line in curr:
+            (level,nodes) = line
             if i == 0:
                 num_levels = int(level)
             i = i + 1
-            graph_stat_string = graph_stat_string + "Level: " + level + ", " + nodes + " nodes "
+            graph_stat_string = graph_stat_string + "Level: " + str(level) + ", " + str(nodes) + " nodes "
         
-        data = client.execute("select min(dt), max(dt), min(cast(intersectx as double)), max(cast(intersectx as double)), min(cast(intersecty as double)), max(cast(intersecty as double)) from " + cache.get().get("table", "") + "_tracks_comms_joined where track_id != 'ship(1.0)' and track_id != 'ais(3.0)'")
-        for line in data.get_data().split('\n'):
-            mindt,maxdt,minlat,maxlat,minlon,maxlon, = line.strip().split('\t')
+        query = "select min(dt), max(dt), min(cast(intersectx as double)), max(cast(intersectx as double)), min(cast(intersecty as double)), max(cast(intersecty as double)) from " + cache.get().get("database", "") + "." + cache.get().get("table", "") + "_tracks_comms_joined where track_id != 'ship(1.0)' and track_id != 'ais(3.0)'"
+        curr.execute(query)
+        for line in curr:
+            (mindt,maxdt,minlat,maxlat,minlon,maxlon) = line
             cache.update({ "mindt" : mindt,
                            "maxdt" : maxdt,
                            "minlat" : minlat,
@@ -92,17 +95,19 @@ def setcomm(*args):
     level = c["level"]
     table = c["table"] + "_tracks_comms_joined"
     rows = []
-    with impalaopen(":".join(settings.IMPALA)) as client:
-        count = client.execute("select count(*) from " + table + " where comm_" + str(level) + " = '" + comm + "'")
-        count_result = count.get_data()
-        print count_result.strip()
-        results = client.execute("select intersectx, intersecty, dt, track_id from " + table + " where comm_" + str(level) + " = '" + comm + "' order by track_id, dt asc limit " + count_result.strip())
-        rows = results.get_data()
+    with impalaopen(":".join(settings.IMPALA)) as curr:
+        query = "select count(*) from " + database + "." + table + " where comm_" + str(level) + " = '" + comm + "'"
+        curr.execute(query)
+        count = curr.fetchall()[0] 
+        print count[0]
+        query = "select intersectx, intersecty, dt, track_id from " + database + "." + table + " where comm_" + str(level) + " = '" + comm + "' order by track_id, dt asc limit " + str(count[0]) 
+        curr.execute(query)
+        rows = curr.fetchall()
 
     whens = {}
     coords = {}
-    for i in rows.split('\n'):
-        latitude, longitude, dt, track = i.strip().split('\t')
+    for i in rows:
+        (latitude, longitude, dt, track) = i
         if whens.get(track) == None:
             whens[track] = "<when>" + dt.split('.')[0].replace(' ','T') + "</when>\n"
         else:
