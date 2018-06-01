@@ -1,4 +1,4 @@
-
+use ${hiveconf:database};
 drop table ${hiveconf:table}_track_linkages;
 create table ${hiveconf:table}_track_linkages as
 select intersectx, intersecty, dt, collect_set(track_id) as links, collect_set(velocity) as vels, collect_set(direction) as dirs
