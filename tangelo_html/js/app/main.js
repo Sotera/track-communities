@@ -197,7 +197,7 @@ $(function () {
 	// Note: This is to avoid the geo-circles jumping around the map and back to the initial/start position.
 	google.maps.event.addListener(map, 'bounds_changed', function() {
 		var currentValue = timeSlider.slider("option", "value")
-		SetCircles(currentValue);
+		//SetCircles(currentValue);
 		SetRelationships(currentValue);	
 	});		
 	
@@ -1074,8 +1074,7 @@ $(document).ready( function() {
 	// Community Info popover //
 	popover_cfg.title = "Community Info";
 	popover_cfg.placement = "top";
-	popover_cfg.content = "<p> View information about your entire community data set. </p>" +
-		"<p>Single click a node in the <span class='small-caps'>COMMUNITY BROWSER</span> to see its details in <span class='small-caps'>LAST SELECT</span>. </p>" +
+	popover_cfg.content = "<p> Single click a node in the <span class='small-caps'>COMMUNITY BROWSER</span> to see its details in <span class='small-caps'>LAST SELECT</span>. </p>" +
 		"<p> Enter <span class='small-caps'>COMMUNITY ID</span> and <span class='small-caps'>LEVEL</span> to go directly to a known community. </p>";
 	$("#community-info-help").popover(popover_cfg);	
 	$("#community-info-help").on("show.bs.popover", function(e) {
