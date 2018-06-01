@@ -1,3 +1,4 @@
+use ${hiveconf:database};
 drop table ${hiveconf:table}_nodes_comms_1;
 create external table ${hiveconf:table}_nodes_comms_1
 (
@@ -6,7 +7,7 @@ comm_1 string
 )
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY '\t'
-location '/tmp/trackcomms/${hiveconf:table}/output/giraph_1/';
+location '/tmp/trackcomms/${hiveconf:table}/output/giraph_0/';
 
 drop table ${hiveconf:table}_good_nodes;
 create table ${hiveconf:table}_good_nodes(
