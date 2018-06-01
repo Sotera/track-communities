@@ -21,13 +21,15 @@ set -e
 ini_file=$1
 
 
+export ROOT=/share/staging1_disk1/users/gzheng
 #aggregate-micro-paths location
-AMP=/srv/software/aggregate-micro-paths
+AMP=$ROOT/aggregate-micro-paths
 #track-communities
-TRACK_COMMS=/srv/software/track-communities
-#distributed-louvain-modularity
-LOUVAIN=/srv/software/distributed-louvain-modularity
+TRACK_COMMS=$ROOT/track-communities
+#distributed-graph-analytics
+GIRAPH=$ROOT/distributed-graph-analytics/dga-giraph
 
+database=$(sed -n 's/.*database_name *: *\([^ ]*.*\)/\1/p' < $AMP/hive-streaming/conf/${ini_file})
 table=$(sed -n 's/.*table_name *: *\([^ ]*.*\)/\1/p' < $AMP/hive-streaming/conf/${ini_file})
 id=$(sed -n 's/.*table_schema_id *: *\([^ ]*.*\)/\1/p' < $AMP/hive-streaming/conf/${ini_file})
 latitude=$(sed -n 's/.*table_schema_lat *: *\([^ ]*.*\)/\1/p' < $AMP/hive-streaming/conf/${ini_file})
@@ -41,16 +43,16 @@ cd $AMP/hive-streaming
 python AggregateMicroPath.py -c ${ini_file}
 
 cd $TRACK_COMMS
-hive -hiveconf ts=${temporal_split} -hiveconf table=${table} -f query.sql
+hive --hiveconf ts=${temporal_split} --hiveconf database=${database} --hiveconf table=${table} -f query.sql
 
-if hadoop fs -test -d /tmp/trackcomms/${table}/output; then
-    hadoop fs -rm -r /tmp/trackcomms/${table}/output
+if hadoop fs -test -d /tmp/trackcomms/${table}; then
+    hadoop fs -rm -r -skipTrash /tmp/trackcomms/${table}
 fi
 
-hadoop fs -mkdir /tmp/trackcomms/${table}/output
+hadoop fs -mkdir -p /tmp/trackcomms/${table}
 
-cd $LOUVAIN
-python louvain.py /user/hive/warehouse/${table}_edgelist /tmp/trackcomms/${table}/output
+cd $GIRAPH
+./bin/dga-mr1-giraph louvain /user/hive/warehouse/${database}.db/${table}_network_edges /tmp/trackcomms/${table}/output -ca simple.edge.delimiter='\x01'
 
 cd $TRACK_COMMS
 if [ -d output ]; then
@@ -63,27 +65,27 @@ if [ -d louvain_to_gephi ]; then
     rm -Rf louvain_to_gephi
 fi
 
-hive -e "select * from ${table}_edgelist;" > edgelist.tsv
+hive -e "select * from ${database}.${table}_edgelist;" > edgelist.tsv
 python louvain_to_gephi.py
 
 python gogo.py
 
 if hadoop fs -test -d /tmp/trackcomms/${table}/output/graph; then
-    hadoop fs -rm -r /tmp/trackcomms/${table}/output/graph
+    hadoop fs -rm -r -skipTrash /tmp/trackcomms/${table}/output/graph
 fi
 
 hadoop fs -mkdir /tmp/trackcomms/${table}/output/graph
 hadoop fs -put goodgraph.out /tmp/trackcomms/${table}/output/graph
 
-if hadoop fs -test -e /tmp/trackcomms/${table}/output/giraph_1/_logs; then
-    hadoop fs -rm -r /tmp/trackcomms/${table}/output/giraph_1/_logs
+if hadoop fs -test -e /tmp/trackcomms/${table}/output/giraph_0/_logs; then
+    hadoop fs -rm -r -skipTrash /tmp/trackcomms/${table}/output/giraph_0/_logs
 fi 
 
-if hadoop fs -test -e /tmp/trackcomms/${table}/output/giraph_1/_SUCCESS; then
-    hadoop fs -rm -r /tmp/trackcomms/${table}/output/giraph_1/_SUCCESS
+if hadoop fs -test -e /tmp/trackcomms/${table}/output/giraph_0/_SUCCESS; then
+    hadoop fs -rm -r -skipTrash /tmp/trackcomms/${table}/output/giraph_0/_SUCCESS
 fi 
 
-hive -hiveconf table=${table} -f nodes_comms.sql
+hive --hiveconf database=${database} --hiveconf table=${table} -f nodes_comms.sql
 
 last_table_num=`python comm_mapping.py ${table}`
 if [ -a garbage.out ]; then
@@ -92,10 +94,10 @@ fi
 
 last_table=${table}_nodes_comms_${last_table_num}
 
-hive -e "insert into table ${table}_good_nodes partition (level='1') select node, comm_1, '1' from ${last_table};"
+hive -e "insert into table ${database}.${table}_good_nodes partition (level='1') select node, comm_1, '1' from ${database}.${last_table};"
 
-hive -hiveconf table=${table} -hiveconf id=${id} -hiveconf latitude=${latitude} -hiveconf longitude=${longitude} -hiveconf dt=${dt} -hiveconf last_table=${last_table} -f join_orig_tracks.sql
+hive --hiveconf database=${database} --hiveconf table=${table} --hiveconf id=${id} --hiveconf latitude=${latitude} --hiveconf longitude=${longitude} --hiveconf dt=${dt} --hiveconf last_table=${last_table} -f join_orig_tracks.sql
 
-python finamic_graph.py ${table} ${last_table} ${last_table_num}
+python finamic_graph.py ${database} ${table} ${last_table} ${last_table_num}
 
 echo "Done"
