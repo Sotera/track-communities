@@ -62,7 +62,8 @@
 	<script type="text/javascript" src="lib/select2/select2.js"></script>
 	<script type="text/javascript" src="lib/momentjs/moment.min.js"></script>
 	<script type="text/javascript" src="lib/clearable_text_field/jquery.clearableTextField.min.js"></script>
-	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=visualization"></script>
+	<!-- Add your GoogleMap API Key after ? below -->
+	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?v=3.exp&libraries=visualization"></script>
 	
 	<script type="text/javascript" src="js/Number.js"></script>
 	<script type="text/javascript" src="js/app/config.js"></script> 
@@ -133,7 +134,7 @@
                     <h5> Community Info <span id="community-info-help" class="icon-question-sign"></span> </h5>
 					<input id="graph_num_levels" type="hidden" />
 					<p style="padding-top:0px;"> 
-						<small> <strong>INFO:</strong> <span id="graph_stat_string">Data table not loaded.</span> </small> <br/>
+						<small> <strong>ENTIRE COMMUNITY:</strong> <span id="graph_stat_string">Data table not loaded.</span> </small> <br/>
 						<span id="selectedCommunityNodeInfo">
 							<small>
 								<strong> LAST SELECT: </strong>
@@ -142,7 +143,7 @@
 						</span>						
 					</p>					
 					<p style="padding-top:0px;"> 
-						<small> <strong>ID&nbsp;&nbsp;:</strong> </small> 
+						<small> <strong>COMM ID&nbsp;&nbsp;:</strong> </small> 
 						<input id="comm-id" type="text" disabled="true" style="padding: 6px; margin:0; height: 28px;" /> 
 						<small> <strong>LVL:</strong> </small> 
 						<input id="level" type="text" disabled="true" style="width: 75px;" />  
