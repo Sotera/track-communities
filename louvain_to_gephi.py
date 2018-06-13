@@ -44,7 +44,7 @@ f.close()
 
 # Here's the looping piece
 
-i = 1
+i = 0
 pm = 'output/mapreduce_'+str(i)
 pg = 'output/giraph_'+str(i+1)
 while os.path.exists(pm):
