@@ -7,7 +7,7 @@ comm_1 string
 )
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY '\t'
-location '/tmp/trackcomms/${hiveconf:table}/output/giraph_0/';
+location '/tmp/trackcomms/${hiveconf:table}/output/${hiveconf:ga}/comm_1';
 
 drop table ${hiveconf:table}_good_nodes;
 create table ${hiveconf:table}_good_nodes(
@@ -31,5 +31,5 @@ level string
 )
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY '\t'
-location '/tmp/trackcomms/${hiveconf:table}/output/graph/';
+location '/tmp/trackcomms/${hiveconf:table}/output/${hiveconf:ga}/graph/';
 
