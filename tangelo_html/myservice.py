@@ -103,7 +103,7 @@ def geoTimeQuery(comm=None, level=None, host=settings.IMPALA[0], port=settings.I
     edges = []
     nodes = []
     with impalaopen(host + ':' + port) as curr:
-    print "****edgequery: " + edgequery
+        print "****edgequery: " + edgequery
         curr.execute(edgequery)
         for record in curr:
             (source,target,weight,level) = record
