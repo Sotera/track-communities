@@ -1,1 +1,1 @@
-{"maxlon": "", "graph_num_levels": 0, "graph_stat_string": "", "level": "", "mindt": "", "community": "", "minlat": "", "maxlat": "", "table": "", "maxdt": "", "minlon": ""}
+{"maxlon": "180", "graph_num_levels": 0, "graph_stat_string": "", "level": "1", "mindt": "", "community": "", "minlat": "-90", "maxlat": "90", "database": "gzheng", "table": "ais_small_final", "maxdt": "", "minlon": "-360"
