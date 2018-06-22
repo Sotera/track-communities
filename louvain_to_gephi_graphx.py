@@ -91,6 +91,6 @@ while os.path.exists(e):
   f.close()
   
   i = i + 1
-  e = 'output/graphx/level_'+str(i)+'_vertices'
-  v = 'output/graphx/level_'+str(i)+'_edges'
+  v = 'output/graphx/level_'+str(i)+'_vertices'
+  e = 'output/graphx/level_'+str(i)+'_edges'
 
