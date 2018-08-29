@@ -20,14 +20,15 @@ set -e
 # This value should match the table value in the .ini file
 ini_file=$1
 
-
 export ROOT=/share/staging1_disk1/users/gzheng
+
 #aggregate-micro-paths location
 AMP=$ROOT/aggregate-micro-paths
-#track-communities
+
+#track-communities location
 TRACK_COMMS=$ROOT/track-communities
-#distributed-louvain-modularity
-#LOUVAIN=$ROOT/distributed-louvain-modularity
+
+#distributed-graph-analytics location
 GRAPHX=$ROOT/distributed-graph-analytics/dga-graphx
 
 database=$(sed -n 's/.*database_name *: *\([^ ]*.*\)/\1/p' < $AMP/hive-streaming/conf/${ini_file})
@@ -37,7 +38,6 @@ latitude=$(sed -n 's/.*table_schema_lat *: *\([^ ]*.*\)/\1/p' < $AMP/hive-stream
 longitude=$(sed -n 's/.*table_schema_lon *: *\([^ ]*.*\)/\1/p' < $AMP/hive-streaming/conf/${ini_file})
 dt=$(sed -n 's/.*table_schema_dt *: *\([^ ]*.*\)/\1/p' < $AMP/hive-streaming/conf/${ini_file})
 temporal_split=$(sed -n 's/.*temporal_split *: *\([^ ]*.*\)/\1/p' < $AMP/hive-streaming/conf/${ini_file})
-
 
 # 1st Run Triplines
 cd $AMP/hive-streaming
